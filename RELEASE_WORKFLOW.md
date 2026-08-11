@@ -17,6 +17,19 @@ resource profiles, dependency edges, required input artifacts, and the
 exact result files (or filename patterns) that may be imported into the
 laptop checkout.
 
+## Which document to use
+
+Keep the two operational documents separate. This file is the end-to-end
+release checklist: it explains the hand-off from JED to the laptop and the
+final Sphinx build. `docs/source/examples/JED_RUNS.md` is the lower-level JED
+reference: it describes runner commands, Slurm diagnostics, cleanup, and
+result commits. `jed_runs/README.md` is the short entry point for the runner.
+
+This separation avoids maintaining two copies of every command while keeping
+the server reference close to the JED implementation. Update both documents
+when a command or workflow changes, and link to the other document instead of
+duplicating a long recipe.
+
 ## At a glance
 
 The complete release sequence is:
@@ -214,6 +227,118 @@ automatically adds all dependencies of each selected script:
 Do not combine `--only` and `--slow`. If a consumer needs a result, list
 the consumer; its producer is included automatically.
 
+### Recover a forgotten `RUN_ID`
+
+The launch command prints the run-state directory, for example
+`.jed_runs/20260810-080103`. That final directory name is the `RUN_ID`. It is
+also stored in `.jed_runs/<RUN_ID>/run.json`.
+
+If the shell variable has been lost, omit `--run-id`: both `status` and the
+error reporter select the newest run directory that contains `run.json` and
+print its ID:
+
+``` bash
+"$PY" jed_runs/jed_examples.py status --verbose
+"$PY" jed_runs/jed_error_report.py
+```
+
+For a script or log that needs the value as a shell variable, retrieve it
+without relying on directory ordering:
+
+``` bash
+RUN_ID="$("$PY" - <<'PY'
+from jed_runs.jed_examples import latest_run, load_config, state_root
+
+run = latest_run(state_root(load_config()))
+if run is None or not (run / 'run.json').is_file():
+    raise SystemExit('No JED run state found')
+print(run.name)
+PY
+)"
+printf 'RUN_ID=%s\n' "$RUN_ID"
+test -f ".jed_runs/$RUN_ID/run.json"
+```
+
+When several runs exist, list them and choose deliberately; “newest” means
+newest by filesystem modification time and may be a dry-run or a retry:
+
+``` bash
+"$PY" - <<'PY'
+from jed_runs.jed_examples import load_config, state_root
+
+root = state_root(load_config())
+for path in sorted(
+    (p for p in root.iterdir() if p.is_dir() and p.name != 'resets'),
+    key=lambda p: p.stat().st_mtime,
+    reverse=True,
+):
+    if (path / 'run.json').is_file():
+        print(path.name)
+PY
+```
+
+Then pass the selected ID explicitly to `status`, `jed_error_report.py`, and
+any archival notes. Never use a newly created run ID to refer to a different
+set of jobs.
+
+### Test an incomplete JED run
+
+Yes. A partial run is useful for validating a new Slurm profile, one example,
+or a dependency chain before committing to an overnight release run. Give it
+a distinct ID such as `smoke-<timestamp>` so it cannot be mistaken for the
+release run.
+
+Use `--only` for a small, explicit selection. Dependencies of each selected
+consumer are added automatically:
+
+``` bash
+TEST_RUN_ID="smoke-$(date +%Y%m%d-%H%M%S)"
+"$PY" jed_runs/jed_examples.py launch \
+   --only indicators/plot_b09wtp.py \
+   --dry-run --run-id "$TEST_RUN_ID"
+# Inspect .jed_runs/$TEST_RUN_ID/jobs, then submit the same selection.
+"$PY" jed_runs/jed_examples.py launch \
+   --only indicators/plot_b09wtp.py \
+   --run-id "$TEST_RUN_ID" --force
+"$PY" jed_runs/jed_examples.py status --run-id "$TEST_RUN_ID" --verbose
+```
+
+Use `--slow` when the purpose is to exercise every non-`light` resource
+profile but not the fast reports. This is still a substantial subset; use
+`--only` when a genuinely small smoke test is wanted:
+
+``` bash
+TEST_RUN_ID="slow-smoke-$(date +%Y%m%d-%H%M%S)"
+"$PY" jed_runs/jed_examples.py launch \
+   --slow --dry-run --run-id "$TEST_RUN_ID"
+"$PY" jed_runs/jed_examples.py launch \
+   --slow --run-id "$TEST_RUN_ID" --force
+```
+
+Do not combine `--only` and `--slow`. A dry run creates a state directory but
+submits no Slurm jobs; its entries are expected to remain `not scheduled`.
+Jobs that were not selected are absent from that run's `run.json`, not failed.
+Do not reset the tree between a producer and its dependent consumer, because
+the dependency's archived result is part of the test.
+
+A partial run is not release evidence. The full release import must use
+`--profile full --strict` and must wait for every declared job and artifact.
+For temporary inspection, import only the completed script's declared files
+with `--script` into a disposable checkout or fixture tree:
+
+``` bash
+uv run --locked --group docs python tools/import_jed_results.py \
+   --source "$JED_STAGE" --profile all \
+   --script indicators/plot_b02estimation.py --strict --apply
+```
+
+If a selected job has no declared output contract, there is nothing for the
+importer to copy; inspect its Slurm output instead. Keep partial fixtures out
+of the release tree. After all smoke jobs finish, remove root-level generated
+files with `jed_cleanup.py --apply`; remove only that test's metadata with
+`rm -rf -- ".jed_runs/$TEST_RUN_ID"` (never while a job is running). Use
+`jed_fresh_start.py --apply` only when the entire JED checkout is disposable.
+
 ## 4. Monitor and diagnose the server run
 
 Status can be checked while jobs are running:
@@ -224,9 +349,10 @@ Status can be checked while jobs are running:
 squeue -u "$USER"
 ```
 
-The runner distinguishes running, scheduled and pending, finished
-without error, finished with errors, and not scheduled. A successful job
-requires a zero Python exit status, a successful Slurm allocation, and
+The status table uses compact keywords: `OK`, `ERROR`, `RUNNING`, `PENDING`,
+and `NOT_SCHEDULED`. Errors are repeated in an `Errors requiring attention`
+block with their diagnostic; use `--verbose` for additional Slurm details. A
+successful job requires a zero Python exit status, a successful Slurm allocation, and
 (for jobs marked `requires_artifacts`) a changed result/report artifact.
 The stricter per-file and per-pattern check is performed by the local
 runner and by the strict laptop importer; a Slurm `COMPLETED` state

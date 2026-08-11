@@ -88,6 +88,30 @@ def test_generated_files_include_indicator_revenue_reports(tmp_path: Path):
     assert docs_examples.generated_files(tmp_path) == [revenue]
 
 
+def test_archived_estimation_outputs_are_harvested_and_validated(tmp_path: Path):
+    workspace = tmp_path / 'workspace'
+    (workspace / 'saved_results').mkdir(parents=True)
+    (workspace / 'saved_results' / 'model.yaml').write_text('result\n')
+    spec = docs_examples.ExampleSpec(
+        script='plot_model.py',
+        source_directory=tmp_path,
+        script_name='plot_model.py',
+        mode='self_contained',
+        profile='full',
+        dependencies=(),
+        required_inputs=(),
+        expected_outputs=('model.yaml',),
+        expected_output_globs=(),
+        requires_artifacts=True,
+        gallery=True,
+    )
+
+    harvested = docs_examples.harvest(workspace)
+
+    assert harvested == ['saved_results/model.yaml']
+    assert docs_examples.validate_outputs(spec, workspace, harvested) == []
+
+
 def test_swissmetro_logit_dependency_chain():
     specs = docs_examples.discover_specs(docs_examples.load_config())
     selected = docs_examples.select_specs(

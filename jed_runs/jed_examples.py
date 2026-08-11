@@ -9,6 +9,7 @@ live below the ignored .jed_runs directory.
 from __future__ import annotations
 
 import argparse
+import fnmatch
 import json
 import os
 import re
@@ -47,6 +48,14 @@ RESULT_DIRECTORIES = {'saved_results', 'saved_html'}
 INPUT_CSV_NAMES = {'data.csv', 'optima.csv'}
 MISSING_OUTPUT_EXIT_CODE = 90
 MISSING_INPUT_EXIT_CODE = 91
+STATUS_LABELS = {
+    'finished without error': 'OK',
+    'finished with errors': 'ERROR',
+    'running': 'RUNNING',
+    'scheduled and pending': 'PENDING',
+    'not scheduled': 'NOT_SCHEDULED',
+}
+STATUS_ORDER = ('ERROR', 'RUNNING', 'PENDING', 'NOT_SCHEDULED', 'OK')
 
 
 def now_iso() -> str:
@@ -174,7 +183,52 @@ def discover_jobs(config: dict[str, Any] | None = None) -> dict[str, Job]:
                 f'{job.script} refers to missing dependency/dependencies: '
                 + ', '.join(missing)
             )
+    validate_dependency_contracts(config, jobs)
     return jobs
+
+
+def validate_dependency_contracts(config: dict[str, Any], jobs: dict[str, Job]) -> None:
+    """Reject dependency edges whose required artifact is not declared.
+
+    ``[jobs]`` is authoritative for execution order and required inputs, while
+    ``[docs.examples]`` declares the producer's output contract.  Checking the
+    two views together prevents a consumer from being scheduled after a
+    producer that cannot provide the file it needs.
+    """
+    docs_examples = config.get('docs', {}).get('examples', {})
+    for job in jobs.values():
+        if not job.dependencies or not job.required_inputs:
+            continue
+        producer_specs = [docs_examples.get(name, {}) for name in job.dependencies]
+        if not all(producer_specs):
+            continue
+        expected = {
+            Path(value).name
+            for spec in producer_specs
+            for value in spec.get('expected_outputs', [])
+        }
+        patterns = {
+            Path(value).name
+            for spec in producer_specs
+            for value in spec.get('expected_output_globs', [])
+        }
+        if not expected and not patterns:
+            continue
+        missing = [
+            Path(value).name
+            for value in job.required_inputs
+            if Path(value).name not in expected
+            and not any(
+                fnmatch.fnmatch(Path(value).name, pattern) for pattern in patterns
+            )
+        ]
+        if missing:
+            dependencies = ', '.join(job.dependencies)
+            available = ', '.join(sorted(expected | patterns)) or '<none>'
+            raise ValueError(
+                f'{job.script} requires {", ".join(missing)}, but its '
+                f'dependency/dependencies ({dependencies}) declare {available}'
+            )
 
 
 def topological_jobs(jobs: dict[str, Job]) -> list[Job]:
@@ -317,17 +371,28 @@ def copy_output(source: Path, destination: Path) -> Path:
 def harvest_outputs(
     directory: Path, started_at_ns: int, destination_root: Path | None = None
 ) -> list[str]:
-    """Copy new root results to the directories consumed by examples.
+    """Copy new root or archived results to the directories consumed by examples.
 
-    Results are discovered only in the isolated working directory of this
-    job. They are archived in the checked-out example directory for dependent
-    jobs, without scanning that shared directory for concurrent outputs.
+    Results are discovered only in the isolated working directory of this job,
+    including its ``saved_results`` and ``saved_html`` subdirectories. They
+    are archived in the checked-out example directory for dependent jobs,
+    without scanning that shared directory for concurrent outputs.
     """
     destination_root = destination_root or directory
     harvested: list[str] = []
-    for path in sorted(directory.iterdir()):
-        if not path.is_file() or path.suffix not in HARVEST_SUFFIXES:
-            continue
+    roots = [directory]
+    roots.extend(
+        directory / result_directory
+        for result_directory in sorted(RESULT_DIRECTORIES)
+        if (directory / result_directory).is_dir()
+    )
+    candidate_paths = [
+        path
+        for root in roots
+        for path in sorted(root.iterdir())
+        if path.is_file() and path.suffix in HARVEST_SUFFIXES
+    ]
+    for path in candidate_paths:
         if path.stat().st_mtime_ns < started_at_ns:
             continue
         destination_directory = (
@@ -335,7 +400,9 @@ def harvest_outputs(
             if path.suffix == '.html'
             else destination_root / 'saved_results'
         )
-        destination = copy_output(path, destination_directory / path.name)
+        destination = destination_directory / path.name
+        if path.resolve() != destination.resolve():
+            destination = copy_output(path, destination)
         harvested.append(destination.relative_to(destination_root).as_posix())
     return harvested
 
@@ -794,7 +861,7 @@ def classify_job(record: dict[str, Any], run_directory: Path) -> tuple[str, str]
     if state:
         normalized = state.upper().split('+', 1)[0]
         if normalized in {'RUNNING', 'COMPLETING', 'CONFIGURING', 'RESIZING'}:
-            return '.....', detail
+            return 'running', detail
         if normalized in {'PENDING', 'SUSPENDED'}:
             return 'scheduled and pending', detail
         if normalized in {
@@ -803,6 +870,12 @@ def classify_job(record: dict[str, Any], run_directory: Path) -> tuple[str, str]
             'CANCELLED',
             'TIMEOUT',
             'OUT_OF_MEMORY',
+            'NODE_FAIL',
+            'PREEMPTED',
+            'BOOT_FAIL',
+            'DEADLINE',
+            'REVOKED',
+            'SPECIAL_EXIT',
         }:
             if completion:
                 sacct_exit_code = detail.split('|', 1)[0] if '|' in detail else None
@@ -825,6 +898,11 @@ def classify_job(record: dict[str, Any], run_directory: Path) -> tuple[str, str]
     return 'scheduled and pending', detail
 
 
+def status_label(status: str) -> str:
+    """Return the compact, stable status shown by the status command."""
+    return STATUS_LABELS.get(status, status.upper().replace(' ', '_'))
+
+
 def latest_run(root: Path) -> Path | None:
     if not root.is_dir():
         return None
@@ -843,21 +921,33 @@ def command_status(args: argparse.Namespace) -> int:
     if run_directory is None or not (run_directory / 'run.json').is_file():
         raise ValueError('No run state was found. Launch a run first.')
     run_record = json_load(run_directory / 'run.json')
+    rows: list[tuple[str, str, str, str]] = []
     counts: dict[str, int] = {}
-    print(f'Run {run_record["run_id"]} ({run_record.get("created_at", "unknown")})')
-    print(f'{"STATUS":24} {"JOB ID":12} SCRIPT')
-    print('-' * 90)
     for script, record in run_record.get('jobs', {}).items():
         status, diagnostic = classify_job(record, run_directory)
-        counts[status] = counts.get(status, 0) + 1
+        label = status_label(status)
+        counts[label] = counts.get(label, 0) + 1
         job_id = str(record.get('job_id', '-'))
-        print(f'{status:24} {job_id:12} {script}')
-        if args.verbose and diagnostic:
-            print(f'  diagnostic: {diagnostic}')
-    print(
-        '\nSummary: '
-        + ', '.join(f'{key}={value}' for key, value in sorted(counts.items()))
+        rows.append((label, job_id, script, diagnostic))
+
+    print(f'Run {run_record["run_id"]} ({run_record.get("created_at", "unknown")})')
+    summary = ' | '.join(
+        f'{label}={counts[label]}' for label in STATUS_ORDER if counts.get(label)
     )
+    print(f'Summary: {summary or "NO_JOBS"}')
+    errors = [row for row in rows if row[0] == 'ERROR']
+    if errors:
+        print('\nErrors requiring attention:')
+        for _, job_id, script, diagnostic in errors:
+            print(f'  ERROR {job_id}: {script}')
+            if diagnostic:
+                print(f'    {diagnostic}')
+    print(f'\n{"STATUS":14} {"JOB ID":12} SCRIPT')
+    print('-' * 90)
+    for label, job_id, script, diagnostic in rows:
+        print(f'{label:14} {job_id:12} {script}')
+        if args.verbose and diagnostic:
+            print(f'  detail: {diagnostic}')
     return 0
 
 

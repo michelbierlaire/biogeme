@@ -283,17 +283,61 @@ def generated_files(workspace: Path) -> list[Path]:
 
 
 def harvest(workspace: Path) -> list[str]:
-    """Archive fresh outputs inside the workspace for downstream jobs."""
+    """Archive outputs written at the workspace root or archive paths."""
     harvested: list[str] = []
-    for source in sorted(workspace.iterdir()):
-        if not source.is_file() or source.suffix not in HARVEST_SUFFIXES:
-            continue
+    roots = [workspace]
+    roots.extend(
+        workspace / result_directory
+        for result_directory in sorted(INPUT_RESULT_DIRECTORIES)
+        if (workspace / result_directory).is_dir()
+    )
+    sources = [
+        source
+        for root in roots
+        for source in sorted(root.iterdir())
+        if source.is_file() and source.suffix in HARVEST_SUFFIXES
+    ]
+    for source in sources:
         directory_name = 'saved_html' if source.suffix == '.html' else 'saved_results'
         target = workspace / directory_name / source.name
         target.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(source, target)
+        if source.resolve() != target.resolve():
+            shutil.copy2(source, target)
         harvested.append(target.relative_to(workspace).as_posix())
     return harvested
+
+
+def expected_output_paths(workspace: Path, expected: str) -> tuple[Path, ...]:
+    """Return root and archive locations for one logical output name."""
+    relative = Path(expected)
+    if relative.parts and relative.parts[0] in INPUT_RESULT_DIRECTORIES:
+        return (workspace / relative,)
+    candidates = [workspace / relative]
+    if relative.suffix.lower() == '.html':
+        candidates.append(workspace / 'saved_html' / relative.name)
+    elif relative.suffix.lower() in HARVEST_SUFFIXES:
+        candidates.append(workspace / 'saved_results' / relative.name)
+    return tuple(candidates)
+
+
+def expected_output_glob_matches(workspace: Path, pattern: str) -> list[Path]:
+    """Match a declared output pattern at the root and archive locations."""
+    relative = Path(pattern)
+    if relative.parts and relative.parts[0] in INPUT_RESULT_DIRECTORIES:
+        roots = (workspace,)
+    elif relative.suffix.lower() == '.html':
+        roots = (workspace, workspace / 'saved_html')
+    elif relative.suffix.lower() in HARVEST_SUFFIXES:
+        roots = (workspace, workspace / 'saved_results')
+    else:
+        roots = (workspace,)
+    return [
+        path
+        for root in roots
+        if root.is_dir()
+        for path in root.glob(pattern)
+        if path.is_file()
+    ]
 
 
 def validate_outputs(
@@ -301,10 +345,12 @@ def validate_outputs(
 ) -> list[str]:
     errors: list[str] = []
     for expected in spec.expected_outputs:
-        if not (workspace / expected).is_file():
+        if not any(
+            path.is_file() for path in expected_output_paths(workspace, expected)
+        ):
             errors.append(f'missing expected output: {expected}')
     for pattern in spec.expected_output_globs:
-        if not any(path.is_file() for path in workspace.glob(pattern)):
+        if not expected_output_glob_matches(workspace, pattern):
             errors.append(f'missing expected output matching pattern: {pattern}')
     if spec.requires_artifacts and not generated_files(workspace):
         errors.append('no generated result/report artifact was produced')

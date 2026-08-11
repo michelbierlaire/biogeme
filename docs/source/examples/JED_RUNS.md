@@ -214,6 +214,11 @@ python jed_runs/jed_cleanup.py
 python jed_runs/jed_cleanup.py --apply
 ~~~
 
+The status table uses compact, log-friendly keywords: `OK`, `ERROR`,
+`RUNNING`, `PENDING`, and `NOT_SCHEDULED`. Errors are repeated in an
+`Errors requiring attention` block with their diagnostic; add `--verbose` to
+also print the Slurm detail below each row.
+
 ## Investigate failed jobs
 
 When the status report contains `finished with errors`, run the diagnostic
@@ -241,6 +246,77 @@ the newest run. To send the complete Markdown report directly to the terminal:
 ~~~bash
 python jed_runs/jed_error_report.py --run-id "$RUN_ID" --output -
 ~~~
+
+### Recover a forgotten run ID
+
+The launch output includes `Run state: .jed_runs/<RUN_ID>`. If that output was
+not saved, the no-argument forms select the newest run directory containing a
+`run.json` and print its ID:
+
+~~~bash
+python jed_runs/jed_examples.py status --verbose
+python jed_runs/jed_error_report.py
+~~~
+
+To recover the exact directory name for another command, use the runner's
+same newest-run rule:
+
+~~~bash
+RUN_ID="$(python - <<'PY'
+from jed_runs.jed_examples import latest_run, load_config, state_root
+
+run = latest_run(state_root(load_config()))
+if run is None or not (run / 'run.json').is_file():
+    raise SystemExit('No JED run state found')
+print(run.name)
+PY
+)"
+printf 'RUN_ID=%s\n' "$RUN_ID"
+~~~
+
+If more than one run exists, choose an ID deliberately and pass
+`--run-id <id>`; “newest” is based on filesystem modification time and can be
+a dry-run or retry. The run record is always at `.jed_runs/<RUN_ID>/run.json`.
+
+### Test only part of the workload
+
+The runner supports incomplete smoke runs. Use a unique test ID and select a
+script (or a complete consumer chain) with `--only`; dependencies are added
+automatically:
+
+~~~bash
+TEST_RUN_ID="smoke-$(date +%Y%m%d-%H%M%S)"
+python jed_runs/jed_examples.py launch \
+  --only indicators/plot_b09wtp.py --dry-run --run-id "$TEST_RUN_ID"
+# Review .jed_runs/$TEST_RUN_ID/jobs, then submit it:
+python jed_runs/jed_examples.py launch \
+  --only indicators/plot_b09wtp.py --run-id "$TEST_RUN_ID" --force
+python jed_runs/jed_examples.py status --run-id "$TEST_RUN_ID" --verbose
+~~~
+
+`--slow` is another supported subset: it selects every non-`light` profile
+and its dependencies. It is useful for testing server resources but is much
+larger than a one-script smoke test. Do not combine `--slow` with `--only`.
+Entries not selected are absent from `run.json`; entries in a dry-run state
+are intentionally `not scheduled`.
+
+Partial runs may be used to validate the Slurm wrapper and a dependency chain,
+but they do not satisfy release acceptance. Do not import them with the full
+strict profile. For temporary inspection, use a script-specific import into a
+disposable fixture tree, and only after that script has finished successfully:
+
+~~~bash
+uv run --locked --group docs python tools/import_jed_results.py \
+  --source "$JED_STAGE" --profile all \
+  --script indicators/plot_b02estimation.py --strict --apply
+~~~
+
+The complete release still requires `--profile full --strict` after every
+declared job and artifact has succeeded. After all smoke jobs finish, clean
+root-level generated files with `python jed_runs/jed_cleanup.py --apply` and
+remove only that test's metadata with `rm -rf -- ".jed_runs/$TEST_RUN_ID"`.
+Never remove it while a job is running. Use `jed_fresh_start.py --apply` only
+when it is acceptable to remove the entire generated JED state.
 
 ## Commit a completed result set
 
@@ -351,4 +427,7 @@ For jobs that declare an expected artifact, success requires Slurm exit code
 zero and a result/report artifact that was created or modified during that
 run. In-memory examples intentionally have no artifact requirement. Missing
 dependencies, missing outputs, interpreter failures, Python exceptions, Slurm
-failures, and missing completion markers are reported as diagnostics.
+failures, and missing completion markers are reported as diagnostics. At
+startup, the runner also validates that each configured dependency's required
+input is among the producer's declared output contract; a mismatch fails
+early instead of submitting a job that is guaranteed to be blocked.

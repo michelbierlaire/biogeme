@@ -1,5 +1,8 @@
+import json
 from pathlib import Path
+from types import SimpleNamespace
 
+from jed_runs import jed_examples
 from jed_runs.jed_examples import (
     Job,
     discover_jobs,
@@ -8,6 +11,7 @@ from jed_runs.jed_examples import (
     job_start,
     load_config,
     select_jobs,
+    status_label,
 )
 from jed_runs.jed_fresh_start import collect_targets
 
@@ -64,6 +68,75 @@ def test_explicit_selection_rejects_slow_flag():
         raise AssertionError('Expected --only/--slow conflict to be rejected')
 
 
+def test_hybrid_sequential_job_declares_predecessor_and_input():
+    jobs = discover_jobs(load_config())
+    job = jobs['hybrid_choice_models/plot_h03_mode_lv_gauss_seq.py']
+
+    assert job.dependencies == ('hybrid_choice_models/plot_h02_lv_mimic_gauss.py',)
+    assert job.required_inputs == ('saved_results/plot_h02_lv_mimic_gauss.yaml',)
+
+
+def test_dependency_contract_rejects_mismatched_producer_output():
+    config = load_config()
+    config['docs']['examples']['hybrid_choice_models/plot_h02_lv_mimic_gauss.py'][
+        'expected_outputs'
+    ] = ['wrong.yaml']
+
+    try:
+        discover_jobs(config)
+    except ValueError as error:
+        assert 'plot_h03_mode_lv_gauss_seq.py requires' in str(error)
+    else:  # pragma: no cover - assertion keeps the failure message explicit.
+        raise AssertionError('Expected the dependency contract to be rejected')
+
+
+def test_status_labels_are_compact():
+    assert status_label('finished without error') == 'OK'
+    assert status_label('finished with errors') == 'ERROR'
+    assert status_label('running') == 'RUNNING'
+    assert status_label('scheduled and pending') == 'PENDING'
+    assert status_label('not scheduled') == 'NOT_SCHEDULED'
+
+
+def test_status_output_highlights_errors(monkeypatch, tmp_path: Path, capsys):
+    run_directory = tmp_path / 'run-1'
+    (run_directory / 'jobs' / 'plot_ok').mkdir(parents=True)
+    (run_directory / 'jobs' / 'plot_ok' / 'completion.json').write_text(
+        json.dumps({'exit_code': 0})
+    )
+    (run_directory / 'jobs' / 'plot_error').mkdir(parents=True)
+    (run_directory / 'run.json').write_text(
+        json.dumps(
+            {
+                'run_id': 'run-1',
+                'created_at': '2026-08-10T16:45:45+00:00',
+                'jobs': {
+                    'plot_ok.py': {'job_id': '1', 'script': 'plot_ok.py'},
+                    'plot_error.py': {'job_id': '2', 'script': 'plot_error.py'},
+                },
+            }
+        )
+    )
+    monkeypatch.setattr(jed_examples, 'latest_run', lambda _: run_directory)
+    monkeypatch.setattr(
+        jed_examples,
+        'slurm_state',
+        lambda job_id: (
+            ('COMPLETED', '0:0|00:01:00||None')
+            if job_id == '1'
+            else ('FAILED', '1:0|00:00:01||None')
+        ),
+    )
+
+    assert jed_examples.command_status(SimpleNamespace(run_id=None, verbose=False)) == 0
+    output = capsys.readouterr().out
+    assert 'Summary: ERROR=1 | OK=1' in output
+    assert '  ERROR 2: plot_error.py' in output
+    assert f'{"OK":14} {"1":12}' in output
+    assert f'{"ERROR":14} {"2":12}' in output
+    assert 'finished without error' not in output
+
+
 def test_job_lifecycle_only_harvests_isolated_work_directory(tmp_path: Path):
     source = tmp_path / 'example'
     work = tmp_path / 'work'
@@ -89,6 +162,30 @@ def test_job_lifecycle_only_harvests_isolated_work_directory(tmp_path: Path):
     assert job_finish(job, state, 0, work) == 0
     assert (source / 'saved_results' / 'model.yaml').read_text() == 'result'
     assert not (source / 'saved_results' / 'other_job.nc').exists()
+
+
+def test_job_lifecycle_harvests_output_written_in_saved_results(tmp_path: Path):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+    )
+
+    assert job_start(job, state, work) == 0
+    (work / 'saved_results').mkdir()
+    (work / 'saved_results' / 'model.yaml').write_text('result')
+
+    assert job_finish(job, state, 0, work) == 0
+    assert (source / 'saved_results' / 'model.yaml').read_text() == 'result'
 
 
 def test_job_lifecycle_harvests_markdown_diagnostic_report(tmp_path: Path):

@@ -344,8 +344,10 @@ expected_outputs = [
     "b26triangular_panel.nc",
 ]
 
-# Hybrid-choice estimators. H03 consumes H02 through the dependency declared
-# below in the JED job section.
+# Hybrid-choice estimators. The output names are logical basenames: the runner
+# accepts a script writing directly under saved_results and promotes it to the
+# shared archive. H03 consumes H02 through the dependency declared below in
+# the JED job section.
 [docs.examples."hybrid_choice_models/plot_h01_mode_logit.py"]
 profile = "full"
 expected_outputs = ["plot_h01_mode_logit.yaml", "plot_h01_mode_logit.html"]
