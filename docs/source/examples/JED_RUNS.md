@@ -106,14 +106,14 @@ documentation build must not consume arbitrary files left in `saved_results`.
 
 ## Import completed JED results on the laptop
 
-After the global status reports every JED job `OK`, stage the server
-example tree on the laptop.  `rsync` can copy from the server directly, or the
-`--source` option can point at a mounted checkout:
+After the global status reports every JED job `OK`, stage the server example
+tree on the laptop. Use the persistent, Git-ignored `.release_staging`
+directory so that the staging path survives terminal sessions and interrupted
+transfers:
 
 ~~~bash
 cd "$HOME/github/biogeme"
-JED_STAGE_ROOT="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
-JED_STAGE="$JED_STAGE_ROOT/examples"
+JED_STAGE="$PWD/.release_staging/examples"
 mkdir -p "$JED_STAGE"
 JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
 rsync -a --partial --progress --whole-file \
@@ -130,11 +130,12 @@ rsync -a --partial --progress --whole-file \
 
 # Review the manifest-limited import.  This is a dry run.
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source "$JED_STAGE" --profile all --strict
+  --profile all --strict
 ~~~
 
 The importer accepts either a complete JED checkout or its
-`docs/source/examples` directory.  It imports only `expected_outputs` and
+`docs/source/examples` directory. If `--source` is omitted, it uses
+`.release_staging/examples`. It imports only `expected_outputs` and
 `expected_output_globs` declared in `jed_runs/jed_examples.toml`:
 YAML and Pareto results are placed in `saved_results/`, HTML reports in
 `saved_html/`, and declared text reports at the example root. The first
@@ -154,12 +155,12 @@ ssh-add --apple-use-keychain ~/.ssh/id_rsa
 Globs cover
 estimators whose model names are generated at runtime, such as the
 all-algorithm and multi-model Swissmetro examples.  Source code, input data,
-and undeclared files are never copied.  The `--strict` check must report no
+and undeclared files are never copied. Verify that Git ignores the stage with
+`git check-ignore -v "$JED_STAGE"`. The `--strict` check must report no
 missing artifacts before applying the import:
 
 ~~~bash
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source "$JED_STAGE" \
   --profile all \
   --strict \
   --replace-results \
@@ -334,7 +335,7 @@ disposable fixture tree, and only after that script has finished successfully:
 
 ~~~bash
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source "$JED_STAGE" --profile all \
+  --profile all \
   --script indicators/plot_b02estimation.py --strict --apply
 ~~~
 

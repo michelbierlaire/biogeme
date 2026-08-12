@@ -20,6 +20,7 @@ stamp-h1
 docs/source/auto_examples
 docs/.cache/
 .docs_runs/
+.release_staging/
 docs.keep/*
 dist/
 *.egg

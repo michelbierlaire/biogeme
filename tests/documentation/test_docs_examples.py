@@ -8,6 +8,7 @@ def test_fast_profile_is_small_and_dependency_selection_is_explicit():
 
     fast = docs_examples.select_specs(specs, 'fast', [])
     assert set(fast) == {
+        'hybrid_choice_models/plot_h08_mode_lv_parameter_overrides.py',
         'hybrid_choice_specs/plot_b00_normalization.py',
         'hybrid_choice_specs/plot_b01_model_specification.py',
         'montecarlo/plot_b01simple_integral.py',
@@ -221,6 +222,14 @@ def test_full_profile_has_artifact_contracts_for_deterministic_jobs():
         'b05_normal_mixture.yaml',
         'b05_normal_mixture.html',
         'b05_normal_mixture.nc',
+    )
+    assert specs['assisted/plot_b10_parameter_overrides.py'].expected_outputs == (
+        'b10_parameter_overrides.yaml',
+        'b10_parameter_overrides.html',
+    )
+    assert specs['swissmetro/plot_b28_parameter_overrides.py'].expected_outputs == (
+        'b28_parameter_overrides.yaml',
+        'b28_parameter_overrides.html',
     )
     declared_netcdf = {
         output

@@ -76,6 +76,7 @@ from .normalcdf import NormalCdf
 from .numeric_expressions import Numeric
 from .numeric_tools import is_numeric
 from .ordered import OrderedLogit, OrderedLogLogit, OrderedLogProbit, OrderedProbit
+from .parameter_overrides import ParameterOverrides, apply_parameter_overrides
 from .panel_likelihood_trajectory import PanelLikelihoodTrajectory
 from .random_variable import RandomVariable
 from .rename_variables import OldNewName, rename_all_variables

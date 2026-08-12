@@ -117,12 +117,13 @@ Importing JED results for a release
 The laptop release workflow imports the completed JED artifacts explicitly;
 it does not make the Sphinx build scan a server checkout or copy arbitrary
 files from ``saved_results``.  Stage the server's example tree with ``rsync``
-or another file-transfer tool, then inspect the manifest-limited dry run:
+in the persistent, Git-ignored ``.release_staging`` directory, then inspect
+the manifest-limited dry run:
 
 .. code-block:: bash
 
-   JED_STAGE_ROOT="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
-   JED_STAGE="$JED_STAGE_ROOT/examples"
+   cd "$HOME/github/biogeme"
+   JED_STAGE="$PWD/.release_staging/examples"
    mkdir -p "$JED_STAGE"
    JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
    rsync -a --partial --progress --whole-file \
@@ -137,7 +138,7 @@ or another file-transfer tool, then inspect the manifest-limited dry run:
       --exclude='*' \
       "$JED_REMOTE/" "$JED_STAGE/"
    uv run --locked --group docs python tools/import_jed_results.py \
-      --source "$JED_STAGE" --profile full --strict
+      --profile full --strict
 
 The source may instead be a mounted JED checkout.  The importer accepts either
 that checkout or its ``docs/source/examples`` directory.  It considers only
@@ -162,6 +163,9 @@ partial files.  To resume a large partial file block by block, remove
 ``--whole-file`` on the retry.  Do not add ``--compress`` (``-z``): NetCDF is
 already compressed and SSH compression usually makes this transfer slower.
 The importer never changes Python source, input data, or undeclared outputs.
+The staging directory persists across terminal sessions and can be reused;
+rerunning ``rsync`` updates changed files and preserves partial transfers.
+Verify that Git ignores it with ``git check-ignore -v "$JED_STAGE"``.
 
 When the dry-run list is complete and every required artifact is present, add
 ``--apply``:
@@ -169,7 +173,7 @@ When the dry-run list is complete and every required artifact is present, add
 .. code-block:: bash
 
    uv run --locked --group docs python tools/import_jed_results.py \
-      --source "$JED_STAGE" --profile full --strict --apply
+      --profile full --strict --apply
 
 The command backs up overwritten files and records SHA-256 checksums in the
 ignored ``.docs_runs/imports/<timestamp>/`` directory.  A strict import exits

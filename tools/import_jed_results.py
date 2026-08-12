@@ -11,9 +11,9 @@ is a dry run by default; ``--apply`` is required before anything is copied.
 Examples::
 
     uv run --locked --group docs python tools/import_jed_results.py \
-        --source /tmp/biogeme-jed-examples --profile all
+        --profile all
     uv run --locked --group docs python tools/import_jed_results.py \
-        --source /tmp/biogeme-jed-examples --profile all --strict --apply
+        --profile all --strict --apply
 
     The source may be a repository checkout or its ``docs/source/examples``
     directory.  Existing target artifacts are backed up below
@@ -34,6 +34,7 @@ from typing import Any, Iterable
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 TARGET_EXAMPLES_ROOT = PROJECT_ROOT / 'docs' / 'source' / 'examples'
+DEFAULT_SOURCE_ROOT = PROJECT_ROOT / '.release_staging' / 'examples'
 RESULT_SUFFIXES = {'.nc', '.pareto', '.yaml'}
 ARCHIVE_DIRECTORIES = {'saved_results', 'saved_html'}
 
@@ -441,8 +442,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         '--source',
-        required=True,
-        help='JED checkout or staged docs/source/examples directory',
+        default=str(DEFAULT_SOURCE_ROOT),
+        help=(
+            'JED checkout or staged docs/source/examples directory '
+            f'(default: {DEFAULT_SOURCE_ROOT})'
+        ),
     )
     parser.add_argument(
         '--target',

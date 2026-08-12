@@ -138,14 +138,13 @@ uv run --locked --group docs python jed_runs/jed_fresh_start.py
 uv run --locked --group docs python jed_runs/jed_fresh_start.py --apply
 ```
 
-Stage the JED examples in a fresh temporary directory. NetCDF files are
-large posterior-draw archives and are not part of the normal gallery fixture
-set. The single transfer below excludes every `.nc` except the two files
-needed by downstream Bayesian examples:
+Stage the JED examples in the persistent, Git-ignored `.release_staging`
+directory. NetCDF files are large posterior-draw archives and are not part of
+the normal gallery fixture set. The single transfer below excludes every
+`.nc` except the two files needed by downstream Bayesian examples:
 
 ```bash
-JED_STAGE_ROOT="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
-JED_STAGE="$JED_STAGE_ROOT/examples"
+JED_STAGE="$PWD/.release_staging/examples"
 mkdir -p "$JED_STAGE"
 JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
 rsync -a --partial --progress --whole-file \
@@ -188,7 +187,7 @@ undeclared files are ignored. First perform a strict dry run:
 
 ```bash
 uv run --locked --group docs python tools/import_jed_results.py \
-    --source "$JED_STAGE" --profile all --strict
+    --profile all --strict
 ```
 
 Every declared output must be available. If anything is missing, return to
@@ -197,14 +196,16 @@ the import and replace stale archived result files safely:
 
 ```bash
 uv run --locked --group docs python tools/import_jed_results.py \
-    --source "$JED_STAGE" \
     --profile all \
     --strict \
     --replace-results \
     --apply
 ```
 
-Replaced files are backed up below `.docs_runs/imports/`, and the importer
+The stage persists across terminal sessions and can be reused; rerunning
+`rsync` updates changed files and preserves partial transfers. It is ignored by
+Git; verify this with `git check-ignore -v "$JED_STAGE"`. Replaced files are
+backed up below `.docs_runs/imports/`, and the importer
 writes checksums to its `report.json`.
 
 Build the gallery on the laptop:
@@ -225,8 +226,8 @@ git diff --name-status -- docs/source/examples
 ```
 
 Commit only the reviewed source, manifest, documentation, and result changes.
-Do not stage `.jed_runs`, `.docs_runs`, Slurm output, caches, or temporary
-transfer directories.
+Do not stage `.jed_runs`, `.docs_runs`, `.release_staging`, Slurm output,
+caches, or other transfer directories.
 
 ## Adding a new example
 

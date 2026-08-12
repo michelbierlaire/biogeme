@@ -4,6 +4,12 @@ from types import SimpleNamespace
 from tools import import_jed_results
 
 
+def test_import_parser_defaults_to_persistent_release_stage():
+    args = import_jed_results.build_parser().parse_args(['--profile', 'all'])
+
+    assert Path(args.source) == import_jed_results.DEFAULT_SOURCE_ROOT
+
+
 def test_resolve_examples_root_accepts_checkout_and_staged_tree(tmp_path: Path):
     checkout = tmp_path / 'checkout'
     examples = checkout / 'docs' / 'source' / 'examples'

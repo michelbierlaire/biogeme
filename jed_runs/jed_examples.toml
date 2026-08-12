@@ -377,6 +377,10 @@ expected_outputs = [
     "plot_h07_mode_lv_ordprobit_simult_generated.html",
 ]
 
+[docs.examples."hybrid_choice_models/plot_h08_mode_lv_parameter_overrides.py"]
+mode = "self_contained"
+profile = "fast"
+
 # MDCEV estimators and their forecasting consumers.
 [docs.examples."mdcev_no_outside_good/plot_gamma_estimation.py"]
 profile = "full"
@@ -484,6 +488,10 @@ expected_outputs = ["cnl_10_63.yaml", "cnl_10_63.html"]
 [docs.examples."assisted/plot_b08selected_specification.py"]
 profile = "full"
 expected_outputs = ["my_favorite_model.yaml", "my_favorite_model.html"]
+
+[docs.examples."assisted/plot_b10_parameter_overrides.py"]
+profile = "full"
+expected_outputs = ["b10_parameter_overrides.yaml", "b10_parameter_overrides.html"]
 
 [docs.examples."assisted/plot_b07everything_assisted.py"]
 profile = "full"
@@ -656,6 +664,10 @@ expected_outputs = [
 profile = "full"
 expected_outputs = ["b27_monte_carlo.yaml", "b27_monte_carlo_diagnostic.yaml"]
 
+[docs.examples."swissmetro/plot_b28_parameter_overrides.py"]
+profile = "full"
+expected_outputs = ["b28_parameter_overrides.yaml", "b28_parameter_overrides.html"]
+
 [docs.examples."swissmetro/plot_b21a_multiple_models.py"]
 profile = "full"
 expected_outputs = ["b21_multiple_models.pareto"]
@@ -695,6 +707,15 @@ required_inputs = ["saved_results/plot_h02_lv_mimic_gauss.yaml"]
 
 [jobs."hybrid_choice_models/plot_h04_mode_lv_gauss_simult.py"]
 profile = "hybrid"
+
+[jobs."hybrid_choice_models/plot_h08_mode_lv_parameter_overrides.py"]
+profile = "light"
+
+[jobs."assisted/plot_b10_parameter_overrides.py"]
+profile = "light"
+
+[jobs."swissmetro/plot_b28_parameter_overrides.py"]
+profile = "light"
 
 [jobs."indicators/plot_b03simulation.py"]
 depends_on = ["indicators/plot_b02estimation.py"]
