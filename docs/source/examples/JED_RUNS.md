@@ -22,6 +22,22 @@ jed_runs/jed_examples.toml. The generated .run files, Slurm logs, job IDs,
 diagnostics, and reset backups are stored below .jed_runs/, which is ignored
 by Git.
 
+For the incremental release workflow, use the wrappers below.  They keep
+resume state automatically and print the next action; the lower-level
+commands documented in this file remain available for diagnostics:
+
+~~~bash
+PY=.venv/bin/python
+$PY jed_runs/release_examples.py --strict
+$PY jed_runs/release_phase1.py run --apply
+$PY jed_runs/release_phase1.py status
+$PY jed_runs/release_phase1.py finalize --apply
+~~~
+
+On the laptop, continue with ``release_phase2.py``.  To start over, inspect
+and then apply ``release_reset.py --scope all --confirm``.  See
+``RELEASE_WORKFLOW.md`` for the complete procedure.
+
 ## Validate examples locally before using JED
 
 The hermetic local runner uses the same discovery and dependency information,

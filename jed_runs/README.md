@@ -8,6 +8,19 @@ diagnostics. Run them from the repository root, using the repository's
 For the complete release checklist, including laptop result import and the
 Sphinx-gallery build, see `RELEASE_WORKFLOW.md` in the repository root.
 
+The incremental release wrappers are:
+
+```text
+release_examples.py  detect and register new plot_*.py examples
+release_phase1.py    prepare, submit, monitor, and finalize the JED phase
+release_phase2.py    transfer artifacts and build the laptop documentation
+release_reset.py     remove generated state for a completely fresh attempt
+```
+
+They are dry runs unless `--apply` is supplied.  Release identifiers and
+resume state are stored automatically below the ignored `.jed_runs/releases`
+directory.
+
 ## Prepare the checkout
 
 On JED:
@@ -26,6 +39,20 @@ project directory; the golden-reference project is intentionally isolated
 under `tests/golden_reference/`.
 
 ## Start a run
+
+For the release workflow, first check the example inventory and inspect the
+Phase-1 plan:
+
+```bash
+$PY jed_runs/release_examples.py --strict
+$PY jed_runs/release_phase1.py run
+$PY jed_runs/release_phase1.py run --apply
+```
+
+The same applied command can be repeated after repairs; it submits only
+unfinished jobs.  Use `release_phase1.py status` and
+`release_phase1.py monitor --wait` while the jobs run.  After all jobs are
+`OK`, use `release_phase1.py finalize --apply` before transferring results.
 
 Make sure all jobs from an earlier run have finished before resetting outputs.
 For a recoverable reset, first inspect and then apply:
@@ -102,6 +129,17 @@ cleaned separately:
 $PY jed_runs/jed_cleanup.py
 $PY jed_runs/jed_cleanup.py --apply
 ```
+
+To discard all generated state and start from scratch, inspect and then apply
+the scoped reset:
+
+```bash
+$PY jed_runs/release_reset.py --scope all
+$PY jed_runs/release_reset.py --scope all --apply --confirm
+```
+
+The reset never removes source files, input data, or the manifest, and refuses
+to clean the JED scope while Slurm jobs are running.
 
 ## Commit archived results
 

@@ -11,6 +11,49 @@ working directory.  The supported workflow gives each example a fresh
 temporary workspace and validates the outputs declared in the shared JED
 manifest.
 
+Incremental release workflow
+----------------------------
+
+Release preparation is incremental.  Persistent state is stored in the
+ignored ``.jed_runs/releases`` directory, while the user works with these
+commands without specifying a release identifier:
+
+.. code-block:: bash
+
+   uv run --locked --group docs python jed_runs/release_examples.py --strict
+   uv run --locked --group docs python jed_runs/release_phase1.py run
+   uv run --locked --group docs python jed_runs/release_phase1.py run --apply
+   uv run --locked --group docs python jed_runs/release_phase1.py status
+
+Phase 1 submits only unfinished JED jobs.  If a job fails, repair it, use
+``jed_examples.py invalidate`` for that job, and rerun ``release_phase1.py``;
+successful jobs are not repeated.  After all jobs are ``OK``, finalize Phase 1
+and run the laptop-side Phase 2 wrapper:
+
+.. code-block:: bash
+
+   uv run --locked --group docs python jed_runs/release_phase1.py finalize --apply
+   uv run --locked --group docs python jed_runs/release_phase2.py run \
+      --source bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples
+
+Phase 2 resumes interrupted ``rsync`` transfers, performs the strict import,
+and then builds the documentation.  If only the build fails, rerun
+``release_phase2.py build --apply``.  Every wrapper is a dry run unless
+``--apply`` is supplied and prints the next recommended action.
+
+To discard all generated state and begin again, inspect and then apply the
+scoped reset:
+
+.. code-block:: bash
+
+   uv run --locked --group docs python jed_runs/release_reset.py --scope all
+   uv run --locked --group docs python jed_runs/release_reset.py \
+      --scope all --apply --confirm
+
+New ``plot_*.py`` files are detected by ``release_examples.py``.  Phase 1
+runs the same check automatically, so an example with missing documentation
+or an incomplete output contract cannot silently enter a release.
+
 The manifest is ``jed_runs/jed_examples.toml``.  It is shared by the local
 runner and the JED scheduler.  An example can be marked as ``self_contained``,
 ``dependent``, or ``server_only``.  Dependent examples are run only after the

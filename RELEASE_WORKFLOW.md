@@ -13,6 +13,20 @@ Git revision and locked `uv` environment. The runner discovers every
 directory. That directory is internal bookkeeping; it is not part of the
 release procedure.
 
+The recommended interface is now provided by three incremental commands:
+
+```text
+jed_runs/release_examples.py   detect and register new examples
+jed_runs/release_phase1.py     run and repair the JED suite
+jed_runs/release_phase2.py     transfer artifacts and build the documentation
+jed_runs/release_reset.py      remove all generated state for a fresh attempt
+```
+
+Release identifiers are stored automatically below `.jed_runs/releases`; the
+user normally does not need to see or provide them.  The commands are dry runs
+unless `--apply` is supplied, and every command ends by printing the next
+action.
+
 ## Before starting
 
 Choose the release commit and use it on both machines:
@@ -33,10 +47,88 @@ squeue -u "$USER"
 
 Do not reset generated files while a job is running.
 
+## Detecting and registering new examples
+
+Run this check after adding a `plot_*.py` file and before starting Phase 1:
+
+```bash
+cd ~/github/biogeme
+PY=.venv/bin/python
+
+"$PY" jed_runs/release_examples.py --strict
+```
+
+The first invocation establishes an ignored inventory of the existing suite.
+Later invocations detect new, changed, and removed examples.  A new example
+must have a documentation label and, when it produces persistent results, a
+complete output contract in `jed_runs/jed_examples.toml`.  The script prints a
+proposed TOML block for anything that needs review.
+
+After reviewing the proposal, register safe entries with:
+
+```bash
+"$PY" jed_runs/release_examples.py --apply
+"$PY" jed_runs/release_examples.py --strict
+```
+
+Estimator examples with unknown output names are deliberately not registered
+automatically.  Add their `expected_outputs` or `expected_output_globs` by
+hand, then rerun the strict check.  Phase 1 performs the same check before
+submission, so a new example cannot silently be omitted from a release.
+
 ## Phase 1 — Run and repair all examples on JED
 
-Start from a clean generated-output tree. The dry run is required before the
-destructive step:
+The incremental wrapper is the recommended interface.  First inspect the
+plan:
+
+```bash
+"$PY" jed_runs/release_phase1.py run
+```
+
+Then execute it:
+
+```bash
+"$PY" jed_runs/release_phase1.py run --apply
+```
+
+The first applied run performs the fresh generated-output cleanup and submits
+unfinished jobs.  Repeating the same command is safe: successful jobs are
+not resubmitted, and only `NOT_DONE` jobs are selected.  The wrapper refuses
+to reset while Slurm jobs are running.
+
+Monitor the release with:
+
+```bash
+"$PY" jed_runs/release_phase1.py status
+"$PY" jed_runs/release_phase1.py monitor --wait --poll-seconds 60
+```
+
+If a job fails, inspect the diagnostics, repair the source, invalidate the
+failed job and its dependents, and rerun the wrapper:
+
+```bash
+"$PY" jed_runs/jed_error_report.py
+"$PY" jed_runs/jed_examples.py invalidate \
+    --script hybrid_choice_models/plot_h01_mode_logit.py
+"$PY" jed_runs/release_phase1.py run --apply
+```
+
+The wrapper preserves the release state and resumes at the unfinished step.
+When every discovered job is `OK`, finalize Phase 1:
+
+```bash
+"$PY" jed_runs/release_phase1.py finalize
+"$PY" jed_runs/release_phase1.py finalize --apply
+```
+
+Finalization removes only temporary root-level copies and preserves the
+archived files in `saved_results` and `saved_html`.
+
+The lower-level commands remain available for diagnostics and exceptional
+cases:
+
+Start from a clean generated-output tree only when using the lower-level
+commands directly. The dry run is required before the destructive step:
 
 ```bash
 cd ~/github/biogeme
@@ -117,6 +209,35 @@ outputs, record it with:
 ```
 
 ## Phase 2 — Transfer results and build the documentation
+
+On the laptop, the incremental wrapper combines the resumable transfer, the
+strict manifest-limited import, and the documentation build.  A dry run is
+shown first:
+
+```bash
+cd ~/MyFiles/github/biogeme
+PY=.venv/bin/python
+JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
+
+"$PY" jed_runs/release_phase2.py run --source "$JED_REMOTE"
+"$PY" jed_runs/release_phase2.py run --source "$JED_REMOTE" --apply
+```
+
+The transfer uses `rsync --partial`, so an interrupted copy can be resumed by
+rerunning the same command.  The import is strict and is attempted only after
+all declared artifacts are available.  If the documentation build fails, run
+only:
+
+```bash
+"$PY" jed_runs/release_phase2.py build --apply
+```
+
+The phase-2 state is retained under `.jed_runs/releases`.  The wrapper never
+commits changes; after a successful build, review `git status --short` and
+commit manually.
+
+The following lower-level commands describe the individual operations and
+remain useful for troubleshooting.
 
 Once every example is `OK`, remove only temporary root-level copies on JED.
 The archived files in `saved_results` and `saved_html` are preserved:
@@ -229,6 +350,28 @@ Commit only the reviewed source, manifest, documentation, and result changes.
 Do not stage `.jed_runs`, `.docs_runs`, `.release_staging`, Slurm output,
 caches, or other transfer directories.
 
+## Starting over completely
+
+If a genuinely fresh release is required, inspect the complete reset plan:
+
+```bash
+"$PY" jed_runs/release_reset.py --scope all
+```
+
+The scopes are `jed`, `laptop`, and `all`.  The reset removes only generated
+artifacts, release state, staging files, documentation build output, and
+caches.  It never removes source code, input data, the manifest, or the Git
+repository.  It refuses to clean the JED scope while Slurm jobs are running.
+
+Apply the reviewed plan explicitly:
+
+```bash
+"$PY" jed_runs/release_reset.py --scope all --apply --confirm
+```
+
+After a reset, the next release starts with `release_examples.py --apply` to
+establish a new ignored example inventory.
+
 ## Adding a new example
 
 The runner automatically discovers a new `plot_*.py`, but the example still
@@ -263,14 +406,23 @@ needs a manifest entry when it has outputs or dependencies.
    required_inputs = ["saved_results/model.yaml"]
    ```
 
-5. Test it locally in an isolated workspace:
+5. Run the release-suite detector. It will propose safe entries and flag
+   output contracts that need human review:
+
+   ```bash
+   "$PY" jed_runs/release_examples.py --strict
+   "$PY" jed_runs/release_examples.py --apply
+   "$PY" jed_runs/release_examples.py --strict
+   ```
+
+6. Test it locally in an isolated workspace:
 
    ```bash
    uv run --locked --group docs python tools/docs_examples.py \
        run --script family/plot_<name>.py --keep-workspace
    ```
 
-6. Commit the source and manifest changes, then let Phase 1 execute the new
+7. Commit the source and manifest changes, then let Phase 1 execute the new
    example on JED. The strict Phase 2 import and full gallery build are
    required before release.
 
