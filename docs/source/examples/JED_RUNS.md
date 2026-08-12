@@ -440,10 +440,12 @@ The reset command removes generated files from the example directories by
 moving them into .jed_runs/resets/<timestamp>/. It preserves Python source,
 input data, configuration files, and .run files. During a run, job-finish
 copies new root-level YAML/NetCDF/HTML/Pareto results into the saved_results
-or saved_html directory expected by dependent examples. It deliberately
-leaves the root-level files in place so concurrent jobs cannot invalidate one
-another's harvest; same-named archive copies are replaced. Once all jobs have
-completed, run `python jed_runs/jed_cleanup.py`
+or saved_html directory expected by dependent examples. Declared root-level
+text reports, such as `revenue_1.00.txt`, are kept at the example root because
+the importer and consumers expect them there. It deliberately leaves the
+root-level files in place so concurrent jobs cannot invalidate one another's
+harvest; same-named archive copies are replaced. Once all jobs have completed,
+run `python jed_runs/jed_cleanup.py`
 to review those root-level files and `python jed_runs/jed_cleanup.py --apply` to
 remove them.
 

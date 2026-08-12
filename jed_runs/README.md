@@ -75,8 +75,10 @@ $PY jed_runs/jed_examples.py launch --slow \
 
 Each submitted job copies its example into a job-specific temporary work
 directory (`$SLURM_TMPDIR`, or `$TMPDIR`/`/tmp`), runs there, and harvests only
-that job's outputs back into `saved_results` or `saved_html`. This prevents
-concurrent jobs from seeing or harvesting one another's artifacts.
+that job's outputs back into `saved_results` or `saved_html`. Declared
+root-level text reports (for example, `revenue_1.00.txt`) remain at the
+example root. This prevents concurrent jobs from seeing or harvesting one
+another's artifacts.
 
 ## Monitor and diagnose
 

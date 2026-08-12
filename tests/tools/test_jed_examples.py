@@ -278,6 +278,31 @@ def test_job_lifecycle_archives_declared_netcdf(tmp_path: Path):
     assert (source / 'saved_results' / 'model.nc').is_file()
 
 
+def test_job_lifecycle_archives_declared_root_text_report(tmp_path: Path):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_revenues.py',
+        path=source / 'plot_revenues.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('revenue_1.00.txt',),
+    )
+
+    assert job_start(job, state, work) == 0
+    (work / 'revenue_1.00.txt').write_text('revenue % lower % upper\n')
+
+    assert job_finish(job, state, 0, work) == 0
+    assert (source / 'revenue_1.00.txt').is_file()
+    assert not (source / 'saved_results' / 'revenue_1.00.txt').exists()
+
+
 def test_job_lifecycle_requires_all_declared_outputs(tmp_path: Path):
     source = tmp_path / 'example'
     work = tmp_path / 'work'

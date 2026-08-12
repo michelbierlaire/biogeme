@@ -537,7 +537,25 @@ def harvest_outputs(
         path
         for root in roots
         for path in sorted(root.iterdir())
-        if path.is_file() and path.suffix in HARVEST_SUFFIXES
+        if path.is_file()
+        and (
+            path.suffix in HARVEST_SUFFIXES
+            or (
+                path.suffix == '.txt'
+                and job is not None
+                and any(
+                    Path(expected).suffix.lower() == '.txt'
+                    and (
+                        Path(expected).name == path.name
+                        or fnmatch.fnmatch(path.name, Path(expected).name)
+                    )
+                    for expected in (
+                        *job.expected_outputs,
+                        *job.expected_output_globs,
+                    )
+                )
+            )
+        )
     ]
     for path in candidate_paths:
         if path.suffix == '.nc' and job is not None:
@@ -565,6 +583,8 @@ def harvest_outputs(
         destination_directory = (
             destination_root / 'saved_html'
             if path.suffix == '.html'
+            else destination_root
+            if path.suffix == '.txt'
             else destination_root / 'saved_results'
         )
         destination = destination_directory / path.name
