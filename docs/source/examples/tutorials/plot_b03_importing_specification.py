@@ -27,7 +27,7 @@ from tutorial_model import utilities
 # Once the ingredients have been imported, the rest of the script is exactly the same.
 log_choice_probability = loglogit(utilities, None, choice)
 biogeme_object = BIOGEME(biogeme_database, log_choice_probability)
-biogeme_object.model_name = 'first_model'
+biogeme_object.model_name = 'imported_model'
 biogeme_object.calculate_null_loglikelihood(avail={0: 1, 1: 1})
 results = biogeme_object.estimate()
 print(results.short_summary())

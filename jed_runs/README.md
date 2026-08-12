@@ -116,7 +116,10 @@ $PY jed_runs/jed_commit_results.py \
   --message "Update JED example results"
 ```
 
-The helper commits only files inside `saved_results` and `saved_html`.  It
+The helper commits only files inside `saved_results` and `saved_html`.  For a
+release, NetCDF files should be force-added only when they are declared in the
+manifest as required posterior-draw inputs (`b01a_logit.nc` and
+`b05_normal_mixture.nc`); all other Bayesian examples use YAML summaries.  It
 refuses to proceed if unrelated files are already staged, so unstage other
 work before running it.  It force-adds files in those two directories because
 some result formats, such as NetCDF, are ignored by general repository rules.

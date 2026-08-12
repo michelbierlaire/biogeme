@@ -1,4 +1,5 @@
 import json
+import os
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -212,9 +213,69 @@ def test_job_lifecycle_harvests_output_written_in_saved_results(tmp_path: Path):
     assert job_start(job, state, work) == 0
     (work / 'saved_results').mkdir()
     (work / 'saved_results' / 'model.yaml').write_text('result')
+    # Simulate a filesystem with coarser timestamp resolution than the
+    # lifecycle clock, as on Windows. The snapshot comparison must still
+    # recognize the newly created output.
+    started_at_ns = json.loads((state / 'start.json').read_text())['started_at_ns']
+    os.utime(
+        work / 'saved_results' / 'model.yaml',
+        ns=(started_at_ns - 1, started_at_ns - 1),
+    )
 
     assert job_finish(job, state, 0, work) == 0
     assert (source / 'saved_results' / 'model.yaml').read_text() == 'result'
+
+
+def test_job_lifecycle_does_not_archive_undeclared_netcdf(tmp_path: Path):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('model.yaml',),
+    )
+
+    assert job_start(job, state, work) == 0
+    (work / 'model.yaml').write_text('result')
+    (work / 'unused.nc').write_bytes(b'unused posterior draws')
+
+    assert job_finish(job, state, 0, work) == 0
+    assert (source / 'saved_results' / 'model.yaml').is_file()
+    assert not (source / 'saved_results' / 'unused.nc').exists()
+
+
+def test_job_lifecycle_archives_declared_netcdf(tmp_path: Path):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('model.yaml', 'model.nc'),
+    )
+
+    assert job_start(job, state, work) == 0
+    (work / 'model.yaml').write_text('result')
+    (work / 'model.nc').write_bytes(b'posterior draws')
+
+    assert job_finish(job, state, 0, work) == 0
+    assert (source / 'saved_results' / 'model.yaml').is_file()
+    assert (source / 'saved_results' / 'model.nc').is_file()
 
 
 def test_job_lifecycle_requires_all_declared_outputs(tmp_path: Path):

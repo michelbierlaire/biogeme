@@ -132,7 +132,7 @@ expected_outputs = ["first_model.yaml", "first_model.html"]
 [docs.examples."tutorials/plot_b03_importing_specification.py"]
 mode = "self_contained"
 profile = "fast"
-expected_outputs = ["first_model.yaml", "first_model.html"]
+expected_outputs = ["imported_model.yaml", "imported_model.html"]
 
 [docs.examples."tutorials/plot_b05_simulation.py"]
 mode = "dependent"
@@ -208,29 +208,28 @@ expected_outputs = ["b12_panel.yaml", "b12_panel.html"]
 mode = "dependent"
 profile = "full"
 
-# Bayesian estimators.  The YAML summary is used by the examples themselves;
-# NetCDF is also retained for Bayesian simulation and individual-level
-# post-processing.  The HTML report is included when the example leaves the
-# default output settings enabled.
+# Bayesian estimators. YAML summaries and HTML reports are the normal release
+# fixtures. NetCDF is declared only when a later gallery example needs the full
+# posterior draws (b01c simulation and b19 individual-level post-processing).
 [docs.examples."bayesian_swissmetro/plot_b01a_logit.py"]
 profile = "full"
 expected_outputs = ["b01a_logit.yaml", "b01a_logit.html", "b01a_logit.nc"]
 
 [docs.examples."bayesian_swissmetro/plot_b01b_logit.py"]
 profile = "full"
-expected_outputs = ["b01b_logit.yaml", "b01b_logit.html", "b01b_logit.nc"]
+expected_outputs = ["b01b_logit.yaml", "b01b_logit.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b02_weight.py"]
 profile = "full"
-expected_outputs = ["b02_weight.yaml", "b02_weight.nc"]
+expected_outputs = ["b02_weight.yaml"]
 
 [docs.examples."bayesian_swissmetro/plot_b03_scale.py"]
 profile = "full"
-expected_outputs = ["b03_scale.yaml", "b03_scale.html", "b03_scale.nc"]
+expected_outputs = ["b03_scale.yaml", "b03_scale.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b04_validation.py"]
 profile = "full"
-expected_outputs = ["b04validation.yaml", "b04validation.html", "b04validation.nc"]
+expected_outputs = ["b04validation.yaml", "b04validation.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b05_normal_mixture.py"]
 profile = "full"
@@ -242,46 +241,43 @@ expected_outputs = [
 
 [docs.examples."bayesian_swissmetro/plot_b06_unif_mixture.py"]
 profile = "full"
-expected_outputs = ["b06_unif_mixture.yaml", "b06_unif_mixture.html", "b06_unif_mixture.nc"]
+expected_outputs = ["b06_unif_mixture.yaml", "b06_unif_mixture.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b07_discrete_mixture.py"]
 profile = "full"
 expected_outputs = [
     "b07_discrete_mixture.yaml",
     "b07_discrete_mixture.html",
-    "b07_discrete_mixture.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b08_boxcox.py"]
 profile = "full"
-expected_outputs = ["b08_boxcox.yaml", "b08_boxcox.html", "b08_boxcox.nc"]
+expected_outputs = ["b08_boxcox.yaml", "b08_boxcox.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b09_nested.py"]
 profile = "full"
-expected_outputs = ["b09_nested.yaml", "b09_nested.html", "b09_nested.nc"]
+expected_outputs = ["b09_nested.yaml", "b09_nested.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b10_nested_bottom.py"]
 profile = "full"
 expected_outputs = [
     "b10_nested_bottom.yaml",
     "b10_nested_bottom.html",
-    "b10_nested_bottom.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b11_cnl.py"]
 profile = "full"
-expected_outputs = ["b11_cnl.yaml", "b11_cnl.html", "b11_cnl.nc"]
+expected_outputs = ["b11_cnl.yaml", "b11_cnl.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b12_panel.py"]
 profile = "full"
-expected_outputs = ["b12_panel.yaml", "b12_panel.html", "b12_panel.nc"]
+expected_outputs = ["b12_panel.yaml", "b12_panel.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b15_panel_discrete.py"]
 profile = "full"
 expected_outputs = [
     "b15_panel_discrete.yaml",
     "b15_panel_discrete.html",
-    "b15_panel_discrete.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b16_panel_discrete_socio_eco.py"]
@@ -289,7 +285,6 @@ profile = "full"
 expected_outputs = [
     "b16_panel_discrete_socio_eco.yaml",
     "b16_panel_discrete_socio_eco.html",
-    "b16_panel_discrete_socio_eco.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b17_lognormal_mixture.py"]
@@ -297,7 +292,6 @@ profile = "full"
 expected_outputs = [
     "b17_lognormal_mixture.yaml",
     "b17_lognormal_mixture.html",
-    "b17_lognormal_mixture.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b18a_ordinal_logit.py"]
@@ -305,7 +299,6 @@ profile = "full"
 expected_outputs = [
     "b18a_ordinal_logit.yaml",
     "b18a_ordinal_logit.html",
-    "b18a_ordinal_logit.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b18b_ordinal_probit.py"]
@@ -313,7 +306,6 @@ profile = "full"
 expected_outputs = [
     "b18b_ordinal_probit.yaml",
     "b18b_ordinal_probit.html",
-    "b18b_ordinal_probit.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b23a_binary_logit.py"]
@@ -321,7 +313,6 @@ profile = "full"
 expected_outputs = [
     "b23a_binary_logit.yaml",
     "b23a_binary_logit.html",
-    "b23a_binary_logit.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b23b_binary_probit.py"]
@@ -329,19 +320,17 @@ profile = "full"
 expected_outputs = [
     "b23b_binary_probit.yaml",
     "b23b_binary_probit.html",
-    "b23b_binary_probit.nc",
 ]
 
 [docs.examples."bayesian_swissmetro/plot_b25_triangular_mixture.py"]
 profile = "full"
-expected_outputs = ["b25_triangular.yaml", "b25_triangular.html", "b25_triangular.nc"]
+expected_outputs = ["b25_triangular.yaml", "b25_triangular.html"]
 
 [docs.examples."bayesian_swissmetro/plot_b26triangular_panel_mixture.py"]
 profile = "full"
 expected_outputs = [
     "b26triangular_panel.yaml",
     "b26triangular_panel.html",
-    "b26triangular_panel.nc",
 ]
 
 # Hybrid-choice estimators. The output names are logical basenames: the runner

@@ -15,8 +15,8 @@ Examples::
     uv run --locked --group docs python tools/import_jed_results.py \
         --source /tmp/biogeme-jed-examples --profile all --strict --apply
 
-The source may be a repository checkout or its ``docs/source/examples``
-directory.  Existing target artifacts are backed up below
+    The source may be a repository checkout or its ``docs/source/examples``
+    directory.  Existing target artifacts are backed up below
 ``.docs_runs/imports`` before they are replaced.
 """
 

@@ -138,13 +138,49 @@ uv run --locked --group docs python jed_runs/jed_fresh_start.py
 uv run --locked --group docs python jed_runs/jed_fresh_start.py --apply
 ```
 
-Stage the JED examples in a fresh temporary directory:
+Stage the JED examples in a fresh temporary directory. NetCDF files are
+large posterior-draw archives and are not part of the normal gallery fixture
+set. The single transfer below excludes every `.nc` except the two files
+needed by downstream Bayesian examples:
 
 ```bash
-JED_STAGE="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
-rsync -a user@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples/ \
-    "$JED_STAGE/"
+JED_STAGE_ROOT="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
+JED_STAGE="$JED_STAGE_ROOT/examples"
+mkdir -p "$JED_STAGE"
+JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
+rsync -a --partial --progress --whole-file \
+    -e 'ssh -o Compression=no' \
+    --include='*/' \
+    --include='bayesian_swissmetro/saved_results/b01a_logit.nc' \
+    --include='bayesian_swissmetro/saved_results/b05_normal_mixture.nc' \
+    --exclude='*.nc' \
+    --include='*/saved_results/***' \
+    --include='*/saved_html/***' \
+    --include='revenue_*.txt' \
+    --exclude='*' \
+    "$JED_REMOTE/" "$JED_STAGE/"
 ```
+
+This single `rsync` invocation transfers only archived YAML/HTML/Pareto
+fixtures, the declared root-level revenue reports, and the two NetCDF files
+required by the gallery. It does not copy source code, input data, logs, or any
+other NetCDF file. These are the only NetCDF files required by the gallery:
+`plot_b01c_logit_simul.py`
+uses the first for posterior-draw simulation, and
+`plot_b19_individual_level_parameters.py` uses the second for observation-level
+posterior means. All other Bayesian examples use YAML summaries. Because the
+files are transferred in one SSH session, the passphrase is requested only
+once. For unattended transfers, load the key into the macOS keychain first:
+
+```bash
+ssh-add --apple-use-keychain ~/.ssh/id_rsa
+```
+
+For a fresh staging directory, `--whole-file` avoids a delta-checksum pass. If
+the transfer is interrupted, rerun the command; `--partial` keeps the partial
+files. To let rsync resume a large partial file block by block, remove
+`--whole-file` on the retry. Do not add `--compress` (`-z`): NetCDF is already
+compressed and SSH compression usually makes this transfer slower.
 
 The importer is manifest-limited. It copies only outputs declared in
 `jed_runs/jed_examples.toml`; source code, input data, logs, caches, and

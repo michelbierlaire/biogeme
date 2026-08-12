@@ -45,7 +45,10 @@ from swissmetro_data import (
 )
 
 import biogeme.biogeme_logging as blog
-from biogeme.bayesian_estimation import BayesianResults, get_pandas_estimated_parameters
+from biogeme.bayesian_estimation import (
+    BayesianResultsSummary,
+    get_pandas_estimated_parameters,
+)
 from biogeme.biogeme import BIOGEME
 from biogeme.expressions import Beta
 from biogeme.models import loglogit
@@ -131,11 +134,11 @@ def main() -> None:
     """Estimate the Bayesian logit model and display the results."""
 
     try:
-        results = BayesianResults.from_netcdf(
-            filename=f'saved_results/{the_biogeme.model_name}.nc'
+        results = BayesianResultsSummary.from_yaml_file(
+            filename=f'saved_results/{the_biogeme.model_name}.yaml'
         )
     except FileNotFoundError:
-        results = the_biogeme.bayesian_estimation()
+        results = the_biogeme.bayesian_estimation().to_summary()
 
     # %%
     # Display a short summary of the estimation results.

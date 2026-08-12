@@ -26,8 +26,8 @@ def test_fast_profile_is_small_and_dependency_selection_is_explicit():
         'tutorials/plot_b03_importing_specification.py',
     }
     assert specs['tutorials/plot_b03_importing_specification.py'].expected_outputs == (
-        'first_model.yaml',
-        'first_model.html',
+        'imported_model.yaml',
+        'imported_model.html',
     )
 
     dependent = docs_examples.select_specs(
@@ -209,6 +209,26 @@ def test_full_profile_has_artifact_contracts_for_deterministic_jobs():
         'b01a_logit.html',
         'b01a_logit.nc',
     )
+    assert specs['bayesian_swissmetro/plot_b01b_logit.py'].expected_outputs == (
+        'b01b_logit.yaml',
+        'b01b_logit.html',
+    )
+    assert specs['bayesian_swissmetro/plot_b04_validation.py'].expected_outputs == (
+        'b04validation.yaml',
+        'b04validation.html',
+    )
+    assert specs['bayesian_swissmetro/plot_b05_normal_mixture.py'].expected_outputs == (
+        'b05_normal_mixture.yaml',
+        'b05_normal_mixture.html',
+        'b05_normal_mixture.nc',
+    )
+    declared_netcdf = {
+        output
+        for spec in specs.values()
+        for output in spec.expected_outputs
+        if output.endswith('.nc')
+    }
+    assert declared_netcdf == {'b01a_logit.nc', 'b05_normal_mixture.nc'}
     assert specs[
         'swissmetro/plot_b05d_normal_mixture_all_algos.py'
     ].expected_output_globs == ('b05normal_mixture_algo_*.yaml',)

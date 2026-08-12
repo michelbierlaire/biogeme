@@ -9,12 +9,6 @@ Michel Bierlaire, EPFL
 Thu Oct 30 2025, 16:40:12
 """
 
-from biogeme.bayesian_estimation import BayesianResults
-from biogeme.biogeme import BIOGEME
-from biogeme.expressions import Beta
-from biogeme.models import loglogit
-from biogeme.validation import ValidationResult
-
 # %%
 # See the data processing script: :ref:`swissmetro_data`.
 from swissmetro_data import (
@@ -30,6 +24,12 @@ from swissmetro_data import (
     TRAIN_TT_SCALED,
     database,
 )
+
+from biogeme.bayesian_estimation import BayesianResultsSummary
+from biogeme.biogeme import BIOGEME
+from biogeme.expressions import Beta
+from biogeme.models import loglogit
+from biogeme.validation import ValidationResult
 
 # %%
 # Parameters to be estimated.
@@ -66,8 +66,8 @@ the_biogeme.model_name = 'b04validation'
 # %%
 # Estimate the parameters.
 try:
-    results = BayesianResults.from_netcdf(
-        filename=f'saved_results/{the_biogeme.model_name}.nc'
+    results = BayesianResultsSummary.from_yaml_file(
+        filename=f'saved_results/{the_biogeme.model_name}.yaml'
     )
 except FileNotFoundError:
     results = the_biogeme.bayesian_estimation()

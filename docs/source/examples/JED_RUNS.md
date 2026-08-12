@@ -112,19 +112,46 @@ example tree on the laptop.  `rsync` can copy from the server directly, or the
 
 ~~~bash
 cd "$HOME/github/biogeme"
-rsync -a user@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples/ \
-  /tmp/biogeme-jed-examples/
+JED_STAGE_ROOT="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
+JED_STAGE="$JED_STAGE_ROOT/examples"
+mkdir -p "$JED_STAGE"
+JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
+rsync -a --partial --progress --whole-file \
+  -e 'ssh -o Compression=no' \
+  --include='*/' \
+  --include='bayesian_swissmetro/saved_results/b01a_logit.nc' \
+  --include='bayesian_swissmetro/saved_results/b05_normal_mixture.nc' \
+  --exclude='*.nc' \
+  --include='*/saved_results/***' \
+  --include='*/saved_html/***' \
+  --include='revenue_*.txt' \
+  --exclude='*' \
+  "$JED_REMOTE/" "$JED_STAGE/"
 
 # Review the manifest-limited import.  This is a dry run.
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source /tmp/biogeme-jed-examples --profile all --strict
+  --source "$JED_STAGE" --profile all --strict
 ~~~
 
 The importer accepts either a complete JED checkout or its
 `docs/source/examples` directory.  It imports only `expected_outputs` and
 `expected_output_globs` declared in `jed_runs/jed_examples.toml`:
-YAML/NetCDF/Pareto results are placed in `saved_results/`, HTML reports in
-`saved_html/`, and declared text reports at the example root.  Globs cover
+YAML and Pareto results are placed in `saved_results/`, HTML reports in
+`saved_html/`, and declared text reports at the example root. The first
+command transfers only archived YAML/HTML/Pareto fixtures and
+declared root-level revenue reports; it does not copy source code, input data,
+logs, or any NetCDF file except the two explicitly included files. Only
+`b01a_logit.nc` and `b05_normal_mixture.nc` are needed by downstream Bayesian
+examples; other NetCDF files are neither required nor imported. The single
+`rsync` invocation transfers everything in one SSH session, so it requests the
+SSH passphrase only once. For unattended transfers, load the key into the
+macOS keychain first, for example:
+
+~~~bash
+ssh-add --apple-use-keychain ~/.ssh/id_rsa
+~~~
+
+Globs cover
 estimators whose model names are generated at runtime, such as the
 all-algorithm and multi-model Swissmetro examples.  Source code, input data,
 and undeclared files are never copied.  The `--strict` check must report no
@@ -132,7 +159,7 @@ missing artifacts before applying the import:
 
 ~~~bash
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source /tmp/biogeme-jed-examples \
+  --source "$JED_STAGE" \
   --profile all \
   --strict \
   --replace-results \

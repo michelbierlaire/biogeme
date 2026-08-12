@@ -121,19 +121,47 @@ or another file-transfer tool, then inspect the manifest-limited dry run:
 
 .. code-block:: bash
 
-   rsync -a user@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples/ \
-      /tmp/biogeme-jed-examples/
+   JED_STAGE_ROOT="$(mktemp -d /tmp/biogeme-jed-results.XXXXXX)"
+   JED_STAGE="$JED_STAGE_ROOT/examples"
+   mkdir -p "$JED_STAGE"
+   JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
+   rsync -a --partial --progress --whole-file \
+      -e 'ssh -o Compression=no' \
+      --include='*/' \
+      --include='bayesian_swissmetro/saved_results/b01a_logit.nc' \
+      --include='bayesian_swissmetro/saved_results/b05_normal_mixture.nc' \
+      --exclude='*.nc' \
+      --include='*/saved_results/***' \
+      --include='*/saved_html/***' \
+      --include='revenue_*.txt' \
+      --exclude='*' \
+      "$JED_REMOTE/" "$JED_STAGE/"
    uv run --locked --group docs python tools/import_jed_results.py \
-      --source /tmp/biogeme-jed-examples --profile full --strict
+      --source "$JED_STAGE" --profile full --strict
 
 The source may instead be a mounted JED checkout.  The importer accepts either
 that checkout or its ``docs/source/examples`` directory.  It considers only
 the ``expected_outputs`` and ``expected_output_globs`` entries for the selected
 profile.  A glob is used for estimators such as the all-algorithm and
-multi-model examples whose model names are generated at runtime.  YAML,
-NetCDF, and Pareto files go to each example's ``saved_results/``, HTML files to
-``saved_html/``, and declared text reports remain at the example root.  It
-never changes Python source, input data, or undeclared outputs.
+multi-model examples whose model names are generated at runtime.  YAML and
+Pareto files go to each example's ``saved_results/``, HTML files to
+``saved_html/``, and declared text reports remain at the example root.  Only
+the two Bayesian examples that consume posterior draws declare NetCDF
+fixtures; all other Bayesian examples use YAML summaries.  The single
+``rsync`` invocation transfers the selected archives and required NetCDF files
+in one SSH session, so the passphrase is requested only once.  For unattended
+transfers on macOS, load the key into the keychain first:
+
+.. code-block:: bash
+
+   ssh-add --apple-use-keychain ~/.ssh/id_rsa
+
+For a fresh staging directory, ``--whole-file`` avoids a delta-checksum pass.
+If the transfer is interrupted, rerun the command; ``--partial`` keeps the
+partial files.  To resume a large partial file block by block, remove
+``--whole-file`` on the retry.  Do not add ``--compress`` (``-z``): NetCDF is
+already compressed and SSH compression usually makes this transfer slower.
+The importer never changes Python source, input data, or undeclared outputs.
 
 When the dry-run list is complete and every required artifact is present, add
 ``--apply``:
@@ -141,7 +169,7 @@ When the dry-run list is complete and every required artifact is present, add
 .. code-block:: bash
 
    uv run --locked --group docs python tools/import_jed_results.py \
-      --source /tmp/biogeme-jed-examples --profile full --strict --apply
+      --source "$JED_STAGE" --profile full --strict --apply
 
 The command backs up overwritten files and records SHA-256 checksums in the
 ignored ``.docs_runs/imports/<timestamp>/`` directory.  A strict import exits

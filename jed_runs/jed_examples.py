@@ -505,16 +505,27 @@ def copy_output(source: Path, destination: Path) -> Path:
 
 
 def harvest_outputs(
-    directory: Path, started_at_ns: int, destination_root: Path | None = None
+    directory: Path,
+    started_at_ns: int,
+    destination_root: Path | None = None,
+    *,
+    job: Job | None = None,
+    before: dict[str, dict[str, int]] | None = None,
+    after: dict[str, dict[str, int]] | None = None,
 ) -> list[str]:
     """Copy new root or archived results to the directories consumed by examples.
 
     Results are discovered only in the isolated working directory of this job,
     including its ``saved_results`` and ``saved_html`` subdirectories. They
     are archived in the checked-out example directory for dependent jobs,
-    without scanning that shared directory for concurrent outputs.
+    without scanning that shared directory for concurrent outputs. NetCDF
+    files are archived only when declared by the job's output contract.
     """
     destination_root = destination_root or directory
+    changed: set[str] | None = None
+    if before is not None:
+        after = snapshot(directory) if after is None else after
+        changed = set(changed_artifacts(before, after))
     harvested: list[str] = []
     roots = [directory]
     roots.extend(
@@ -529,7 +540,27 @@ def harvest_outputs(
         if path.is_file() and path.suffix in HARVEST_SUFFIXES
     ]
     for path in candidate_paths:
-        if path.stat().st_mtime_ns < started_at_ns:
+        if path.suffix == '.nc' and job is not None:
+            declared_netcdf = any(
+                Path(expected).suffix.lower() == '.nc'
+                and (
+                    Path(expected).name == path.name
+                    or fnmatch.fnmatch(path.name, Path(expected).name)
+                )
+                for expected in (*job.expected_outputs, *job.expected_output_globs)
+            )
+            if not declared_netcdf:
+                continue
+        relative = path.relative_to(directory).as_posix()
+        if changed is not None:
+            # Comparing snapshots avoids relying on the timestamp resolution of
+            # the host filesystem. In particular, Windows can round a newly
+            # written file's mtime below ``started_at_ns``.
+            if relative not in changed:
+                continue
+        elif path.stat().st_mtime_ns < started_at_ns:
+            # Keep the timestamp behavior for callers that do not provide the
+            # lifecycle snapshots.
             continue
         destination_directory = (
             destination_root / 'saved_html'
@@ -590,14 +621,17 @@ def job_finish(
     working_directory = working_directory or job.directory
     start_path = job_directory / 'start.json'
     start = json_load(start_path) if start_path.is_file() else {}
+    after = snapshot(working_directory)
     harvested: list[str] = []
     if exit_code == 0 and start:
         harvested = harvest_outputs(
             working_directory,
             int(start.get('started_at_ns', time.time_ns())),
             destination_root=job.directory,
+            job=job,
+            before=start.get('before', {}),
+            after=after,
         )
-    after = snapshot(working_directory)
     changed = changed_artifacts(start.get('before', {}), after) if start else []
     diagnostics: list[str] = []
     if exit_code != 0:
