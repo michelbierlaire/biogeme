@@ -11,9 +11,9 @@ is a dry run by default; ``--apply`` is required before anything is copied.
 Examples::
 
     uv run --locked --group docs python tools/import_jed_results.py \
-        --source /tmp/biogeme-jed-examples --profile full
+        --source /tmp/biogeme-jed-examples --profile all
     uv run --locked --group docs python tools/import_jed_results.py \
-        --source /tmp/biogeme-jed-examples --profile full --strict --apply
+        --source /tmp/biogeme-jed-examples --profile all --strict --apply
 
 The source may be a repository checkout or its ``docs/source/examples``
 directory.  Existing target artifacts are backed up below
@@ -320,6 +320,35 @@ def apply_plan(
     return records
 
 
+def replace_result_archives(
+    items: Iterable[ImportItem], target_root: Path, import_directory: Path
+) -> list[Path]:
+    """Move archived files not present in the incoming manifest to backup."""
+
+    expected_targets = {item.target.resolve() for item in items}
+    backup_root = import_directory / 'backup'
+    removed: list[Path] = []
+    archive_directories = [
+        path
+        for path in target_root.rglob('*')
+        if path.is_dir() and not path.is_symlink() and path.name in ARCHIVE_DIRECTORIES
+    ]
+    for directory in sorted(archive_directories):
+        for path in sorted(directory.rglob('*')):
+            if (
+                path.is_symlink()
+                or not path.is_file()
+                or path.resolve() in expected_targets
+            ):
+                continue
+            relative = path.relative_to(target_root)
+            backup = backup_root / relative
+            backup.parent.mkdir(parents=True, exist_ok=True)
+            shutil.move(str(path), str(backup))
+            removed.append(path)
+    return removed
+
+
 def print_plan(items: Iterable[ImportItem]) -> tuple[int, int]:
     available = 0
     missing = 0
@@ -383,6 +412,9 @@ def command_import(args: argparse.Namespace) -> int:
         return 1
 
     import_directory = new_import_directory(docs_examples.state_root(config))
+    removed: list[Path] = []
+    if args.replace_results:
+        removed = replace_result_archives(items, target_root, import_directory)
     records = apply_plan(items, target_root, import_directory)
     report = {
         'created_at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
@@ -390,6 +422,8 @@ def command_import(args: argparse.Namespace) -> int:
         'target_examples': str(target_root),
         'profile': args.profile,
         'strict': args.strict,
+        'replace_results': args.replace_results,
+        'removed_stale_results': [relative_to_project(path) for path in removed],
         'artifacts': records,
         'counts': {
             'copied': sum(record['status'] == 'copied' for record in records),
@@ -428,6 +462,14 @@ def build_parser() -> argparse.ArgumentParser:
         '--apply',
         action='store_true',
         help='copy artifacts; without this flag the command is a dry run',
+    )
+    parser.add_argument(
+        '--replace-results',
+        action='store_true',
+        help=(
+            'with --apply, remove archived files not declared by the selected '
+            'manifest; removed files are backed up in the import report directory'
+        ),
     )
     parser.set_defaults(function=command_import)
     return parser

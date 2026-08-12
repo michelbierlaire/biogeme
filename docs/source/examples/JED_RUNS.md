@@ -106,7 +106,7 @@ documentation build must not consume arbitrary files left in `saved_results`.
 
 ## Import completed JED results on the laptop
 
-After all required JED jobs report `finished without error`, stage the server
+After the global status reports every JED job `OK`, stage the server
 example tree on the laptop.  `rsync` can copy from the server directly, or the
 `--source` option can point at a mounted checkout:
 
@@ -117,7 +117,7 @@ rsync -a user@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples/ \
 
 # Review the manifest-limited import.  This is a dry run.
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source /tmp/biogeme-jed-examples --profile full --strict
+  --source /tmp/biogeme-jed-examples --profile all --strict
 ~~~
 
 The importer accepts either a complete JED checkout or its
@@ -132,14 +132,19 @@ missing artifacts before applying the import:
 
 ~~~bash
 uv run --locked --group docs python tools/import_jed_results.py \
-  --source /tmp/biogeme-jed-examples --profile full --strict --apply
+  --source /tmp/biogeme-jed-examples \
+  --profile all \
+  --strict \
+  --replace-results \
+  --apply
 ~~~
 
-The command backs up any overwritten result under the ignored
+The command backs up overwritten or removed result files under the ignored
 `.docs_runs/imports/<timestamp>/backup/` directory and records source/target
-SHA-256 checksums in `report.json`.  A strict `--apply` refuses to copy
-anything when a declared artifact is missing, so fix the JED run and repeat
-the dry run before applying the import.
+SHA-256 checksums in `report.json`. `--replace-results` removes stale files
+from managed archive directories; it never touches source code or input data.
+A strict `--apply` refuses to copy anything when a declared artifact is
+missing, so fix the JED run and repeat the dry run before applying the import.
 
 Four JED jobs are deliberately not imported by the full fixture contract yet:
 `assisted/plot_b09post_processing.py`,
@@ -182,48 +187,73 @@ not follow symlinks. Never use `git clean -fdx` as a substitute: that command
 can remove source files, input data, environments, and other recoverable
 state outside the example-output scope.
 
-## Complete workflow
+## Release iteration workflow
 
 Run these commands from the repository checkout on JED:
 
 ~~~bash
 cd "$HOME/github/biogeme"
 
-# 1. Inspect what will be reset.
+# 1. Inspect what will be reset before the first release iteration.
 python jed_runs/jed_examples.py reset --dry-run
 
 # 2. Move old generated results aside. This preserves a recoverable backup.
 python jed_runs/jed_examples.py reset --apply
 
-# 3. Generate all jobs and submit them. Use --dry-run first if desired.
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
-python jed_runs/jed_examples.py launch --dry-run --run-id "$RUN_ID"
-python jed_runs/jed_examples.py launch --run-id "$RUN_ID" --force
+# 3. Submit only jobs that are not done. The runner manages its state internally.
+python jed_runs/jed_examples.py launch --not-done --dry-run
+python jed_runs/jed_examples.py launch --not-done
 
-# To submit only non-light (slow) resource profiles, use --slow instead.
-# Do not combine --slow with --only.
-# python jed_runs/jed_examples.py launch --slow --dry-run --run-id "$RUN_ID"
-# python jed_runs/jed_examples.py launch --slow --run-id "$RUN_ID" --force
-
-# 4. Inspect status at any time.
+# 4. Inspect global status at any time.
 python jed_runs/jed_examples.py status
 python jed_runs/jed_examples.py status --verbose
 
-# 5. After every job is finished, inspect and remove root-level generated files.
+# 5. After status reports every job OK, remove root-level generated files.
 python jed_runs/jed_cleanup.py
 python jed_runs/jed_cleanup.py --apply
 ~~~
 
-The status table uses compact, log-friendly keywords: `OK`, `ERROR`,
-`RUNNING`, `PENDING`, and `NOT_SCHEDULED`. Errors are repeated in an
-`Errors requiring attention` block with their diagnostic; add `--verbose` to
-also print the Slurm detail below each row.
+The status table scans all recorded runs and uses `OK`, `ERROR`, `RUNNING`, and
+`NOT_DONE`. Errors are repeated in an `Errors requiring attention` block with
+their diagnostic; add `--verbose` to also print the source run and detail.
+
+After fixing an error, invalidate it before the next iteration. Consumers are
+invalidated automatically:
+
+~~~bash
+python jed_runs/jed_examples.py invalidate --script family/plot_fixed.py
+python jed_runs/jed_examples.py launch --not-done
+~~~
+
+For example, after correcting
+`hybrid_choice_models/plot_h01_mode_logit.py`, use:
+
+~~~bash
+python jed_runs/jed_examples.py invalidate \
+  --script hybrid_choice_models/plot_h01_mode_logit.py
+python jed_runs/jed_examples.py launch --not-done
+~~~
+
+`invalidate` changes the example from `ERROR` to `NOT_DONE`, removes its
+declared stale result files, and marks dependent examples `NOT_DONE` too.
+
+If a repaired script is run on the laptop, mark it explicitly:
+
+~~~bash
+python jed_runs/jed_examples.py mark-ok --script family/plot_fixed.py --source laptop
+~~~
+
+If the repaired script is a producer, its dependent examples are marked
+`NOT_DONE` automatically and are selected by the next `launch --not-done`.
+
+The release loop requires no manual state bookkeeping. Historical diagnostics
+remain available below the ignored `.jed_runs/` directory.
 
 ## Investigate failed jobs
 
-When the status report contains `finished with errors`, run the diagnostic
-reporter. It examines the newest run by default; pass `--run-id` to select a
-specific run. It does not rerun an example or change its outputs. The report
+When the status report contains `ERROR`, run the diagnostic
+reporter. It scans the global release state and all recorded runs. It does not
+rerun an example or change its outputs. The report
 is written below the ignored `.jed_runs/` directory, with a short digest first
 and the runner metadata, Slurm accounting, generated batch script, standard
 output, standard error, and completion records afterward.
@@ -231,74 +261,44 @@ output, standard error, and completion records afterward.
 ~~~bash
 cd "$HOME/github/biogeme"
 
-# Inspect the newest run.
+# Inspect the global release report.
 python jed_runs/jed_error_report.py
-
-# Or inspect a particular run.
-python jed_runs/jed_error_report.py --run-id "$RUN_ID"
-less ".jed_runs/$RUN_ID/error-report.md"
+less .jed_runs/aggregate-error-report.md
 ~~~
 
-The command prints the report path and the number of failed jobs. If the
-launch shell no longer has `RUN_ID`, use the no-argument form above to inspect
-the newest run. To send the complete Markdown report directly to the terminal:
+### Laptop repairs
+
+Run a repaired fast script directly from its example directory, then mark its
+status in the release state:
 
 ~~~bash
-python jed_runs/jed_error_report.py --run-id "$RUN_ID" --output -
+(cd docs/source/examples/family && uv run --locked --group docs python plot_fixed.py)
+python jed_runs/jed_examples.py mark-ok --script family/plot_fixed.py --source laptop
 ~~~
 
-### Recover a forgotten run ID
-
-The launch output includes `Run state: .jed_runs/<RUN_ID>`. If that output was
-not saved, the no-argument forms select the newest run directory containing a
-`run.json` and print its ID:
-
-~~~bash
-python jed_runs/jed_examples.py status --verbose
-python jed_runs/jed_error_report.py
-~~~
-
-To recover the exact directory name for another command, use the runner's
-same newest-run rule:
-
-~~~bash
-RUN_ID="$(python - <<'PY'
-from jed_runs.jed_examples import latest_run, load_config, state_root
-
-run = latest_run(state_root(load_config()))
-if run is None or not (run / 'run.json').is_file():
-    raise SystemExit('No JED run state found')
-print(run.name)
-PY
-)"
-printf 'RUN_ID=%s\n' "$RUN_ID"
-~~~
-
-If more than one run exists, choose an ID deliberately and pass
-`--run-id <id>`; “newest” is based on filesystem modification time and can be
-a dry-run or retry. The run record is always at `.jed_runs/<RUN_ID>/run.json`.
+`jed_error_report.py` scans all runs automatically and writes the global
+digest/evidence report to `.jed_runs/aggregate-error-report.md`.
 
 ### Test only part of the workload
 
-The runner supports incomplete smoke runs. Use a unique test ID and select a
-script (or a complete consumer chain) with `--only`; dependencies are added
-automatically:
+The runner supports incomplete smoke runs. Select a script (or a complete
+consumer chain) with `--only`; dependencies are added automatically. This is
+an optional diagnostic workflow, not part of the release checklist:
 
 ~~~bash
-TEST_RUN_ID="smoke-$(date +%Y%m%d-%H%M%S)"
 python jed_runs/jed_examples.py launch \
-  --only indicators/plot_b09wtp.py --dry-run --run-id "$TEST_RUN_ID"
-# Review .jed_runs/$TEST_RUN_ID/jobs, then submit it:
+  --only indicators/plot_b09wtp.py --dry-run
+# Review the generated internal run directory, then submit it:
 python jed_runs/jed_examples.py launch \
-  --only indicators/plot_b09wtp.py --run-id "$TEST_RUN_ID" --force
-python jed_runs/jed_examples.py status --run-id "$TEST_RUN_ID" --verbose
+  --only indicators/plot_b09wtp.py
+python jed_runs/jed_examples.py status --verbose
 ~~~
 
 `--slow` is another supported subset: it selects every non-`light` profile
 and its dependencies. It is useful for testing server resources but is much
 larger than a one-script smoke test. Do not combine `--slow` with `--only`.
 Entries not selected are absent from `run.json`; entries in a dry-run state
-are intentionally `not scheduled`.
+are intentionally not part of the release status until selected.
 
 Partial runs may be used to validate the Slurm wrapper and a dependency chain,
 but they do not satisfy release acceptance. Do not import them with the full
@@ -311,18 +311,17 @@ uv run --locked --group docs python tools/import_jed_results.py \
   --script indicators/plot_b02estimation.py --strict --apply
 ~~~
 
-The complete release still requires `--profile full --strict` after every
+The complete release still requires `--profile all --strict` after every
 declared job and artifact has succeeded. After all smoke jobs finish, clean
 root-level generated files with `python jed_runs/jed_cleanup.py --apply` and
-remove only that test's metadata with `rm -rf -- ".jed_runs/$TEST_RUN_ID"`.
+remove only that test's metadata after it finishes, if desired.
 Never remove it while a job is running. Use `jed_fresh_start.py --apply` only
 when it is acceptable to remove the entire generated JED state.
 
 ## Commit a completed result set
 
-Commit results only after every job in the run is reported as
-`finished without error`. Do not commit while a job is `running`,
-`scheduled and pending`, `not scheduled`, or `finished with errors`.
+Commit results only after the global status reports every job as `OK`. Do not
+commit while any job is `RUNNING`, `NOT_DONE`, or `ERROR`.
 
 After the run is complete, copy the current result files into the tracked
 archive directories and clean the root-level working files:
@@ -343,9 +342,8 @@ run state (the `.jed_runs/` directory is ignored by Git):
 ~~~bash
 cd "$HOME/github/biogeme"
 
-# Use --run-id "$RUN_ID" if the launch shell still has RUN_ID set.
 python jed_runs/jed_examples.py status --verbose \
-  | tee ".jed_runs/${RUN_ID:-latest}-status.txt"
+  | tee ".jed_runs/release-status.txt"
 ~~~
 
 The reset operation moved the previous generated files into

@@ -23,7 +23,7 @@ Michel Bierlaire
 Sat Jun 06 2026, 15:23:41
 """
 
-from choice_latent_variables import generate_utility_functions
+from choice_latent_variables import generate_availability, generate_utility_functions
 from optima import (
     Choice,
     read_data,
@@ -36,9 +36,6 @@ from biogeme.results_processing import (
     get_latex_estimated_parameters,
     get_latex_general_statistics,
     get_pandas_estimated_parameters,
-)
-from docs.source.examples.hybrid_choice_models.choice_latent_variables import (
-    generate_availability,
 )
 
 logger = blog.get_screen_logger(level=blog.INFO)

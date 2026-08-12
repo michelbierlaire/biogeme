@@ -38,18 +38,18 @@ $PY jed_runs/jed_examples.py reset --dry-run
 $PY jed_runs/jed_examples.py reset --apply
 ```
 
-Generate the complete dependency graph without submitting it:
+Start or continue the release workload. The runner manages its internal state
+automatically and selects only unfinished examples:
 
 ```bash
-RUN_ID="$(date +%Y%m%d-%H%M%S)"
-$PY jed_runs/jed_examples.py launch --dry-run --run-id "$RUN_ID"
+$PY jed_runs/jed_examples.py launch --not-done --dry-run
 ```
 
 When the generated scripts and resource settings are correct, submit with
 `sbatch` through the runner:
 
 ```bash
-$PY jed_runs/jed_examples.py launch --run-id "$RUN_ID" --force
+$PY jed_runs/jed_examples.py launch --not-done
 ```
 
 The resource profiles and explicit dependency overrides are in
@@ -59,17 +59,18 @@ example:
 ```bash
 $PY jed_runs/jed_examples.py launch --only \
   hybrid_choice_models/plot_h04_mode_lv_gauss_simult.py \
-  --dry-run --run-id "$RUN_ID"
+  --dry-run
 ```
 
 To launch every non-light resource profile without maintaining a manual list,
-use `--slow`; declared dependencies are included automatically:
+use `--slow`; declared dependencies are included automatically. This is a
+diagnostic option, not part of the normal release loop:
 
 ```bash
 $PY jed_runs/jed_examples.py launch --slow \
-  --dry-run --run-id "$RUN_ID"
+  --dry-run
 $PY jed_runs/jed_examples.py launch --slow \
-  --run-id "$RUN_ID" --force
+  --force
 ```
 
 Each submitted job copies its example into a job-specific temporary work
@@ -83,9 +84,9 @@ concurrent jobs from seeing or harvesting one another's artifacts.
 $PY jed_runs/jed_examples.py status --verbose
 squeue -u "$USER"
 
-# After a failure, inspect the newest run or select one explicitly.
-$PY jed_runs/jed_error_report.py --run-id "$RUN_ID"
-less ".jed_runs/$RUN_ID/error-report.md"
+# The global report scans all recorded attempts automatically.
+$PY jed_runs/jed_error_report.py
+less .jed_runs/aggregate-error-report.md
 ```
 
 Generated `.run` files, Slurm logs, completion records, and reports are kept

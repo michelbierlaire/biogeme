@@ -68,6 +68,18 @@ def test_explicit_selection_rejects_slow_flag():
         raise AssertionError('Expected --only/--slow conflict to be rejected')
 
 
+def test_explicit_selection_can_omit_dependencies_for_retries():
+    jobs = discover_jobs(load_config())
+
+    selected = select_jobs(
+        jobs,
+        ['hybrid_choice_models/plot_h03_mode_lv_gauss_seq.py'],
+        include_dependencies=False,
+    )
+
+    assert list(selected) == ['hybrid_choice_models/plot_h03_mode_lv_gauss_seq.py']
+
+
 def test_hybrid_sequential_job_declares_predecessor_and_input():
     jobs = discover_jobs(load_config())
     job = jobs['hybrid_choice_models/plot_h03_mode_lv_gauss_seq.py']
@@ -117,7 +129,24 @@ def test_status_output_highlights_errors(monkeypatch, tmp_path: Path, capsys):
             }
         )
     )
-    monkeypatch.setattr(jed_examples, 'latest_run', lambda _: run_directory)
+    monkeypatch.setattr(
+        jed_examples,
+        'global_statuses',
+        lambda: {
+            'plot_ok.py': {
+                'label': 'OK',
+                'record': {'job_id': '1'},
+                'run_directory': run_directory,
+                'detail': 'outputs validated',
+            },
+            'plot_error.py': {
+                'label': 'ERROR',
+                'record': {'job_id': '2'},
+                'run_directory': run_directory,
+                'detail': 'failed in test',
+            },
+        },
+    )
     monkeypatch.setattr(
         jed_examples,
         'slurm_state',
@@ -132,8 +161,8 @@ def test_status_output_highlights_errors(monkeypatch, tmp_path: Path, capsys):
     output = capsys.readouterr().out
     assert 'Summary: ERROR=1 | OK=1' in output
     assert '  ERROR 2: plot_error.py' in output
-    assert f'{"OK":14} {"1":12}' in output
-    assert f'{"ERROR":14} {"2":12}' in output
+    assert f'{"OK":10} {"1":12}' in output
+    assert f'{"ERROR":10} {"2":12}' in output
     assert 'finished without error' not in output
 
 
@@ -186,6 +215,92 @@ def test_job_lifecycle_harvests_output_written_in_saved_results(tmp_path: Path):
 
     assert job_finish(job, state, 0, work) == 0
     assert (source / 'saved_results' / 'model.yaml').read_text() == 'result'
+
+
+def test_job_lifecycle_requires_all_declared_outputs(tmp_path: Path):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('model.yaml', 'model.html'),
+    )
+
+    assert job_start(job, state, work) == 0
+    (work / 'model.yaml').write_text('result')
+
+    assert job_finish(job, state, 0, work) != 0
+    completion = json.loads((state / 'completion.json').read_text())
+    assert 'model.html' in completion['diagnostics'][0]
+
+
+def test_mark_ok_requires_declared_outputs(monkeypatch, tmp_path: Path):
+    source = tmp_path / 'example'
+    source.mkdir()
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('model.yaml',),
+    )
+    monkeypatch.setattr(jed_examples, 'load_config', lambda: {'jobs': {}})
+    monkeypatch.setattr(jed_examples, 'discover_jobs', lambda config: {job.script: job})
+    monkeypatch.setenv('BIOGEME_JED_STATE_DIRECTORY', str(tmp_path / 'state'))
+
+    try:
+        jed_examples.command_mark_ok(
+            SimpleNamespace(script=[job.script], source='laptop', note=None)
+        )
+    except ValueError as error:
+        assert 'no result/report artifact' in str(error)
+    else:  # pragma: no cover
+        raise AssertionError('Expected mark-ok to validate declared outputs')
+
+
+def test_invalidate_removes_declared_outputs(monkeypatch, tmp_path: Path):
+    source = tmp_path / 'example'
+    source.mkdir()
+    output = source / 'saved_results' / 'model.yaml'
+    output.parent.mkdir()
+    output.write_text('old')
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('model.yaml',),
+    )
+    monkeypatch.setattr(jed_examples, 'load_config', lambda: {'jobs': {}})
+    monkeypatch.setattr(jed_examples, 'discover_jobs', lambda config: {job.script: job})
+    monkeypatch.setenv('BIOGEME_JED_STATE_DIRECTORY', str(tmp_path / 'state'))
+
+    assert (
+        jed_examples.command_invalidate(
+            SimpleNamespace(
+                script=[job.script],
+                all=False,
+                no_dependents=False,
+                reason='repair',
+            )
+        )
+        == 0
+    )
+    assert not output.exists()
 
 
 def test_job_lifecycle_harvests_markdown_diagnostic_report(tmp_path: Path):

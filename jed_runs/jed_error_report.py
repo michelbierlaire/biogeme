@@ -10,7 +10,10 @@ import sys
 from pathlib import Path
 from typing import Any, Iterable
 
-import jed_examples as runner
+try:
+    import jed_examples as runner
+except ModuleNotFoundError:  # pragma: no cover - direct script vs package import
+    from jed_runs import jed_examples as runner
 
 ERROR_MARKERS = (
     'traceback',
@@ -177,6 +180,241 @@ def select_run(root: Path, run_id: str | None) -> Path:
     raise ValueError('No run state was found. Launch a run first.')
 
 
+def run_directories(root: Path) -> list[Path]:
+    """Return recorded runs from oldest to newest.
+
+    A release may be assembled from several partial runs.  Sorting by the
+    timestamp recorded in ``run.json`` (with filesystem mtime as a fallback)
+    gives the aggregate report a deterministic definition of the latest
+    attempt for each script.
+    """
+
+    if not root.is_dir():
+        return []
+
+    def sort_key(path: Path) -> tuple[str, float]:
+        record = read_json(path / 'run.json')
+        return (str(record.get('created_at', '')), path.stat().st_mtime)
+
+    return sorted(
+        (
+            path
+            for path in root.iterdir()
+            if path.is_dir() and path.name != 'resets' and (path / 'run.json').is_file()
+        ),
+        key=sort_key,
+    )
+
+
+def aggregate_attempts(
+    root: Path,
+) -> tuple[list[Path], dict[str, tuple[Path, dict[str, Any]]]]:
+    """Collect the newest recorded attempt for each script across all runs."""
+
+    runs = run_directories(root)
+    attempts: dict[str, tuple[Path, dict[str, Any]]] = {}
+    for run_directory in runs:
+        run_record = read_json(run_directory / 'run.json')
+        jobs = run_record.get('jobs', {})
+        if not isinstance(jobs, dict):
+            continue
+        for script, value in jobs.items():
+            record = dict(value) if isinstance(value, dict) else {}
+            # A dry-run is a plan, not an attempt. It must not supersede a
+            # successful job recorded by an earlier real run.
+            if (
+                record.get('status') == 'not scheduled'
+                and record.get('diagnostic') == 'dry run'
+            ):
+                continue
+            record.setdefault('script', script)
+            attempts[str(script)] = (run_directory, record)
+    return runs, attempts
+
+
+def aggregate_item(
+    script: str,
+    attempt: tuple[Path, dict[str, Any]] | None,
+) -> dict[str, Any]:
+    """Classify one script's newest attempt, or mark it as not run."""
+
+    if attempt is None:
+        return {
+            'script': script,
+            'run_directory': None,
+            'record': {},
+            'status': 'not done',
+            'status_detail': 'no recorded attempt in the selected runs',
+            'completion': {},
+            'diagnostic': {},
+            'outputs': [],
+            'sacct': '',
+        }
+
+    run_directory, record = attempt
+    status, detail = runner.classify_job(record, run_directory)
+    directory = job_directory(run_directory, script)
+    completion = read_json(directory / 'completion.json')
+    diagnostic = read_json(directory / 'diagnostic.json')
+    return {
+        'script': script,
+        'run_directory': run_directory,
+        'record': record,
+        'status': status,
+        'status_detail': detail,
+        'completion': completion,
+        'diagnostic': diagnostic,
+        'outputs': output_texts(directory)
+        if status != 'finished without error'
+        else [],
+        'sacct': slurm_evidence(str(record.get('job_id', '')) or None)
+        if status == 'finished with errors'
+        else '',
+    }
+
+
+def aggregate_status_label(status: str) -> str:
+    """Return the compact label used by the cross-run report."""
+
+    if status == 'scheduled and pending':
+        return 'RUNNING'
+    return runner.status_label(status)
+
+
+def build_aggregate_report(root: Path) -> tuple[str, int]:
+    """Build the release report from the persistent global release state."""
+
+    statuses = runner.global_statuses(root=root)
+    items: list[dict[str, Any]] = []
+    for script, item in statuses.items():
+        run_directory = item['run_directory']
+        record = item['record']
+        if run_directory is None:
+            items.append(
+                {
+                    'script': script,
+                    'run_directory': None,
+                    'record': record,
+                    'status': item['status'],
+                    'status_detail': item['detail'],
+                    'completion': {},
+                    'diagnostic': {},
+                    'outputs': [],
+                    'sacct': '',
+                }
+            )
+            continue
+        directory = job_directory(run_directory, script)
+        completion = read_json(directory / 'completion.json')
+        diagnostic = read_json(directory / 'diagnostic.json')
+        status = item['status']
+        items.append(
+            {
+                'script': script,
+                'run_directory': run_directory,
+                'record': record,
+                'status': status,
+                'label': item['label'],
+                'status_detail': item['detail'],
+                'completion': completion,
+                'diagnostic': diagnostic,
+                'outputs': output_texts(directory)
+                if status != 'finished without error'
+                else [],
+                'sacct': slurm_evidence(str(record.get('job_id', '')) or None)
+                if status == 'finished with errors'
+                else '',
+            }
+        )
+    unresolved = [item for item in items if item['status'] != 'finished without error']
+
+    lines = [
+        '# JED aggregate error/status report',
+        '',
+        f'- Runs considered: **{len(runner.run_directories(root))}**',
+        f'- Latest attempt per script: **{len(items)}**',
+        f'- Unresolved scripts: **{len(unresolved)}**',
+        '',
+        'The report combines all recorded runs and the persistent release state.',
+        'Invalidated scripts remain NOT_DONE until a new successful attempt is',
+        'recorded or they are explicitly marked OK after a laptop run.',
+        '',
+        '## Summary',
+        '',
+    ]
+    counts: dict[str, int] = {}
+    for item in items:
+        label = item.get('label', aggregate_status_label(item['status']))
+        counts[label] = counts.get(label, 0) + 1
+    for label in ('ERROR', 'RUNNING', 'NOT_DONE', 'NOT_SCHEDULED', 'OK'):
+        if counts.get(label):
+            lines.append(f'- **{label}**: {counts[label]}')
+    lines.extend(['', '## Per-script status', ''])
+    for item in items:
+        label = item.get('label', aggregate_status_label(item['status']))
+        run_name = (
+            item['run_directory'].name if item['run_directory'] is not None else '-'
+        )
+        detail = item['status_detail']
+        lines.append(f'- **{label}** `{item["script"]}` (run `{run_name}`): {detail}')
+
+    if unresolved:
+        lines.extend(['', '## Errors requiring attention', ''])
+        for item in unresolved:
+            if item['status'] == 'finished without error':
+                continue
+            lines.extend([f'### `{item["script"]}`', ''])
+            if item['status'] == 'not done':
+                lines.append('- The example is not done and needs to be run.')
+            else:
+                reasons = digest_reasons(
+                    item['status'],
+                    item['status_detail'],
+                    item['completion'],
+                    item['diagnostic'],
+                    item['outputs'],
+                )
+                lines.extend(f'- {reason}' for reason in reasons)
+            lines.append('')
+
+        lines.extend(['## Comprehensive evidence', ''])
+        for item in unresolved:
+            if item['run_directory'] is None:
+                continue
+            lines.extend([f'### `{item["script"]}`', ''])
+            metadata = {
+                'run_id': item['run_directory'].name,
+                'status': item['status'],
+                'status_detail': item['status_detail'],
+                'job_record': item['record'],
+                'diagnostic': item['diagnostic'],
+                'completion': item['completion'],
+                'sacct': item['sacct'],
+            }
+            lines.extend(
+                [
+                    '#### Runner and Slurm metadata',
+                    '',
+                    code_block(json.dumps(metadata, indent=2, sort_keys=True)),
+                    '',
+                ]
+            )
+            for filename, text in item['outputs']:
+                lines.extend([f'#### `{filename}`', '', code_block(text), ''])
+            generated = generated_script_path(item['run_directory'], item['script'])
+            if generated.is_file():
+                lines.extend(
+                    [
+                        '#### Generated Slurm script',
+                        '',
+                        code_block(read_text(generated)),
+                        '',
+                    ]
+                )
+
+    return chr(10).join(lines), len(unresolved)
+
+
 def build_report(run_directory: Path) -> tuple[str, int]:
     run_record = read_json(run_directory / 'run.json')
     jobs = run_record.get('jobs', {})
@@ -286,13 +524,25 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         description='Compile digest and full output for failed JED jobs.'
     )
-    parser.add_argument('--run-id', help='run ID; defaults to the newest run')
+    parser.add_argument(
+        '--run-id',
+        help='inspect one historical run; omit this for the global release report',
+    )
+    parser.add_argument(
+        '--all-runs',
+        action='store_true',
+        help=(
+            'combine all recorded runs, keeping the newest attempt for each '
+            'script; cannot be combined with --run-id'
+        ),
+    )
     parser.add_argument(
         '--output',
         default=None,
         help=(
-            'report path; defaults to .jed_runs/<run-id>/error-report.md; '
-            'use - for stdout'
+            'report path; defaults to .jed_runs/aggregate-error-report.md '
+            'for the global report (or the selected run directory with '
+            '--run-id); use - for stdout'
         ),
     )
     return parser
@@ -304,6 +554,25 @@ def main(argv: list[str] | None = None) -> int:
     try:
         config = runner.load_config()
         root = runner.state_root(config)
+        if args.all_runs and args.run_id:
+            raise ValueError('--all-runs cannot be combined with --run-id.')
+        if args.all_runs or not args.run_id:
+            report, failed_count = build_aggregate_report(root)
+            output = (
+                root / 'aggregate-error-report.md'
+                if args.output is None
+                else Path(args.output)
+            )
+            if args.output == '-':
+                print(report)
+                return 0 if failed_count == 0 else 1
+            if not output.is_absolute():
+                output = runner.PROJECT_ROOT / output
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(report + chr(10), encoding='utf-8')
+            print(f'Wrote {output}')
+            print(f'Unresolved jobs included: {failed_count}')
+            return 0 if failed_count == 0 else 1
         run_directory = select_run(root, args.run_id)
         report, failed_count = build_report(run_directory)
         if args.output == '-':
@@ -320,7 +589,7 @@ def main(argv: list[str] | None = None) -> int:
             output.write_text(report + chr(10), encoding='utf-8')
             print(f'Wrote {output}')
             print(f'Failed jobs included: {failed_count}')
-        return 0
+        return 0 if failed_count == 0 else 1
     except (OSError, ValueError, RuntimeError) as error:
         print(f'error: {error}', file=sys.stderr)
         return 2

@@ -43,6 +43,7 @@ ARTIFACT_SUFFIXES = {
     '.yaml',
 }
 HARVEST_SUFFIXES = {'.html', '.md', '.nc', '.pareto', '.yaml'}
+DECLARED_RESULT_SUFFIXES = {'.nc', '.pareto', '.yaml'}
 DIAGNOSTIC_MARKDOWN_SUFFIX = '_monte_carlo_diagnostic.md'
 RESULT_DIRECTORIES = {'saved_results', 'saved_html'}
 INPUT_CSV_NAMES = {'data.csv', 'optima.csv'}
@@ -54,8 +55,10 @@ STATUS_LABELS = {
     'running': 'RUNNING',
     'scheduled and pending': 'PENDING',
     'not scheduled': 'NOT_SCHEDULED',
+    'not done': 'NOT_DONE',
 }
-STATUS_ORDER = ('ERROR', 'RUNNING', 'PENDING', 'NOT_SCHEDULED', 'OK')
+STATUS_ORDER = ('ERROR', 'RUNNING', 'PENDING', 'NOT_DONE', 'NOT_SCHEDULED', 'OK')
+RELEASE_STATE_FILENAME = 'release-state.json'
 
 
 def now_iso() -> str:
@@ -126,6 +129,8 @@ class Job:
     dependencies: tuple[str, ...]
     required_inputs: tuple[str, ...]
     requires_artifacts: bool
+    expected_outputs: tuple[str, ...] = ()
+    expected_output_globs: tuple[str, ...] = ()
 
     @property
     def directory(self) -> Path:
@@ -154,11 +159,13 @@ def default_profile(relative_script: str, source: str) -> str:
 def discover_jobs(config: dict[str, Any] | None = None) -> dict[str, Job]:
     config = config or load_config()
     configured_jobs = config.get('jobs', {})
+    configured_docs = config.get('docs', {}).get('examples', {})
     jobs: dict[str, Job] = {}
     for path in sorted(EXAMPLES_ROOT.rglob('plot_*.py')):
         relative = path.relative_to(EXAMPLES_ROOT).as_posix()
         source = path.read_text(errors='replace')
         override = configured_jobs.get(relative, {})
+        docs_override = configured_docs.get(relative, {})
         dependencies = tuple(override.get('depends_on', []))
         required_inputs = tuple(
             override.get('required_inputs', infer_required_inputs(source))
@@ -173,6 +180,8 @@ def discover_jobs(config: dict[str, Any] | None = None) -> dict[str, Job]:
             requires_artifacts=override.get(
                 'requires_artifacts', source_has_output(source)
             ),
+            expected_outputs=tuple(docs_override.get('expected_outputs', [])),
+            expected_output_globs=tuple(docs_override.get('expected_output_globs', [])),
         )
     for job in jobs.values():
         missing = [
@@ -243,7 +252,8 @@ def topological_jobs(jobs: dict[str, Job]) -> list[Job]:
             raise ValueError(f'Circular example dependency involving {name}')
         visiting.add(name)
         for dependency in jobs[name].dependencies:
-            visit(dependency)
+            if dependency in jobs:
+                visit(dependency)
         visiting.remove(name)
         visited.add(name)
         ordered.append(jobs[name])
@@ -257,12 +267,15 @@ def select_jobs(
     all_jobs: dict[str, Job],
     requested: list[str] | None = None,
     slow_only: bool = False,
+    include_dependencies: bool = True,
 ) -> dict[str, Job]:
     """Select jobs and close the selection over their dependencies.
 
     ``slow_only`` excludes the ``light`` resource profile.  Explicitly
-    requested jobs always include their prerequisites, even when a prerequisite
-    uses the light profile.
+    requested jobs normally include their prerequisites, even when a
+    prerequisite uses the light profile.  A retry can set
+    ``include_dependencies`` to false when the required artifacts are already
+    archived from an earlier successful run.
     """
     requested_set = set(requested or [])
     if requested_set and slow_only:
@@ -276,6 +289,9 @@ def select_jobs(
         selected = {name for name, job in all_jobs.items() if job.profile != 'light'}
     else:
         selected = set(all_jobs)
+
+    if not include_dependencies:
+        return {name: all_jobs[name] for name in selected}
 
     changed = True
     while changed:
@@ -346,6 +362,126 @@ def changed_artifacts(
         for name, metadata in after.items()
         if name not in before or before[name] != metadata
     )
+
+
+def declared_output_matches(
+    job: Job, working_directory: Path, changed: list[str]
+) -> list[str]:
+    """Return declared outputs that were not created or changed this attempt."""
+
+    changed_set = set(changed)
+    missing: list[str] = []
+
+    def candidates(expected: str) -> list[Path]:
+        relative = Path(expected)
+        if relative.is_absolute() or '..' in relative.parts:
+            return []
+        if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+            return [working_directory / relative]
+        if relative.suffix.lower() == '.html':
+            return [
+                working_directory / 'saved_html' / relative,
+                working_directory / relative,
+            ]
+        if relative.suffix.lower() in DECLARED_RESULT_SUFFIXES:
+            return [
+                working_directory / 'saved_results' / relative,
+                working_directory / relative,
+            ]
+        return [
+            working_directory / relative,
+            working_directory / 'saved_results' / relative,
+        ]
+
+    def changed_path(path: Path) -> bool:
+        try:
+            return path.relative_to(working_directory).as_posix() in changed_set
+        except ValueError:
+            return False
+
+    for expected in job.expected_outputs:
+        if not any(
+            path.is_file() and changed_path(path) for path in candidates(expected)
+        ):
+            missing.append(expected)
+
+    for pattern in job.expected_output_globs:
+        relative = Path(pattern)
+        if relative.is_absolute() or '..' in relative.parts:
+            missing.append(pattern)
+            continue
+        if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+            roots = [working_directory]
+        elif relative.suffix.lower() == '.html':
+            roots = [working_directory / 'saved_html', working_directory]
+        elif relative.suffix.lower() in DECLARED_RESULT_SUFFIXES:
+            roots = [working_directory / 'saved_results', working_directory]
+        else:
+            roots = [working_directory, working_directory / 'saved_results']
+        matches = [
+            path
+            for root in roots
+            if root.is_dir()
+            for path in root.glob(pattern)
+            if path.is_file() and changed_path(path)
+        ]
+        if not matches:
+            missing.append(pattern)
+    return missing
+
+
+def declared_output_files(job: Job, directory: Path) -> list[Path]:
+    """Return existing files matching a job's declared output contract."""
+
+    result: set[Path] = set()
+
+    def safe_path(value: str) -> Path | None:
+        relative = Path(value)
+        if relative.is_absolute() or '..' in relative.parts:
+            return None
+        return relative
+
+    def exact_candidates(value: str) -> list[Path]:
+        relative = safe_path(value)
+        if relative is None:
+            return []
+        if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+            return [directory / relative]
+        if relative.suffix.lower() == '.html':
+            return [directory / 'saved_html' / relative, directory / relative]
+        if relative.suffix.lower() in DECLARED_RESULT_SUFFIXES:
+            return [directory / 'saved_results' / relative, directory / relative]
+        return [directory / relative, directory / 'saved_results' / relative]
+
+    for expected in job.expected_outputs:
+        result.update(path for path in exact_candidates(expected) if path.is_file())
+
+    for pattern in job.expected_output_globs:
+        relative = safe_path(pattern)
+        if relative is None:
+            continue
+        if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+            roots = [directory]
+        elif relative.suffix.lower() == '.html':
+            roots = [directory / 'saved_html', directory]
+        elif relative.suffix.lower() in DECLARED_RESULT_SUFFIXES:
+            roots = [directory / 'saved_results', directory]
+        else:
+            roots = [directory, directory / 'saved_results']
+        for root in roots:
+            if root.is_dir():
+                result.update(path for path in root.glob(pattern) if path.is_file())
+    return sorted(result)
+
+
+def remove_declared_outputs(job: Job) -> list[Path]:
+    """Remove generated outputs so an invalidated example cannot reuse them."""
+
+    removed: list[Path] = []
+    for path in declared_output_files(job, job.directory):
+        path.unlink()
+        removed.append(path)
+    return removed
 
 
 def move_without_overwrite(source: Path, destination: Path) -> Path:
@@ -470,12 +606,20 @@ def job_finish(
         diagnostics.append(
             'Missing required inputs: ' + ', '.join(start['missing_inputs'])
         )
-    if exit_code == 0 and job.requires_artifacts and not changed:
-        diagnostics.append(
-            'No result/report artifact was created or modified; expected an '
-            'estimation or post-processing output.'
-        )
-        exit_code = MISSING_OUTPUT_EXIT_CODE
+    if exit_code == 0:
+        missing_declared = declared_output_matches(job, working_directory, changed)
+        if missing_declared:
+            diagnostics.append(
+                'Missing or unchanged declared output(s): '
+                + ', '.join(missing_declared)
+            )
+            exit_code = MISSING_OUTPUT_EXIT_CODE
+        elif job.requires_artifacts and not changed:
+            diagnostics.append(
+                'No result/report artifact was created or modified; expected an '
+                'estimation or post-processing output.'
+            )
+            exit_code = MISSING_OUTPUT_EXIT_CODE
     completion = {
         'job': job.script,
         'finished_at': now_iso(),
@@ -484,6 +628,8 @@ def job_finish(
         'required_inputs': list(job.required_inputs),
         'harvested_outputs': harvested,
         'changed_artifacts': changed,
+        'expected_outputs': list(job.expected_outputs),
+        'expected_output_globs': list(job.expected_output_globs),
         'diagnostics': diagnostics,
     }
     json_dump(job_directory / 'completion.json', completion)
@@ -748,6 +894,18 @@ def command_reset(args: argparse.Namespace) -> int:
     for path in unique:
         destination = backup / path.relative_to(EXAMPLES_ROOT)
         move_without_overwrite(path, destination)
+    # Resetting artifacts starts a new release attempt.  Clear any previous
+    # OK/manual decisions so the global loop cannot mistake old attempts for
+    # fixtures that still exist in the checkout.
+    release_state = load_release_state(state)
+    timestamp = now_iso()
+    for script in discover_jobs(config):
+        release_state['invalidated'][script] = {
+            'at': timestamp,
+            'reason': 'release reset; artifacts must be regenerated',
+        }
+        release_state.get('manual_ok', {}).pop(script, None)
+    save_release_state(state, release_state)
     print(f'Moved {len(unique)} artifact(s) to {backup}')
     return 0
 
@@ -755,10 +913,46 @@ def command_reset(args: argparse.Namespace) -> int:
 def command_launch(args: argparse.Namespace) -> int:
     config = load_config()
     all_jobs = discover_jobs(config)
-    jobs = select_jobs(all_jobs, args.only, args.slow)
+    if args.not_done:
+        if args.only or args.slow or args.no_dependencies:
+            raise ValueError(
+                '--not-done cannot be combined with --only, --slow, or --no-dependencies.'
+            )
+        statuses = global_statuses(config)
+        jobs = select_not_done_jobs(all_jobs, statuses)
+        if not jobs:
+            unfinished = sum(item['label'] == 'NOT_DONE' for item in statuses.values())
+            if unfinished:
+                print(
+                    'No NOT_DONE jobs are runnable yet; check dependencies '
+                    'and the ERROR/RUNNING entries in status.'
+                )
+            else:
+                print('All jobs are already OK or currently running.')
+            return 0
+        print(f'Preparing {len(jobs)} NOT_DONE job(s).')
+    else:
+        jobs = None
+    if args.no_dependencies and not args.only:
+        raise ValueError('--no-dependencies requires --only.')
+    if jobs is None:
+        jobs = select_jobs(
+            all_jobs,
+            args.only,
+            args.slow,
+            include_dependencies=not args.no_dependencies,
+        )
     ordered = topological_jobs(jobs)
     run_id = args.run_id or datetime.now().strftime('%Y%m%d-%H%M%S')
-    run_directory = state_root(config) / run_id
+    state_directory = state_root(config)
+    run_directory = state_directory / run_id
+    if not args.run_id:
+        base_run_id = run_id
+        suffix = 1
+        while run_directory.exists():
+            run_id = f'{base_run_id}-{suffix}'
+            run_directory = state_directory / run_id
+            suffix += 1
     if run_directory.exists() and not args.force:
         raise ValueError(f'Run directory already exists: {run_directory}')
     run_directory.mkdir(parents=True, exist_ok=True)
@@ -774,21 +968,30 @@ def command_launch(args: argparse.Namespace) -> int:
         'jobs': {},
     }
     job_ids: dict[str, str] = {}
+    selected_names = set(jobs)
     for job in ordered:
-        dependencies = [job_ids[name] for name in job.dependencies if name in job_ids]
+        selected_dependencies = [
+            name for name in job.dependencies if name in selected_names
+        ]
+        dependencies = [
+            job_ids[name] for name in selected_dependencies if name in job_ids
+        ]
         script = write_generated_script(config, job, run_directory)
         record: dict[str, Any] = {
             'script': job.script,
             'profile': job.profile,
             'dependencies': list(job.dependencies),
+            'scheduled_dependencies': selected_dependencies,
             'required_inputs': list(job.required_inputs),
             'requires_artifacts': job.requires_artifacts,
+            'expected_outputs': list(job.expected_outputs),
+            'expected_output_globs': list(job.expected_output_globs),
             'run_script': str(script),
         }
         if args.dry_run:
             record.update({'status': 'not scheduled', 'diagnostic': 'dry run'})
-            print(f'DRY RUN {job.script} <- {", ".join(job.dependencies) or "-"}')
-        elif len(dependencies) != len(job.dependencies):
+            print(f'DRY RUN {job.script} <- {", ".join(selected_dependencies) or "-"}')
+        elif len(dependencies) != len(selected_dependencies):
             record.update(
                 {
                     'status': 'not scheduled',
@@ -914,7 +1117,307 @@ def latest_run(root: Path) -> Path | None:
     )
 
 
+def run_directories(root: Path) -> list[Path]:
+    """Return recorded runs from oldest to newest, excluding reset backups."""
+    if not root.is_dir():
+        return []
+
+    def sort_key(path: Path) -> tuple[str, float]:
+        record = json_load(path / 'run.json')
+        return (str(record.get('created_at', '')), path.stat().st_mtime)
+
+    return sorted(
+        (
+            path
+            for path in root.iterdir()
+            if path.is_dir() and path.name != 'resets' and (path / 'run.json').is_file()
+        ),
+        key=sort_key,
+    )
+
+
+def release_state_path(root: Path) -> Path:
+    return root / RELEASE_STATE_FILENAME
+
+
+def load_release_state(root: Path) -> dict[str, Any]:
+    path = release_state_path(root)
+    if not path.is_file():
+        return {'invalidated': {}, 'manual_ok': {}}
+    value = json_load(path)
+    value.setdefault('invalidated', {})
+    value.setdefault('manual_ok', {})
+    return value
+
+
+def save_release_state(root: Path, state: dict[str, Any]) -> None:
+    json_dump(release_state_path(root), state)
+
+
+def event_timestamp(value: str | None, fallback: float = 0.0) -> float:
+    if not value:
+        return fallback
+    try:
+        return datetime.fromisoformat(value.replace('Z', '+00:00')).timestamp()
+    except ValueError:
+        return fallback
+
+
+def latest_attempts(
+    root: Path,
+) -> dict[str, tuple[Path, dict[str, Any], float]]:
+    """Return the latest non-dry-run attempt for every script across runs."""
+    attempts: dict[str, tuple[Path, dict[str, Any], float]] = {}
+    for run_directory in run_directories(root):
+        run_record = json_load(run_directory / 'run.json')
+        run_time = event_timestamp(
+            str(run_record.get('created_at', '')), run_directory.stat().st_mtime
+        )
+        jobs = run_record.get('jobs', {})
+        if not isinstance(jobs, dict):
+            continue
+        for script, value in jobs.items():
+            if not isinstance(value, dict):
+                continue
+            if (
+                value.get('status') == 'not scheduled'
+                and value.get('diagnostic') == 'dry run'
+            ):
+                continue
+            previous = attempts.get(str(script))
+            if previous is None or run_time >= previous[2]:
+                record = dict(value)
+                record.setdefault('script', str(script))
+                attempts[str(script)] = (run_directory, record, run_time)
+    return attempts
+
+
+def global_statuses(
+    config: dict[str, Any] | None = None,
+    root: Path | None = None,
+) -> dict[str, dict[str, Any]]:
+    """Compute one release status per discovered example across all attempts."""
+    config = config or load_config()
+    root = root or state_root(config)
+    state = load_release_state(root)
+    attempts = latest_attempts(root)
+    statuses: dict[str, dict[str, Any]] = {}
+    try:
+        discovered_jobs = discover_jobs(config)
+    except TypeError:
+        # Keep compatibility with small test doubles and third-party wrappers
+        # that expose the historical zero-argument discovery call.
+        discovered_jobs = discover_jobs()
+    for script in sorted(discovered_jobs):
+        attempt = attempts.get(script)
+        invalidation = state.get('invalidated', {}).get(script, {})
+        manual_ok = state.get('manual_ok', {}).get(script, {})
+        invalidated_at = event_timestamp(str(invalidation.get('at', '')))
+        manual_ok_at = event_timestamp(str(manual_ok.get('at', '')))
+        if attempt is None:
+            status, detail = 'not done', 'no completed attempt is recorded'
+            run_directory = None
+            record: dict[str, Any] = {}
+            attempt_time = 0.0
+        else:
+            run_directory, record, attempt_time = attempt
+            status, detail = classify_job(record, run_directory)
+
+            # A submitted job without an ID cannot be retried automatically
+            # until it is explicitly invalidated, but it is unfinished from a
+            # release perspective rather than a separate terminal state.
+            if status == 'not scheduled':
+                status = 'not done'
+                detail = detail or 'job was not scheduled'
+
+        # Timestamps are stored to second precision.  Treat an invalidation
+        # or laptop completion at the same second as the latest attempt as the
+        # newer release decision, avoiding a stale ERROR/OK classification.
+        if invalidated_at and invalidated_at >= max(attempt_time, manual_ok_at):
+            status, detail = (
+                'not done',
+                str(invalidation.get('reason', 'invalidated after source changes')),
+            )
+        elif manual_ok_at and manual_ok_at >= max(attempt_time, invalidated_at):
+            status, detail = (
+                'finished without error',
+                (f'manually marked OK ({manual_ok.get("source", "external")})'),
+            )
+
+        statuses[script] = {
+            'script': script,
+            'status': status,
+            'label': 'RUNNING'
+            if status == 'scheduled and pending'
+            else status_label(status),
+            'detail': detail,
+            'run_directory': run_directory,
+            'record': record,
+        }
+    return statuses
+
+
+def descendants(jobs: dict[str, Job], roots: set[str]) -> set[str]:
+    result = set(roots)
+    changed = True
+    while changed:
+        changed = False
+        for script, job in jobs.items():
+            if script in result:
+                continue
+            if any(dependency in result for dependency in job.dependencies):
+                result.add(script)
+                changed = True
+    return result
+
+
+def command_invalidate(args: argparse.Namespace) -> int:
+    config = load_config()
+    jobs = discover_jobs(config)
+    requested = set(jobs) if args.all else set(args.script or [])
+    unknown = requested - jobs.keys()
+    if unknown:
+        raise ValueError('Unknown job(s): ' + ', '.join(sorted(unknown)))
+    if not requested:
+        raise ValueError('Specify --script or --all.')
+    affected = descendants(jobs, requested) if not args.no_dependents else requested
+    root = state_root(config)
+    state = load_release_state(root)
+    timestamp = now_iso()
+    for script in sorted(affected):
+        remove_declared_outputs(jobs[script])
+        state['invalidated'][script] = {
+            'at': timestamp,
+            'reason': args.reason or 'invalidated after source changes',
+        }
+        state.get('manual_ok', {}).pop(script, None)
+    save_release_state(root, state)
+    print(f'Invalidated {len(affected)} job(s).')
+    for script in sorted(affected):
+        print(f'NOT_DONE {script}')
+    return 0
+
+
+def command_mark_ok(args: argparse.Namespace) -> int:
+    config = load_config()
+    jobs = discover_jobs(config)
+    requested = set(args.script or [])
+    unknown = requested - jobs.keys()
+    if unknown:
+        raise ValueError('Unknown job(s): ' + ', '.join(sorted(unknown)))
+    if not args.script:
+        raise ValueError('Specify at least one --script.')
+    for script in requested:
+        directory = jobs[script].directory
+        existing_artifacts = [
+            path.relative_to(directory).as_posix()
+            for path in example_artifacts(directory)
+        ]
+        if jobs[script].requires_artifacts and not existing_artifacts:
+            raise ValueError(
+                f'Cannot mark {script} OK; no result/report artifact was found'
+            )
+        missing = declared_output_matches(jobs[script], directory, existing_artifacts)
+        if missing:
+            raise ValueError(
+                f'Cannot mark {script} OK; missing declared output(s): '
+                + ', '.join(missing)
+            )
+    affected = descendants(jobs, requested)
+    root = state_root(config)
+    state = load_release_state(root)
+    timestamp = now_iso()
+    for script in args.script:
+        state['manual_ok'][script] = {
+            'at': timestamp,
+            'source': args.source,
+            'note': args.note or '',
+        }
+        state.get('invalidated', {}).pop(script, None)
+    for script in sorted(affected - requested):
+        state['invalidated'][script] = {
+            'at': timestamp,
+            'reason': 'dependency was repaired outside JED',
+        }
+        state.get('manual_ok', {}).pop(script, None)
+    save_release_state(root, state)
+    for script in args.script:
+        print(f'OK {script} ({args.source})')
+    for script in sorted(affected - requested):
+        print(f'NOT_DONE {script} (dependent of repaired job)')
+    return 0
+
+
+def select_not_done_jobs(
+    jobs: dict[str, Job], statuses: dict[str, dict[str, Any]]
+) -> dict[str, Job]:
+    """Select unfinished jobs whose dependencies are OK or also unfinished."""
+    selected = {
+        script for script, item in statuses.items() if item['label'] == 'NOT_DONE'
+    }
+    # Keep the dependency closure explicit for filtered status mappings.
+    changed = True
+    while changed:
+        changed = False
+        for script in tuple(selected):
+            for dependency in jobs[script].dependencies:
+                if (
+                    statuses[dependency]['label'] == 'NOT_DONE'
+                    and dependency not in selected
+                ):
+                    selected.add(dependency)
+                    changed = True
+    blocked = {
+        script
+        for script in selected
+        if any(
+            statuses[dependency]['label'] not in {'OK', 'NOT_DONE'}
+            for dependency in jobs[script].dependencies
+        )
+    }
+    # Jobs with a currently running/pending dependency must wait; they remain
+    # NOT_DONE and will be picked up by a later release iteration.
+    return {script: jobs[script] for script in selected - blocked}
+
+
+def command_release_status(args: argparse.Namespace) -> int:
+    statuses = global_statuses()
+    rows: list[tuple[str, str, str, str]] = []
+    counts: dict[str, int] = {}
+    for script, item in statuses.items():
+        label = item['label']
+        record = item['record']
+        job_id = str(record.get('job_id', '-'))
+        run_directory = item['run_directory']
+        run_id = run_directory.name if run_directory else '-'
+        detail = f'{item["detail"]} [{run_id}]'
+        counts[label] = counts.get(label, 0) + 1
+        rows.append((label, job_id, script, detail))
+    summary = ' | '.join(
+        f'{label}={counts[label]}' for label in STATUS_ORDER if counts.get(label)
+    )
+    print('Release status (all recorded runs)')
+    print(f'Summary: {summary or "NO_JOBS"}')
+    errors = [row for row in rows if row[0] == 'ERROR']
+    if errors:
+        print('\nErrors requiring attention:')
+        for _, job_id, script, detail in errors:
+            print(f'  ERROR {job_id}: {script}')
+            print(f'    {detail}')
+    print(f'\n{"STATUS":10} {"JOB ID":12} SCRIPT')
+    print('-' * 90)
+    for label, job_id, script, detail in rows:
+        print(f'{label:10} {job_id:12} {script}')
+        if args.verbose:
+            print(f'  detail: {detail}')
+    if getattr(args, 'require_all_ok', False):
+        return 0 if all(item['label'] == 'OK' for item in statuses.values()) else 1
+    return 0
+
+
 def command_status(args: argparse.Namespace) -> int:
+    if not args.run_id:
+        return command_release_status(args)
     config = load_config()
     root = state_root(config)
     run_directory = root / args.run_id if args.run_id else latest_run(root)
@@ -996,14 +1499,52 @@ def build_parser() -> argparse.ArgumentParser:
         action='store_true',
         help='submit every non-light resource profile and its dependencies',
     )
+    launch.add_argument(
+        '--no-dependencies',
+        action='store_true',
+        help=(
+            'with --only, retry only the named scripts; use this only when '
+            'their required artifacts already exist in saved_results/'
+        ),
+    )
+    launch.add_argument(
+        '--not-done',
+        action='store_true',
+        help='submit every job currently marked NOT_DONE in the release state',
+    )
     launch.set_defaults(function=command_launch)
 
     status = subparsers.add_parser('status', help='summarize a JED run')
-    status.add_argument('--run-id', help='run id; defaults to the newest run')
+    status.add_argument(
+        '--run-id',
+        help='optional historical run id; omit it for the global release status',
+    )
     status.add_argument(
         '--verbose', action='store_true', help='print diagnostics for every job'
     )
+    status.add_argument(
+        '--require-all-ok',
+        action='store_true',
+        help='return nonzero unless every discovered job is OK',
+    )
     status.set_defaults(function=command_status)
+
+    invalidate = subparsers.add_parser(
+        'invalidate', help='mark repaired examples and their consumers NOT_DONE'
+    )
+    invalidate.add_argument('--script', action='append')
+    invalidate.add_argument('--all', action='store_true')
+    invalidate.add_argument('--no-dependents', action='store_true')
+    invalidate.add_argument('--reason')
+    invalidate.set_defaults(function=command_invalidate)
+
+    mark_ok = subparsers.add_parser(
+        'mark-ok', help='mark a result produced outside JED as OK'
+    )
+    mark_ok.add_argument('--script', action='append', required=True)
+    mark_ok.add_argument('--source', default='laptop')
+    mark_ok.add_argument('--note')
+    mark_ok.set_defaults(function=command_mark_ok)
 
     start = subparsers.add_parser('job-start', help=argparse.SUPPRESS)
     start.add_argument('--script', required=True)

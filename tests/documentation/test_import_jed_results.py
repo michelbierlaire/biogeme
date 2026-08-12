@@ -130,3 +130,31 @@ def test_build_plan_reports_missing_dynamic_output_pattern(tmp_path: Path):
     assert items[0].pattern is True
     assert items[0].source is None
     assert items[0].expected == 'model_*.yaml'
+
+
+def test_replace_result_archives_moves_stale_files_to_backup(tmp_path: Path):
+    target = tmp_path / 'examples'
+    kept = target / 'family' / 'saved_results' / 'new.yaml'
+    stale = target / 'family' / 'saved_results' / 'old.yaml'
+    kept.parent.mkdir(parents=True)
+    kept.write_text('new')
+    stale.write_text('old')
+    item = import_jed_results.ImportItem(
+        script='family/plot_model.py',
+        expected='new.yaml',
+        source=None,
+        target=kept,
+        candidates=(),
+    )
+    import_directory = tmp_path / 'state' / 'imports' / 'run'
+    import_directory.mkdir(parents=True)
+
+    removed = import_jed_results.replace_result_archives(
+        [item], target, import_directory
+    )
+
+    assert removed == [stale]
+    assert not stale.exists()
+    assert (
+        import_directory / 'backup' / 'family' / 'saved_results' / 'old.yaml'
+    ).read_text() == 'old'
