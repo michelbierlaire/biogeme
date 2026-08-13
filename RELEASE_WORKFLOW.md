@@ -229,102 +229,12 @@ When every discovered job is `OK`, finalize Phase 1:
 Finalization removes only temporary root-level copies and preserves the
 archived files in `saved_results` and `saved_html`.
 
-The lower-level commands remain available for diagnostics and exceptional
-cases:
-
-Start from a clean generated-output tree only when using the lower-level
-commands directly. The dry run is required before the destructive step:
-
-```bash
-cd ~/github/biogeme
-PY=.venv/bin/python
-
-"$PY" jed_runs/jed_fresh_start.py
-"$PY" jed_runs/jed_fresh_start.py --apply
-```
-
-This removes generated result files, archived fixtures, Slurm logs, caches,
-diagnostics, and previous runner state while preserving source code and input
-data. If old diagnostics may be needed, use
-`jed_runs/jed_examples.py reset --apply` instead; it keeps a recoverable
-backup.
-
-Submit the unfinished examples. The first call submits the complete set; the
-same command is used after every repair and submits only examples still marked
-`NOT_DONE`:
-
-```bash
-"$PY" jed_runs/jed_examples.py launch --not-done --dry-run
-"$PY" jed_runs/jed_examples.py launch --not-done
-```
-
-Dependencies are handled by the runner, and independent jobs are submitted in
-parallel.
-
-Monitor the iteration:
-
-```bash
-"$PY" jed_runs/jed_examples.py status
-"$PY" jed_runs/jed_examples.py status --verbose
-"$PY" jed_runs/jed_error_report.py
-less .jed_runs/aggregate-error-report.md
-```
-
-The status meanings are:
-
-- `OK`: Python, Slurm, and every declared output contract succeeded;
-- `ERROR`: the job finished but failed or missed a declared output;
-- `RUNNING`: the job is active or waiting in Slurm;
-- `NOT_DONE`: it has not yet completed successfully.
-
-`OK` also means that every declared output is present in the JED example's
-`saved_results`/`saved_html` archive (or at its declared root location).  A
-Slurm `COMPLETED` record by itself is not sufficient.  After updating the
-runner, an older attempt that was previously shown as `OK` can therefore be
-reported as `NOT_DONE` if its archive is missing; `release_phase1.py run
---apply` will submit only that example.
-
-When an example fails:
-
-1. Read the diagnostic report.
-2. Fix the source or manifest on the release branch.
-3. Mark the example unfinished; its dependent examples are marked unfinished
-   automatically.
-4. Submit the unfinished set again.
-
-For example, after correcting `hybrid_choice_models/plot_h01_mode_logit.py`,
-run:
-
-```bash
-"$PY" jed_runs/jed_examples.py invalidate \
-    --script hybrid_choice_models/plot_h01_mode_logit.py
-"$PY" jed_runs/jed_examples.py launch --not-done
-```
-
-`invalidate` changes the example from `ERROR` to `NOT_DONE`, removes its
-declared stale result files, and marks dependent examples `NOT_DONE` as well.
-The next `launch --not-done` therefore runs only the unfinished work.
-
-Repeat this loop until the release gate succeeds:
-
-```bash
-"$PY" jed_runs/jed_examples.py status --require-all-ok
-```
-
-Do not transfer results before this command succeeds. A fast example may be
-run directly on the laptop only as an exception; after verifying its declared
-outputs, record it with:
-
-```bash
-uv run --locked --group docs python jed_runs/jed_examples.py mark-ok \
-    --script family/plot_fixed.py --source laptop
-```
-
 ## Phase 2 — Transfer results and build the documentation
 
-On the laptop, the incremental wrapper combines the resumable transfer, the
-strict manifest-limited import, and the documentation build.  A dry run is
-shown first:
+On the laptop, the incremental wrapper performs the complete Phase 2 workflow:
+it transfers the required artifacts, cleans generated documentation state,
+imports the fixtures strictly, builds the gallery, and checks the generated
+HTML. A dry run is shown first:
 
 ```bash
 cd ~/MyFiles/github/biogeme
@@ -336,31 +246,75 @@ uv run --locked --group docs python jed_runs/release_phase2.py \
     run --source "$JED_REMOTE" --apply
 ```
 
-The transfer uses `rsync --partial`, so an interrupted copy can be resumed by
-rerunning the same command.  The import is strict and is attempted only after
-all declared artifacts are available.  If the documentation build fails, run
-only:
+The wrapper owns the staging directory and the transfer filters. The user does
+not need to create `JED_STAGE`, invoke `rsync`, or run the importer separately.
+It transfers only the manifest-relevant YAML/HTML/Pareto/text files and the
+small set of NetCDF files required by downstream examples. The transfer uses
+`rsync --partial`, so an interrupted copy can be resumed by rerunning the same
+command. The strict import is retried from a refreshed staging snapshot until
+all declared artifacts are available. Successful JED jobs are not resubmitted.
 
-```bash
-uv run --locked --group docs python jed_runs/release_phase2.py build --apply
-```
+The first applied Phase 2 run also performs the equivalent of
+`make -C docs clean` before importing fixtures. This removes stale Sphinx
+build state, the generated `docs/source/auto_examples` gallery directory, and
+local documentation-run state without removing the imported result
+directories. The next Sphinx build recreates `auto_examples` from the source
+examples. The wrapper then runs the full gallery and the generated-HTML check.
 
-If strict import reports missing artifacts, do not rerun individual examples
-just for that message.  The phase-2 wrapper refreshes the persistent staging
-directory from JED on every retry until import succeeds.  This matters when a
-JED status was checked before the first transfer, or when an example writes a
-declared YAML/HTML file at its workspace root.  Rerun the same `run --apply`
-command after the JED results are available; the transfer is resumable and the
-successful JED jobs are not resubmitted.
+If the command fails, do not manually repeat the individual operations as a
+first response. Read the error and follow the recovery procedures in
+[Appendix A](#appendix-a--phase-2-recovery-and-emergency-manual-transfer), then
+rerun the same `run --apply` command. Completed stages are recorded and reused.
 
 The phase-2 state is retained under `.jed_runs/releases`.  The wrapper never
 commits changes; after a successful build, review `git status --short` and
 commit manually.
 
-The following lower-level commands describe the individual operations and
-remain useful for troubleshooting.
+The full HTML target executes the gallery. A failure is a release blocker.
+Review `docs/warnings.log`, then inspect the Git diff:
 
-Once every example is `OK`, remove only temporary root-level copies on JED.
+```bash
+git status --short
+git diff --check
+git diff --name-status -- docs/source/examples
+```
+
+Commit only the reviewed source, manifest, documentation, and result changes.
+Do not stage `.jed_runs`, `.docs_runs`, `.release_staging`, Slurm output,
+caches, or other transfer directories.
+
+## Appendix A — Phase 2 recovery and emergency manual transfer
+
+This appendix is for troubleshooting only. It is not part of the normal
+release path. Normally, rerun the single `release_phase2.py run --apply`
+command from Phase 2.
+
+### A.1 Recovering an interrupted or incomplete Phase 2
+
+If the transfer is interrupted, or strict import reports a missing artifact,
+rerun the same command. The wrapper refreshes the persistent staging directory
+from JED until strict import succeeds; `rsync --partial` preserves an
+interrupted file. Do not rerun successful examples merely because the laptop
+transfer was incomplete.
+
+If only the documentation build failed, the individual build command may be
+used:
+
+```bash
+uv run --locked --group docs python jed_runs/release_phase2.py build --apply
+```
+
+For detailed diagnosis, the individual scripted steps are also available:
+
+```bash
+uv run --locked --group docs python jed_runs/release_phase2.py \
+    transfer --source "$JED_REMOTE" --apply
+uv run --locked --group docs python jed_runs/release_phase2.py \
+    import --source "$JED_REMOTE" --apply
+uv run --locked --group docs python jed_runs/release_phase2.py build --apply
+```
+
+Once every example is `OK`, temporary root-level copies on JED may be removed.
 The archived files in `saved_results` and `saved_html` are preserved:
 
 ```bash
@@ -368,22 +322,17 @@ The archived files in `saved_results` and `saved_html` are preserved:
 "$PY" jed_runs/jed_cleanup.py --apply
 ```
 
-On the laptop, check out the same commit and remove old generated fixtures:
+### A.2 Manual transfer when the wrapper cannot be used
 
-```bash
-cd ~/MyFiles/github/biogeme
-git rev-parse HEAD
-git status --short
-uv sync --frozen
+Use this only for an emergency workaround, transfer debugging, or benchmarking
+`rsync`. The command deliberately duplicates the filters implemented by
+`release_phase2.py`; if those filters change, this recipe must be updated too.
+The normal release workflow should never require it.
 
-uv run --locked --group docs python jed_runs/jed_fresh_start.py
-uv run --locked --group docs python jed_runs/jed_fresh_start.py --apply
-```
-
-Stage the JED examples in the persistent, Git-ignored `.release_staging`
-directory. NetCDF files are large posterior-draw archives and are not part of
-the normal gallery fixture set. The single transfer below excludes every
-`.nc` except the two files needed by downstream Bayesian examples:
+The staging directory is persistent and Git-ignored. NetCDF files are large
+posterior-draw archives and are not part of the normal gallery fixture set.
+The transfer below excludes every `.nc` except the two files needed by
+downstream Bayesian examples:
 
 ```bash
 JED_STAGE="$PWD/.release_staging/examples"
@@ -423,9 +372,9 @@ ssh-add --apple-use-keychain ~/.ssh/id_rsa
 
 The staging directory is dedicated to release artifacts; `--delete` removes
 stale selected files from an earlier transfer, while `--partial` preserves an
-interrupted file for the next attempt. `--whole-file` avoids a delta-checksum pass. If
-the transfer is interrupted, rerun the command; `--partial` keeps the partial
-files. To let rsync resume a large partial file block by block, remove
+interrupted file for the next attempt. `--whole-file` avoids a delta-checksum
+pass. If the transfer is interrupted, rerun the command; `--partial` keeps the
+partial files. To let rsync resume a large partial file block by block, remove
 `--whole-file` on the retry. Do not add `--compress` (`-z`): NetCDF is already
 compressed and SSH compression usually makes this transfer slower.
 
@@ -453,29 +402,57 @@ uv run --locked --group docs python tools/import_jed_results.py \
 The stage persists across terminal sessions and can be reused; rerunning
 `rsync` updates changed files and preserves partial transfers. It is ignored by
 Git; verify this with `git check-ignore -v "$JED_STAGE"`. Replaced files are
-backed up below `.docs_runs/imports/`, and the importer
-writes checksums to its `report.json`.
+backed up below `.docs_runs/imports/`, and the importer writes checksums to its
+`report.json`. After a manual import, run the documented build command from
+Phase 2.
 
-Build the gallery on the laptop:
+## Appendix B — Lower-level JED diagnostics
 
-```bash
-make -C docs clean
-make -C docs html PROFILE=full
-make -C docs check-html
-```
-
-The full HTML target executes the gallery. A failure is a release blocker.
-Review `docs/warnings.log`, then inspect the Git diff:
+The normal release workflow uses `release_phase1.py`; these commands are
+provided only when diagnosing the runner itself or when a targeted repair is
+needed. The dry run is required before a destructive cleanup:
 
 ```bash
-git status --short
-git diff --check
-git diff --name-status -- docs/source/examples
+"$PY" jed_runs/jed_fresh_start.py
+"$PY" jed_runs/jed_fresh_start.py --apply
 ```
 
-Commit only the reviewed source, manifest, documentation, and result changes.
-Do not stage `.jed_runs`, `.docs_runs`, `.release_staging`, Slurm output,
-caches, or other transfer directories.
+This removes generated result files, archived fixtures, Slurm logs, caches,
+diagnostics, and previous runner state while preserving source code and input
+data. If old diagnostics may be needed, use the recoverable reset command
+instead. Do not use either cleanup while Slurm jobs are running.
+
+To submit only unfinished examples directly:
+
+```bash
+"$PY" jed_runs/jed_examples.py launch --not-done --dry-run
+"$PY" jed_runs/jed_examples.py launch --not-done
+```
+
+To inspect detailed status and errors:
+
+```bash
+"$PY" jed_runs/jed_examples.py status --verbose
+"$PY" jed_runs/jed_error_report.py
+less .jed_runs/aggregate-error-report.md
+```
+
+`OK` requires successful Python/Slurm execution and every declared output in
+the JED archive. A Slurm `COMPLETED` record alone is not sufficient. After
+repairing a failed example, invalidate it and its dependents before launching
+unfinished work:
+
+```bash
+"$PY" jed_runs/jed_examples.py invalidate \
+    --script hybrid_choice_models/plot_h01_mode_logit.py
+"$PY" jed_runs/jed_examples.py launch --not-done
+```
+
+The release gate remains:
+
+```bash
+"$PY" jed_runs/jed_examples.py status --require-all-ok
+```
 
 ## Starting over completely
 

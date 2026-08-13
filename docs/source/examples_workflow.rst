@@ -157,6 +157,12 @@ uses the full gallery profile and is intended for nightly or release builds
 after the remaining examples have been migrated to the isolated runner.  Both
 profiles generate API/configuration RST before invoking Sphinx.
 
+Before a fresh gallery build, ``make -C docs clean`` removes the generated
+``source/auto_examples`` directory as well as the Sphinx build directory,
+local example-run state, and documentation caches. Sphinx-Gallery recreates
+``source/auto_examples`` during the subsequent ``html`` or ``html-fast``
+build; the authored examples under ``source/examples`` are never removed.
+
 JED and expensive examples
 ---------------------------
 

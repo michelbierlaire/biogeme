@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Incrementally transfer JED artifacts, import them, and build the docs.
+"""Incrementally transfer JED artifacts, clean/import them, and build the docs.
 
 The command is a dry run unless ``--apply`` is supplied.  Transfers use
 ``rsync --partial`` and imports are manifest-limited and strict, so an
@@ -119,6 +119,11 @@ def import_artifacts(source: Path, *, apply: bool) -> int:
     return run_command(apply_command, apply=True)
 
 
+def clean_docs(*, apply: bool) -> int:
+    """Remove generated Sphinx/gallery build state before the first import."""
+    return run_command(['make', '-C', 'docs', 'clean'], apply=apply)
+
+
 def build_docs(*, apply: bool) -> int:
     code = run_command(['make', '-C', 'docs', 'html', 'PROFILE=full'], apply=apply)
     if code:
@@ -158,6 +163,20 @@ def phase2_run(args: argparse.Namespace) -> int:
     else:
         source = Path(phase.get('artifact_root', str(stage)))
         print(f'Reusing the completed transfer at {relative(source)}.')
+
+    if not phase.get('cleaned') and not phase.get('imported'):
+        code = clean_docs(apply=args.apply)
+        if code:
+            next_steps(
+                [
+                    'Inspect the documentation cleanup error.',
+                    'Rerun release_phase2.py run --apply.',
+                ]
+            )
+            return code
+        if args.apply:
+            phase['cleaned'] = True
+            save_release(release)
 
     if not phase.get('imported'):
         code = import_artifacts(source, apply=args.apply)
@@ -246,6 +265,19 @@ def phase2_step(args: argparse.Namespace) -> int:
                 save_release(release)
         if phase.get('imported'):
             print(f'Reusing the completed transfer at {relative(source)}.')
+        if not phase.get('cleaned'):
+            code = clean_docs(apply=args.apply)
+            if code:
+                next_steps(
+                    [
+                        'Inspect the documentation cleanup error.',
+                        'Rerun release_phase2.py import --apply.',
+                    ]
+                )
+                return code
+            if args.apply:
+                phase['cleaned'] = True
+                save_release(release)
         code = import_artifacts(source, apply=args.apply)
         if code:
             next_steps(

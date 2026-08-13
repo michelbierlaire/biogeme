@@ -7,6 +7,7 @@ SPHINXBUILD ?= $(UVRUN) sphinx-build
 DOCSEXAMPLES ?= $(UVRUN) python ../tools/docs_examples.py
 SOURCEDIR = source
 BUILDDIR = build
+GALLERYDIR = $(SOURCEDIR)/auto_examples
 PROFILE ?= full
 DOCS_CACHE ?= $(CURDIR)/.cache
 DOCS_ENV = MPLCONFIGDIR=$(DOCS_CACHE)/matplotlib XDG_CACHE_HOME=$(DOCS_CACHE)
@@ -44,4 +45,6 @@ doctest: generate
 clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	@$(DOCSEXAMPLES) clean --apply
+	@echo "Removing generated Sphinx-Gallery output: $(GALLERYDIR)"
+	@rm -rf "$(GALLERYDIR)"
 	@rm -rf "$(DOCS_CACHE)"

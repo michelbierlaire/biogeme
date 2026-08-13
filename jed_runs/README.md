@@ -13,13 +13,19 @@ The incremental release wrappers are:
 ```text
 release_examples.py  detect and register new plot_*.py examples
 release_phase1.py    prepare, submit, monitor, and finalize the JED phase
-release_phase2.py    transfer artifacts and build the laptop documentation
+release_phase2.py    transfer, clean, import, and build the laptop documentation
 release_reset.py     remove generated state for a completely fresh attempt
 ```
 
 They are dry runs unless `--apply` is supplied.  Release identifiers and
 resume state are stored automatically below the ignored `.jed_runs/releases`
 directory.
+
+On the laptop, use `release_phase2.py run` for the normal Phase 2 workflow. It
+owns the persistent `.release_staging` directory, the filtered resumable
+transfer, the strict manifest import, and the full documentation build. Do not
+create the staging directory or invoke `rsync` manually unless diagnosing an
+exception; the emergency recipe is documented in `RELEASE_WORKFLOW.md`.
 
 ## Prepare the checkout
 

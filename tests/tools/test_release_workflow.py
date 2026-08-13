@@ -254,6 +254,7 @@ def test_phase2_refreshes_incomplete_transfer_before_import(monkeypatch, tmp_pat
     stage = tmp_path / 'examples'
     source = 'user@host:/home/user/examples'
     calls = []
+    events = []
     release = {
         'phase2': {
             'source': source,
@@ -265,14 +266,22 @@ def test_phase2_refreshes_incomplete_transfer_before_import(monkeypatch, tmp_pat
     monkeypatch.setattr(release_phase2, 'ensure_release', lambda **_: release)
     monkeypatch.setattr(release_phase2, 'save_release', lambda _: None)
     monkeypatch.setattr(release_phase2, 'next_steps', lambda _: None)
+    monkeypatch.setattr(release_phase2, 'clean_docs', lambda **_: 0)
 
     def refresh(remote, destination, *, apply):
         calls.append((remote, destination, apply))
+        events.append('transfer')
         return destination
 
     monkeypatch.setattr(release_phase2, 'ensure_source', refresh)
-    monkeypatch.setattr(release_phase2, 'import_artifacts', lambda *_args, **_kwargs: 1)
+    monkeypatch.setattr(release_phase2, 'clean_docs', lambda **_: events.append('clean') or 0)
+    monkeypatch.setattr(
+        release_phase2,
+        'import_artifacts',
+        lambda *_args, **_kwargs: events.append('import') or 1,
+    )
     args = SimpleNamespace(source=source, stage=str(stage), apply=True)
 
     assert release_phase2.phase2_run(args) == 1
     assert calls == [(source, stage.resolve(), True)]
+    assert events == ['transfer', 'clean', 'import']
