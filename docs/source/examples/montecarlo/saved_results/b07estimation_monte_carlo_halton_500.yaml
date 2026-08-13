@@ -1,0 +1,119 @@
+# File b07estimation_monte_carlo_halton_500.yaml has automatically been generated on 2026-08-11 19:09:52.744851
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.46732483934691205
+- -1.8633047776799898
+- 1.2078481451506673
+- -0.8457250346621341
+- 0.18017039713535207
+bhhh:
+- - 1012.3023278625417
+  - 464.69659626547457
+  - 195.9952079477347
+  - -28.67074205564839
+  - -278.5314672986415
+- - 464.69659626547457
+  - 825.5172298202023
+  - 374.1537534119341
+  - -261.3153016249352
+  - 420.60332356173296
+- - 195.9952079477347
+  - 374.1537534119341
+  - 284.1269027260382
+  - 8.34669546250485
+  - 45.77273361353117
+- - -28.67074205564839
+  - -261.3153016249352
+  - 8.34669546250485
+  - 1533.679001013323
+  - -536.9683275176814
+- - -278.5314672986415
+  - 420.6033235617329
+  - 45.77273361353117
+  - -536.9683275176815
+  - 1511.6866247145417
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '1.105676'
+final_log_likelihood: -8570.965150998154
+gradient:
+- 0.002090820032108809
+- -0.00479978635189493
+- -0.011197813497876297
+- 0.02175765208590974
+- 0.009079701641041993
+gradient_bhhh_complete: true
+hessian:
+- - -1061.9093061925669
+  - -511.9052861815747
+  - -239.62710701185262
+  - 73.08799163900942
+  - 378.63208510344526
+- - -511.90528618157475
+  - -824.7996827032886
+  - -389.15144550068027
+  - 191.3006226977151
+  - -333.99757280977167
+- - -239.62710701185262
+  - -389.1514455006802
+  - -312.09442052325767
+  - 37.19021370176377
+  - -16.0461439958167
+- - 73.08799163900943
+  - 191.30062269771508
+  - 37.19021370176377
+  - -707.8130385824011
+  - 235.0953814373101
+- - 378.6320851034452
+  - -333.99757280977167
+  - -16.046143995816703
+  - 235.0953814373101
+  - -1529.386136523951
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -10979.633231737485
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b07estimation_monte_carlo_halton_500
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 500
+number_of_excluded_data: 9
+number_of_observations: 10719
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2e-06 <= 6.1e-06
+  Number of function evaluations: 109
+  Number of gradient evaluations: 65
+  Number of hessian evaluations: 0
+  Number of iterations: '44'
+  Optimization time: '9.172365'
+  Proportion of Hessian calculation: 0/32 = 0.0%
+  Relative gradient: 1.9816374214645344e-06
+sample_size: 10719
+types_of_draws:
+  b_time_rnd: NORMAL_HALTON2
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

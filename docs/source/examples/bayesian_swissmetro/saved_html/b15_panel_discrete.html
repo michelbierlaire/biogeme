@@ -1,0 +1,736 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>b15_panel_discrete - Report from biogeme 3.3.4 [2026-08-11]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.3.4 [2026-08-11]">
+<meta name="author" content="biogeme">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+
+<p>biogeme 3.3.4 [2026-08-11]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2026-08-11 19:52:37.761702</p>
+<table>
+<tr class=biostyle><td align=right><strong>Bayesian estimation report file</strong>:	</td><td>b15_panel_discrete.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>swissmetro</td></tr>
+</table>
+
+<h1>Bayesian estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>6768</td></tr>
+<tr class=biostyle><td align=right ><strong>Sampler</strong>: </td> <td>NUTS</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of chains</strong>: </td> <td>4</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of draws per chain</strong>: </td> <td>4000</td></tr>
+<tr class=biostyle><td align=right ><strong>Total number of draws</strong>: </td> <td>16000</td></tr>
+<tr class=biostyle><td align=right ><strong>Acceptance rate target</strong>: </td> <td>0.9</td></tr>
+<tr class=biostyle><td align=right ><strong>Run time</strong>: </td> <td>0:27:27.347566</td></tr>
+<tr class=biostyle><td align=right ><strong>Posterior predictive log-likelihood (sum of log mean p)</strong>: </td> <td>-2156.93</td></tr>
+<tr class=biostyle><td align=right ><strong>Expected log-likelihood E[log L(Y|θ)]</strong>: </td> <td>-2342.30</td></tr>
+<tr class=biostyle><td align=right ><strong>Best-draw log-likelihood (posterior upper bound)</strong>: </td> <td>-2232.19</td></tr>
+<tr class=biostyle><td align=right ><strong>LOO (Leave-One-Out Cross-Validation)</strong>: </td> <td>-3043.55</td></tr>
+<tr class=biostyle><td align=right ><strong>LOO Standard Error</strong>: </td> <td>78.39</td></tr>
+<tr class=biostyle><td align=right ><strong>Effective number of parameters (p_LOO)</strong>: </td> <td>886.62</td></tr>
+</table>
+
+<h1>Estimated parameters</h1>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value (mean)</th><th>Value (median)</th><th>Value (mode)</th><th>std err.</th><th>z-value</th><th>p-value</th><th>HDI low</th><th>HDI high</th><th>R hat</th><th>ESS (bulk)</th><th>ESS (tail)</th></tr>
+<tr class=biostyle><td>5</td><td>asc_car_class0</td><td>-0.729</td><td>-0.898</td><td>-1.58</td><td>5.42</td><td>-0.135</td><td>0.878</td><td>-10.5</td><td>9.75</td><td>1</td><td>3.93e+03</td><td>5.68e+03</td></tr>
+<tr class=biostyle><td>13</td><td>asc_car_class1</td><td>0.501</td><td>0.496</td><td>0.486</td><td>0.235</td><td>2.14</td><td>0.0294</td><td>0.063</td><td>0.947</td><td>1</td><td>3.18e+03</td><td>5.34e+03</td></tr>
+<tr class=biostyle><td>6</td><td>asc_car_s_class0</td><td>0.996</td><td>0.884</td><td>0.248</td><td>5.12</td><td>0.195</td><td>0.856</td><td>-9.04</td><td>10.2</td><td>1</td><td>5.5e+03</td><td>8.22e+03</td></tr>
+<tr class=biostyle><td>14</td><td>asc_car_s_class1</td><td>-2.01</td><td>-3.88</td><td>-4</td><td>3.5</td><td>-0.576</td><td>0.5</td><td>-4.65</td><td>4.31</td><td>1.53</td><td>7.17</td><td>10.3</td></tr>
+<tr class=biostyle><td>4</td><td>asc_sm_s_class0</td><td>1.37</td><td>1.52</td><td>2.02</td><td>5.96</td><td>0.23</td><td>0.808</td><td>-9.91</td><td>12.2</td><td>1</td><td>2.25e+03</td><td>2.75e+03</td></tr>
+<tr class=biostyle><td>12</td><td>asc_sm_s_class1</td><td>-0.166</td><td>-0.639</td><td>-1.46</td><td>1.4</td><td>-0.119</td><td>0.858</td><td>-2.04</td><td>2.02</td><td>1.09</td><td>36</td><td>218</td></tr>
+<tr class=biostyle><td>1</td><td>asc_train_class0</td><td>-2.57</td><td>-2.73</td><td>-3.26</td><td>4.2</td><td>-0.613</td><td>0.522</td><td>-10.5</td><td>5.31</td><td>1</td><td>4.19e+03</td><td>8.3e+03</td></tr>
+<tr class=biostyle><td>7</td><td>asc_train_class1</td><td>-0.315</td><td>-0.314</td><td>-0.335</td><td>0.264</td><td>-1.19</td><td>0.233</td><td>-0.818</td><td>0.177</td><td>1</td><td>1.46e+03</td><td>2.63e+03</td></tr>
+<tr class=biostyle><td>2</td><td>asc_train_s_class0</td><td>0.745</td><td>0.703</td><td>0.59</td><td>4.25</td><td>0.175</td><td>0.857</td><td>-7.18</td><td>9.05</td><td>1</td><td>6.34e+03</td><td>7.89e+03</td></tr>
+<tr class=biostyle><td>8</td><td>asc_train_s_class1</td><td>2.27</td><td>2.3</td><td>2.35</td><td>0.416</td><td>5.46</td><td>0</td><td>1.48</td><td>3.04</td><td>1.01</td><td>559</td><td>870</td></tr>
+<tr class=biostyle><td>3</td><td>b_cost_class0</td><td>2.73</td><td>2.5</td><td>1.85</td><td>3.26</td><td>0.839</td><td>0.319</td><td>-2.29</td><td>9.34</td><td>1</td><td>2.35e+03</td><td>2.2e+03</td></tr>
+<tr class=biostyle><td>11</td><td>b_cost_class1</td><td>-4.22</td><td>-4.2</td><td>-4.16</td><td>0.302</td><td>-14</td><td>0</td><td>-4.78</td><td>-3.65</td><td>1</td><td>2.14e+03</td><td>3.05e+03</td></tr>
+<tr class=biostyle><td>9</td><td>b_time_class1</td><td>-6.52</td><td>-6.49</td><td>-6.51</td><td>0.434</td><td>-15</td><td>0</td><td>-7.38</td><td>-5.76</td><td>1</td><td>1.62e+03</td><td>2.06e+03</td></tr>
+<tr class=biostyle><td>10</td><td>b_time_s_class1</td><td>-4.02</td><td>-4</td><td>-3.99</td><td>0.353</td><td>-11.4</td><td>0</td><td>-4.67</td><td>-3.34</td><td>1</td><td>2.02e+03</td><td>3.13e+03</td></tr>
+<tr class=biostyle><td>0</td><td>score_class_0</td><td>-5.27</td><td>-5.12</td><td>-4.96</td><td>1.1</td><td>-4.81</td><td>0</td><td>-7.25</td><td>-3.47</td><td>1</td><td>1.11e+03</td><td>1.28e+03</td></tr>
+</table>
+<table border="0">
+<tr class=biostyle><td>Name:</td><td>Identifier of the model parameter being estimated.</td></tr>
+<tr class=biostyle><td>Value:</td><td>Posterior mean (expected value) of the parameter.</td></tr>
+<tr class=biostyle><td>Median:</td><td>Posterior median (50% quantile) of the parameter.</td></tr>
+<tr class=biostyle><td>Mode:</td><td>Posterior mode (most frequent value) of the parameter.</td></tr>
+<tr class=biostyle><td>Std err.:</td><td>Posterior standard deviation, measuring uncertainty around the mean.</td></tr>
+<tr class=biostyle><td>z-value:</td><td>Standardized estimate (mean divided by std. dev.), indicating signal-to-noise ratio.</td></tr>
+<tr class=biostyle><td>p-value:</td><td>Two-sided Bayesian tail probability that the parameter differs in sign from zero.</td></tr>
+<tr class=biostyle><td>HDI low / HDI high:</td><td>Lower and upper bounds of the Highest Density Interval containing the most probable parameter values.</td></tr>
+<tr class=biostyle><td>R-hat (Gelman–Rubin):</td><td>Convergence diagnostic; values very close to 1 (typically ≤ 1.01) indicate well-mixed chains.</td></tr>
+<tr class=biostyle><td>ESS (bulk):</td><td>Effective sample size for the central part of the posterior; values above ~400 are generally considered sufficient.</td></tr>
+<tr class=biostyle><td>ESS (tail):</td><td>Effective sample size for the posterior tails; values above ~100 ensure reliable estimates of extreme quantiles.</td></tr>
+</table>
+
+<h1>Identification diagnostics</h1>
+<p class="biostyle">This section reports quick numerical checks for <em>non-identification</em> or <em>weak identification</em>. Intuitively, identification problems mean that some combinations of parameters can change without changing the likelihood much, so the posterior is very wide, or nearly flat, in some directions. These checks use the posterior draws and the prior draws, if available.</p>
+<h2>How to read the numbers</h2>
+<p class="biostyle"><strong>Posterior covariance diagnostics</strong> (eigenvalues, condition number, effective rank): these describe the shape of the posterior cloud in parameter space.</p>
+<p class="biostyle"><code>max_eigenvalue</code> is the largest posterior-variance direction, that is, the widest direction of the posterior. When identification is weak, the posterior can become extremely wide along some linear combination of parameters; this often shows up as a very large <code>max_eigenvalue</code> together with a large condition number. If reported, the <code>max_eigenvector_top</code> loadings indicate which parameters contribute most to that weakly identified linear combination.</p>
+<p class="biostyle"><code>condition_number = max_eigenvalue / min_eigenvalue</code> measures anisotropy of the posterior covariance. Larger values indicate stronger near-dependencies among parameters. As a rough rule of thumb, values around 10<sup>3</sup> deserve attention, and values around 10<sup>5</sup> or more are a strong red flag.</p>
+<p class="biostyle"><code>effective_rank</code> is an effective dimension of posterior variability, between 0 and the number of parameters. If it is much smaller than the number of parameters, the posterior variability concentrates in a lower-dimensional subspace, consistent with near linear dependencies among parameters.</p>
+<p class="biostyle"><strong>Prior covariance diagnostics</strong> report the same metrics for the prior. If the prior has normal scale and full rank but the posterior becomes ill-conditioned, the issue is typically in the likelihood or model specification, not in the prior.</p>
+<p class="biostyle"><strong>Per-parameter prior/posterior dispersion</strong>, when prior draws are available, compares prior and posterior standard deviations. A ratio close to 1 means the data did not shrink uncertainty much, so the likelihood is weakly informative for that parameter. A ratio well below 1, for example 0.1 or 0.01, means the likelihood is informative for that parameter.</p>
+<p class="biostyle"><strong>Flags:</strong> Some parameters have posterior std close to prior std (ratio > 0.8), suggesting they may be largely identified by the prior: asc_train_class0, asc_train_s_class0, asc_sm_s_class0, asc_car_class0, asc_car_s_class0</p>
+<h2>Posterior covariance diagnostics</h2>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>effective_rank</strong>: </td> <td>15</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue</strong>: </td> <td>0.0207</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvalue</strong>: </td> <td>36.8</td></tr>
+<tr class=biostyle><td align=right ><strong>min_positive_eigenvalue</strong>: </td> <td>0.0207</td></tr>
+<tr class=biostyle><td align=right ><strong>condition_number</strong>: </td> <td>1.78e+03</td></tr>
+</table>
+<h2>Prior covariance diagnostics</h2>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>effective_rank</strong>: </td> <td>15</td></tr>
+<tr class=biostyle><td align=right ><strong>min_eigenvalue</strong>: </td> <td>22.4</td></tr>
+<tr class=biostyle><td align=right ><strong>max_eigenvalue</strong>: </td> <td>27.3</td></tr>
+<tr class=biostyle><td align=right ><strong>min_positive_eigenvalue</strong>: </td> <td>22.4</td></tr>
+<tr class=biostyle><td align=right ><strong>condition_number</strong>: </td> <td>1.22</td></tr>
+</table>
+<h2>Per-parameter prior/posterior dispersion</h2>
+<p class="biostyle">The table below compares posterior and prior standard deviations when prior draws are available. A ratio close to 1 suggests that the prior dominates; a ratio well below 1 suggests that the data are informative.</p>
+<table border="1">
+<tr class=biostyle><th>name</th><th>posterior_std</th><th>prior_std</th><th>std_ratio_post_over_prior</th></tr>
+<tr class=biostyle><td>score_class_0</td><td>1.096698684725271</td><td>5.073077194235596</td><td>0.2161801689064422</td></tr>
+<tr class=biostyle><td>asc_train_class0</td><td>4.19691514059804</td><td>4.909146492406274</td><td>0.8549174784435642</td></tr>
+<tr class=biostyle><td>asc_train_s_class0</td><td>4.249408051151106</td><td>4.992619243020167</td><td>0.8511380188048403</td></tr>
+<tr class=biostyle><td>b_cost_class0</td><td>3.2580921475507343</td><td>4.91517315827124</td><td>0.6628641642193268</td></tr>
+<tr class=biostyle><td>asc_sm_s_class0</td><td>5.955646545387682</td><td>5.025784131696488</td><td>1.1850183751082266</td></tr>
+<tr class=biostyle><td>asc_car_class0</td><td>5.419019607868663</td><td>5.047877360239936</td><td>1.0735244185114445</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>5.116619364504827</td><td>4.8835255400763256</td><td>1.0477306451078494</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>0.26429234463296747</td><td>4.949645756781153</td><td>0.053396214117117285</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>0.41576918083474823</td><td>5.043702714511325</td><td>0.08243332416054805</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>0.4343681328756314</td><td>5.06926937678264</td><td>0.08568653598584573</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>0.35256807982465493</td><td>4.959497297808021</td><td>0.07108947916565689</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>0.30218394271363785</td><td>5.033217270103813</td><td>0.060037929319789754</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>1.3985337411599221</td><td>5.020042959667889</td><td>0.27858999462674816</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>0.234519380909442</td><td>4.996871659834356</td><td>0.046933240810354576</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>3.495058171125986</td><td>4.979489089514696</td><td>0.7018909185855082</td></tr>
+</table>
+
+<h1>Simulated quantities</h1>
+<table class="dataframe table table-striped table-sm">
+  <thead>
+    <tr style="text-align: left;">
+      <th>group</th>
+      <th>variable</th>
+      <th>dims</th>
+      <th>shape</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>constant_data</td>
+      <td>CAR_AV_SP</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CAR_CO_SCALED</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CAR_TT_SCALED</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>CHOICE</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>SM_AV</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>SM_COST_SCALED</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>SM_TT_SCALED</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TRAIN_AV_SP</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TRAIN_COST_SCALED</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>constant_data</td>
+      <td>TRAIN_TT_SCALED</td>
+      <td>(obs,)</td>
+      <td>(6768,)</td>
+    </tr>
+    <tr>
+      <td>log_likelihood</td>
+      <td>_choice</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_class0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_eps_class0</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_rnd_class0</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_rnd_class0_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_s_class0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_car_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_eps_class0</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_rnd_class0</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_rnd_class0_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_s_class0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_sm_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_class0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_eps_class0</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_rnd_class0</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_rnd_class0_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_s_class0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>asc_train_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_cost_class0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_cost_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_time_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_time_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_time_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(4, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_time_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>b_time_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>log_like</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(4, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>posterior</td>
+      <td>score_class_0</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_class0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_eps_class0</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_rnd_class0</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_rnd_class0_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_s_class0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_car_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_eps_class0</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_rnd_class0</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_rnd_class0_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_s_class0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_sm_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_class0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_eps_class0</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_rnd_class0</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_rnd_class0_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_s_class0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>asc_train_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_cost_class0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_cost_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_time_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_time_eps_class1</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_time_rnd_class1</td>
+      <td>(chain, draw, obs)</td>
+      <td>(1, 4000, 6768)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_time_rnd_class1_per_individual</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>b_time_s_class1</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>log_like</td>
+      <td>(chain, draw, individuals)</td>
+      <td>(1, 4000, 752)</td>
+    </tr>
+    <tr>
+      <td>prior</td>
+      <td>score_class_0</td>
+      <td>(chain, draw)</td>
+      <td>(1, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>acceptance_rate</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>diverging</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>energy</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>lp</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>n_steps</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>step_size</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+    <tr>
+      <td>sample_stats</td>
+      <td>tree_depth</td>
+      <td>(chain, draw)</td>
+      <td>(4, 4000)</td>
+    </tr>
+  </tbody>
+</table>
+<h1>Diagnostics</h1>
+<p class="biostyle">The plots below summarize MCMC diagnostics. Look for well-mixed chains, agreement across chains, and weak lag dependence.</p><table border="0">
+<tr class=biostyle><td colspan=2><p><strong>Trace</strong>: per-chain draws vs iteration and marginal density. Good: chains overlap, no trends or stickiness, rapid mixing. Suspicious: chains at different levels, strong drifts, long flat stretches, sudden jumps.</p></td></tr>
+<tr class=biostyle><td><strong>Trace</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b15_panel_discrete/trace.png" alt="trace"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Rank plot</strong>: rank-normalized samples by chain. Good: chains produce nearly uniform, overlapping ranks. Suspicious: U-shapes, spikes, or chains with very different rank distributions.</p></td></tr>
+<tr class=biostyle><td><strong>Rank plot</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b15_panel_discrete/rank.png" alt="rank"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Energy</strong>: HMC energy diagnostics and BFMI. Good: similar energy distributions across chains, no extreme tails; BFMI not flagged. Suspicious: clearly separated energy histograms across chains or very low BFMI.</p></td></tr>
+<tr class=biostyle><td><strong>Energy</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b15_panel_discrete/energy.png" alt="energy"></td></tr>
+<tr class=biostyle><td colspan=2><p><strong>Autocorrelation</strong>: lag correlation within chains. Good: autocorrelation decays quickly toward 0 within tens of lags. Suspicious: long positive tails, high values at large lags, or periodic patterns.</p></td></tr>
+<tr class=biostyle><td><strong>Autocorrelation</strong></td><td><img style="max-width:840px;height:auto;display:block;" src="b15_panel_discrete/autocorr.png" alt="autocorr"></td></tr>
+</table>
+
+<h1>More diagnostics...</h1>
+<p class="biostyle">The figures above are only a subset of the ArviZ diagnostics. To generate additional figures, reload the Bayesian results file containing the posterior draws and call ArviZ directly. Adapt the filename and variable names in the example below if necessary.</p>
+<p class="biostyle">See the official ArviZ documentation for more plotting functions and options: <a href="https://python.arviz.org/en/stable/examples/">ArviZ examples</a>, <a href="https://python.arviz.org/projects/plots/en/stable/api/plots.html">ArviZ plotting API</a>.</p>
+<pre style="background-color:#f4f4f4;padding:12px;border:1px solid #ccc;overflow-x:auto;"><code>import arviz as az
+import matplotlib.pyplot as plt
+
+from biogeme.bayesian_estimation.bayesian_results import BayesianResults
+
+results = BayesianResults.from_netcdf(&#x27;b15_panel_discrete.nc&#x27;)
+
+# Use None for all variables, or specify a list such as [&#x27;beta_time&#x27;, &#x27;beta_cost&#x27;].
+var_names = [&#x27;score_class_0&#x27;, &#x27;asc_train_class0&#x27;, &#x27;asc_train_s_class0&#x27;, &#x27;b_cost_class0&#x27;, &#x27;asc_sm_s_class0&#x27;, &#x27;asc_car_class0&#x27;, &#x27;asc_car_s_class0&#x27;, &#x27;asc_train_class1&#x27;, &#x27;asc_train_s_class1&#x27;, &#x27;b_time_class1&#x27;, &#x27;b_time_s_class1&#x27;, &#x27;b_cost_class1&#x27;, &#x27;asc_sm_s_class1&#x27;, &#x27;asc_car_class1&#x27;, &#x27;asc_car_s_class1&#x27;]
+
+az.plot_trace(results.idata, var_names=var_names)
+plt.show()
+
+az.plot_rank(results.idata, var_names=var_names)
+plt.show()
+
+az.plot_autocorr(results.idata, var_names=var_names)
+plt.show()
+
+az.plot_energy(results.idata)
+plt.show()
+</code></pre>
+</body>
+</html>

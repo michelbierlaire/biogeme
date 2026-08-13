@@ -28,13 +28,11 @@ from scenarios import scenario
 
 from biogeme.data.optima import normalized_weight, read_data
 
-EXAMPLE_DIRECTORY = Path(__file__).resolve().parent
-
 # %%
 # Read the estimation results from the file.
 try:
     results = EstimationResults.from_yaml_file(
-        filename=EXAMPLE_DIRECTORY / 'saved_results' / 'b02estimation.yaml'
+        filename=Path('saved_results') / 'b02estimation.yaml'
     )
 except FileNotFoundError:
     sys.exit(
@@ -61,7 +59,7 @@ def revenues(factor: float) -> tuple[float, float, float]:
         the confidence interval.
 
     """
-    filename = EXAMPLE_DIRECTORY / f'revenue_{factor:.2f}.txt'
+    filename = Path(f'revenue_{factor:.2f}.txt')
     SEPARATOR = '%'
     try:
         with open(filename, 'r') as f:

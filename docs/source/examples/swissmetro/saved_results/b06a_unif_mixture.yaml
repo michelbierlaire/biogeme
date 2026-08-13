@@ -1,0 +1,119 @@
+# File b06a_unif_mixture.yaml has automatically been generated on 2026-08-11 19:13:41.872334
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.3862198281414197
+- -2.3162946542469114
+- 2.868551970539849
+- -1.277277310692445
+- 0.1439141653625164
+bhhh:
+- - 598.429003414365
+  - 280.5868469177566
+  - 97.38480091362389
+  - -22.801991701565406
+  - -168.592528270668
+- - 280.5868469177566
+  - 449.5442510887407
+  - 166.75802766881796
+  - -109.32206682054039
+  - 202.4442508731415
+- - 97.38480091362389
+  - 166.75802766881796
+  - 90.92494900572736
+  - 13.094239579569074
+  - 16.543208126888498
+- - -22.801991701565406
+  - -109.32206682054039
+  - 13.094239579569074
+  - 598.676983249016
+  - -231.45888029495728
+- - -168.59252827066794
+  - 202.4442508731414
+  - 16.543208126888494
+  - -231.45888029495728
+  - 803.0938991018942
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.827801'
+final_log_likelihood: -5215.805432865823
+gradient:
+- 0.0055330330806810935
+- 0.007012443875147767
+- 0.0032621472811129593
+- -0.007740296121866663
+- -0.0028283065523595496
+gradient_bhhh_complete: true
+hessian:
+- - -632.6170920438373
+  - -304.0812502588728
+  - -113.89410292464689
+  - 34.06761149027156
+  - 235.0017422427053
+- - -304.0812502588728
+  - -455.5514934277699
+  - -171.77895753935348
+  - 103.81210115318432
+  - -156.13041232595785
+- - -113.89410292464687
+  - -171.77895753935348
+  - -97.3773537239069
+  - 5.683869450845093
+  - 7.893972763404338
+- - 34.06761149027156
+  - 103.8121011531843
+  - 5.683869450845091
+  - -316.0597675700823
+  - 149.62310030199168
+- - 235.0017422427053
+  - -156.13041232595785
+  - 7.89397276340434
+  - 149.62310030199168
+  - -822.5008681519366
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6922.4120238196565
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b06a_unif_mixture
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2.3e-06 <= 6.1e-06
+  Number of function evaluations: 114
+  Number of gradient evaluations: 65
+  Number of hessian evaluations: 0
+  Number of iterations: '49'
+  Optimization time: '102.750286'
+  Proportion of Hessian calculation: 0/32 = 0.0%
+  Relative gradient: 2.3464200347295157e-06
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: UNIFORMSYM
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

@@ -1,0 +1,95 @@
+# File b18b_ordinal_probit.yaml has automatically been generated on 2026-08-11 19:10:45.775235
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- b_time
+- b_cost
+- tau1
+- delta2
+beta_values:
+- 0.018052627394305784
+- 0.6871832033411688
+- -0.6047967329959081
+- 1.7543464023643967
+bhhh:
+- - 14830.52144149187
+  - 8135.68211595087
+  - -7937.798900010132
+  - -4606.596139643228
+- - 8135.68211595087
+  - 7904.859647084923
+  - -4546.951879459069
+  - -2930.203808667302
+- - -7937.798900010132
+  - -4546.951879459069
+  - 5004.174073703355
+  - 2663.0134045859504
+- - -4606.596139643228
+  - -2930.203808667302
+  - 2663.0134045859504
+  - 2680.2047665902114
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5789.054727618485
+gradient:
+- 3.340726701139829e-05
+- 2.045920703608317e-05
+- -1.6824611378751797e-05
+- 5.577946936341505e-06
+gradient_bhhh_complete: true
+hessian:
+- - -16060.052386411497
+  - -7763.480847389169
+  - 8264.299013518168
+  - 4480.493267782191
+- - -7763.480847389169
+  - -5461.858504975065
+  - 4154.335309470333
+  - 2587.2737678743642
+- - 8264.299013518168
+  - 4154.335309470333
+  - -5004.174111064057
+  - -2565.941340778628
+- - 4480.493267782191
+  - 2587.273767874365
+  - -2565.9413407786274
+  - -2597.4508146615995
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6676.77851924551
+lower_bounds:
+- null
+- null
+- null
+- 0
+model_name: b18b_ordinal_probit
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 5e-09 <= 6.1e-06
+  Number of function evaluations: 10
+  Number of gradient evaluations: 7
+  Number of hessian evaluations: 3
+  Number of iterations: '3'
+  Optimization time: '0.822407'
+  Proportion of Hessian calculation: 3/3 = 100.0%
+  Relative gradient: 5.0035008522603176e-09
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- 0
+- null
+user_notes: null

@@ -1,0 +1,203 @@
+<html>
+<head>
+<script src="http://transp-or.epfl.ch/biogeme/sorttable.js"></script>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>b15b_panel_discrete - Report from biogeme 3.3.4 [2026-08-11]</title>
+<meta name="keywords" content="biogeme, discrete choice, random utility">
+<meta name="description" content="Report from biogeme 3.3.4 [2026-08-11]">
+<meta name="author" content="{bv.author}">
+<style type=text/css>
+.biostyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;}
+.boundstyle
+	{font-size:10.0pt;
+	font-weight:400;
+	font-style:normal;
+	font-family:Courier;
+        color:red}
+</style>
+</head>
+<body bgcolor="#ffffff">
+
+<p>biogeme 3.3.4 [2026-08-11]</p>
+<p><a href="https://www.python.org/" target="_blank">Python</a> package</p>
+<p>Home page: <a href="http://biogeme.epfl.ch" target="_blank">http://biogeme.epfl.ch</a></p>
+<p>Submit questions to <a href="https://groups.google.com/d/forum/biogeme" target="_blank">https://groups.google.com/d/forum/biogeme</a></p>
+<p><a href="http://people.epfl.ch/michel.bierlaire">Michel Bierlaire</a>, <a href="http://transp-or.epfl.ch">Transport and Mobility Laboratory</a>, <a href="http://www.epfl.ch">Ecole Polytechnique F&#233;d&#233;rale de Lausanne (EPFL)</a></p>
+<p>This file has automatically been generated on 2026-08-11 19:14:58.620248</p>
+<table>
+<tr class=biostyle><td align=right><strong>Report file</strong>:	</td><td>b15b_panel_discrete.html</td></tr>
+<tr class=biostyle><td align=right><strong>Database name</strong>:	</td><td>flat swissmetro</td></tr>
+</table>
+<h2>Warning: second derivatives matrix not available.</h2>
+<p>The second derivatives matrix has not been calculated. The statistics requiring it have been generated using the BHHH matrix or the bootstrap samples (if available).</p>
+<h1>Estimation report</h1>
+<table border="0">
+<tr class=biostyle><td align=right ><strong>Number of estimated parameters</strong>: </td> <td>15</td></tr>
+<tr class=biostyle><td align=right ><strong>Sample size</strong>: </td> <td>752</td></tr>
+<tr class=biostyle><td align=right ><strong>Observations</strong>: </td> <td>6768</td></tr>
+<tr class=biostyle><td align=right ><strong>Excluded observations</strong>: </td> <td>0</td></tr>
+<tr class=biostyle><td align=right ><strong>Init log likelihood</strong>: </td> <td>-4898.878</td></tr>
+<tr class=biostyle><td align=right ><strong>Final log likelihood</strong>: </td> <td>-3524.886</td></tr>
+<tr class=biostyle><td align=right ><strong>Likelihood ratio test for the init. model</strong>: </td> <td>2747.985</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square for the init. model</strong>: </td> <td>0.28</td></tr>
+<tr class=biostyle><td align=right ><strong>Rho-square-bar for the init. model</strong>: </td> <td>0.277</td></tr>
+<tr class=biostyle><td align=right ><strong>Akaike Information Criterion</strong>: </td> <td>7079.772</td></tr>
+<tr class=biostyle><td align=right ><strong>Bayesian Information Criterion</strong>: </td> <td>7149.113</td></tr>
+<tr class=biostyle><td align=right ><strong>Final gradient norm</strong>: </td> <td>7.9192E-03</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of draws</strong>: </td> <td>5000</td></tr>
+<tr class=biostyle><td align=right ><strong>Draws generation time</strong>: </td> <td>0:00:03.759118</td></tr>
+<tr class=biostyle><td align=right ><strong>Types of draws</strong>: </td> <td>asc_train_rnd_class0: NORMAL_ANTI, asc_sm_rnd_class0: NORMAL_ANTI, asc_car_rnd_class0: NORMAL_ANTI, asc_train_rnd_class1: NORMAL_ANTI, b_time_rnd_class1: NORMAL_ANTI, asc_sm_rnd_class1: NORMAL_ANTI, asc_car_rnd_class1: NORMAL_ANTI</td></tr>
+<tr class=biostyle><td align=right ><strong>Bootstrapping time</strong>: </td> <td>None</td></tr>
+<tr class=biostyle><td align=right ><strong>Relative gradient</strong>: </td> <td>5.850616e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Cause of termination</strong>: </td> <td>Relative gradient = 5.9e-06 <= 6.1e-06</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of function evaluations</strong>: </td> <td>210</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of gradient evaluations</strong>: </td> <td>121</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of hessian evaluations</strong>: </td> <td>0</td></tr>
+<tr class=biostyle><td align=right ><strong>Algorithm</strong>: </td> <td>BFGS with trust region for simple bound constraints</td></tr>
+<tr class=biostyle><td align=right ><strong>Number of iterations</strong>: </td> <td>89</td></tr>
+<tr class=biostyle><td align=right ><strong>Proportion of Hessian calculation</strong>: </td> <td>0/60 = 0.0%</td></tr>
+<tr class=biostyle><td align=right ><strong>Optimization time</strong>: </td> <td>0:02:55.690570</td></tr>
+</table>
+
+<h1>Estimated parameters</h1>
+<h3>Class 0</h3>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value</th><th>BHHH std err.</th><th>BHHH t-stat.</th><th>BHHH p-value</th></tr>
+<tr class=biostyle><td>5</td><td>asc_car_class0</td><td>-4.86</td><td>1.63</td><td>-2.99</td><td>0.0028</td></tr>
+<tr class=biostyle><td>6</td><td>asc_car_s_class0</td><td>6.07</td><td>1.86</td><td>3.27</td><td>0.00107</td></tr>
+<tr class=biostyle><td>4</td><td>asc_sm_s_class0</td><td>0.0384</td><td>6.38</td><td>0.00603</td><td>0.995</td></tr>
+<tr class=biostyle><td>1</td><td>asc_train_class0</td><td>-1.05</td><td>0.683</td><td>-1.53</td><td>0.125</td></tr>
+<tr class=biostyle><td>2</td><td>asc_train_s_class0</td><td>3.11</td><td>0.647</td><td>4.81</td><td>1.49e-06</td></tr>
+<tr class=biostyle><td>3</td><td>b_cost_class0</td><td>-1.17</td><td>0.536</td><td>-2.19</td><td>0.0288</td></tr>
+</table>
+<h3>Class 1</h3>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value</th><th>BHHH std err.</th><th>BHHH t-stat.</th><th>BHHH p-value</th></tr>
+<tr class=biostyle><td>13</td><td>asc_car_class1</td><td>1.02</td><td>0.216</td><td>4.73</td><td>2.25e-06</td></tr>
+<tr class=biostyle><td>14</td><td>asc_car_s_class1</td><td>2.88</td><td>0.261</td><td>11</td><td>0</td></tr>
+<tr class=biostyle><td>12</td><td>asc_sm_s_class1</td><td>1.7</td><td>0.334</td><td>5.09</td><td>3.54e-07</td></tr>
+<tr class=biostyle><td>7</td><td>asc_train_class1</td><td>-0.32</td><td>0.285</td><td>-1.12</td><td>0.261</td></tr>
+<tr class=biostyle><td>8</td><td>asc_train_s_class1</td><td>1.76</td><td>0.458</td><td>3.84</td><td>0.000125</td></tr>
+<tr class=biostyle><td>11</td><td>b_cost_class1</td><td>-4.76</td><td>0.253</td><td>-18.8</td><td>0</td></tr>
+<tr class=biostyle><td>9</td><td>b_time_class1</td><td>-6.96</td><td>0.367</td><td>-18.9</td><td>0</td></tr>
+<tr class=biostyle><td>10</td><td>b_time_s_class1</td><td>3.28</td><td>0.354</td><td>9.28</td><td>0</td></tr>
+</table>
+<h3>Other parameters</h3>
+<table border="1">
+<tr class=biostyle><th>Id</th><th>Name</th><th>Value</th><th>BHHH std err.</th><th>BHHH t-stat.</th><th>BHHH p-value</th></tr>
+<tr class=biostyle><td>0</td><td>score_class_0</td><td>-1.76</td><td>0.226</td><td>-7.78</td><td>7.33e-15</td></tr>
+</table>
+<h2>Correlation of coefficients</h2>
+<table border="1">
+<tr class=biostyle><th>Coefficient 1</th><th>Coefficient 2</th><th>BHHH covariance</th><th>BHHH correlation</th><th>BHHH t-test</th><th>BHHH p-value</th></tr><tr class=biostyle><td>asc_train_class0</td><td>score_class_0</td><td>-0.0309</td><td>-0.2</td><td>0.934</td><td>0.35</td></tr>
+<tr class=biostyle><td>asc_train_s_class0</td><td>score_class_0</td><td>0.0135</td><td>0.0923</td><td>7.33</td><td>2.39e-13</td></tr>
+<tr class=biostyle><td>asc_train_s_class0</td><td>asc_train_class0</td><td>-0.203</td><td>-0.46</td><td>3.66</td><td>0.000251</td></tr>
+<tr class=biostyle><td>b_cost_class0</td><td>score_class_0</td><td>-0.0429</td><td>-0.354</td><td>0.902</td><td>0.367</td></tr>
+<tr class=biostyle><td>b_cost_class0</td><td>asc_train_class0</td><td>0.112</td><td>0.306</td><td>-0.17</td><td>0.865</td></tr>
+<tr class=biostyle><td>b_cost_class0</td><td>asc_train_s_class0</td><td>-0.0627</td><td>-0.181</td><td>-4.7</td><td>2.61e-06</td></tr>
+<tr class=biostyle><td>asc_sm_s_class0</td><td>score_class_0</td><td>0.0989</td><td>0.0685</td><td>0.282</td><td>0.778</td></tr>
+<tr class=biostyle><td>asc_sm_s_class0</td><td>asc_train_class0</td><td>0.68</td><td>0.156</td><td>0.172</td><td>0.863</td></tr>
+<tr class=biostyle><td>asc_sm_s_class0</td><td>asc_train_s_class0</td><td>-1.36</td><td>-0.33</td><td>-0.464</td><td>0.642</td></tr>
+<tr class=biostyle><td>asc_sm_s_class0</td><td>b_cost_class0</td><td>-0.741</td><td>-0.217</td><td>0.186</td><td>0.853</td></tr>
+<tr class=biostyle><td>asc_car_class0</td><td>score_class_0</td><td>0.0745</td><td>0.202</td><td>-1.94</td><td>0.052</td></tr>
+<tr class=biostyle><td>asc_car_class0</td><td>asc_train_class0</td><td>-0.0959</td><td>-0.0862</td><td>-2.1</td><td>0.0359</td></tr>
+<tr class=biostyle><td>asc_car_class0</td><td>asc_train_s_class0</td><td>0.00229</td><td>0.00218</td><td>-4.56</td><td>5.16e-06</td></tr>
+<tr class=biostyle><td>asc_car_class0</td><td>b_cost_class0</td><td>-0.148</td><td>-0.169</td><td>-2.05</td><td>0.04</td></tr>
+<tr class=biostyle><td>asc_car_class0</td><td>asc_sm_s_class0</td><td>-1.28</td><td>-0.124</td><td>-0.724</td><td>0.469</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>score_class_0</td><td>-0.0689</td><td>-0.164</td><td>4.11</td><td>3.98e-05</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>asc_train_class0</td><td>0.0976</td><td>0.077</td><td>3.69</td><td>0.000221</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>asc_train_s_class0</td><td>0.102</td><td>0.0852</td><td>1.55</td><td>0.122</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>b_cost_class0</td><td>-0.0689</td><td>-0.0693</td><td>3.68</td><td>0.000231</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>asc_sm_s_class0</td><td>0.905</td><td>0.0765</td><td>0.927</td><td>0.354</td></tr>
+<tr class=biostyle><td>asc_car_s_class0</td><td>asc_car_class0</td><td>-1.89</td><td>-0.625</td><td>3.48</td><td>0.0005</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>score_class_0</td><td>0.00528</td><td>0.082</td><td>4.13</td><td>3.63e-05</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>asc_train_class0</td><td>-0.0588</td><td>-0.302</td><td>0.894</td><td>0.371</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>asc_train_s_class0</td><td>0.0535</td><td>0.291</td><td>-5.48</td><td>4.25e-08</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>b_cost_class0</td><td>-0.023</td><td>-0.151</td><td>1.32</td><td>0.185</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>asc_sm_s_class0</td><td>-0.0909</td><td>-0.0501</td><td>-0.056</td><td>0.955</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>asc_car_class0</td><td>0.0509</td><td>0.11</td><td>2.8</td><td>0.00506</td></tr>
+<tr class=biostyle><td>asc_train_class1</td><td>asc_car_s_class0</td><td>-0.031</td><td>-0.0588</td><td>-3.37</td><td>0.000739</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>score_class_0</td><td>-0.0184</td><td>-0.177</td><td>6.45</td><td>1.16e-10</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>asc_train_class0</td><td>-0.035</td><td>-0.112</td><td>3.25</td><td>0.00117</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>asc_train_s_class0</td><td>-0.0506</td><td>-0.171</td><td>-1.59</td><td>0.112</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>b_cost_class0</td><td>0.0212</td><td>0.0865</td><td>4.34</td><td>1.41e-05</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>asc_sm_s_class0</td><td>-0.0961</td><td>-0.0329</td><td>0.268</td><td>0.789</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>asc_car_class0</td><td>-0.0212</td><td>-0.0285</td><td>3.89</td><td>0.000101</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>asc_car_s_class0</td><td>0.0318</td><td>0.0374</td><td>-2.28</td><td>0.0228</td></tr>
+<tr class=biostyle><td>asc_train_s_class1</td><td>asc_train_class1</td><td>-0.0666</td><td>-0.511</td><td>3.19</td><td>0.00143</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>score_class_0</td><td>-0.0272</td><td>-0.327</td><td>-10.6</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_train_class0</td><td>0.0299</td><td>0.119</td><td>-8.03</td><td>1.11e-15</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_train_s_class0</td><td>0.0174</td><td>0.0734</td><td>-14</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>b_cost_class0</td><td>0.0355</td><td>0.18</td><td>-9.76</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_sm_s_class0</td><td>-0.0591</td><td>-0.0252</td><td>-1.09</td><td>0.274</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_car_class0</td><td>-0.179</td><td>-0.3</td><td>-1.18</td><td>0.238</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_car_s_class0</td><td>0.174</td><td>0.255</td><td>-7.25</td><td>4.23e-13</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_train_class1</td><td>-0.0332</td><td>-0.317</td><td>-12.5</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_class1</td><td>asc_train_s_class1</td><td>0.00689</td><td>0.041</td><td>-15.1</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>score_class_0</td><td>-0.0185</td><td>-0.231</td><td>10.9</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_train_class0</td><td>-0.042</td><td>-0.174</td><td>5.27</td><td>1.39e-07</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_train_s_class0</td><td>-0.00125</td><td>-0.00547</td><td>0.229</td><td>0.819</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>b_cost_class0</td><td>0.0204</td><td>0.107</td><td>7.3</td><td>2.82e-13</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_sm_s_class0</td><td>-0.284</td><td>-0.126</td><td>0.504</td><td>0.614</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_car_class0</td><td>0.0378</td><td>0.0656</td><td>4.96</td><td>7.09e-07</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_car_s_class0</td><td>-0.103</td><td>-0.157</td><td>-1.44</td><td>0.151</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_train_class1</td><td>0.00922</td><td>0.0916</td><td>8.31</td><td>0</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>asc_train_s_class1</td><td>-0.0051</td><td>-0.0315</td><td>2.6</td><td>0.00945</td></tr>
+<tr class=biostyle><td>b_time_s_class1</td><td>b_time_class1</td><td>-0.0332</td><td>-0.256</td><td>17.9</td><td>0</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>score_class_0</td><td>-0.00831</td><td>-0.145</td><td>-8.25</td><td>2.22e-16</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_train_class0</td><td>0.0168</td><td>0.0971</td><td>-5.26</td><td>1.46e-07</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_train_s_class0</td><td>0.00863</td><td>0.0527</td><td>-11.5</td><td>0</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>b_cost_class0</td><td>0.00294</td><td>0.0217</td><td>-6.1</td><td>1.09e-09</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_sm_s_class0</td><td>0.0241</td><td>0.015</td><td>-0.752</td><td>0.452</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_car_class0</td><td>-0.0983</td><td>-0.239</td><td>0.0627</td><td>0.95</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_car_s_class0</td><td>0.125</td><td>0.267</td><td>-6</td><td>1.98e-09</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_train_class1</td><td>-0.00965</td><td>-0.134</td><td>-10.9</td><td>0</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>asc_train_s_class1</td><td>0.00623</td><td>0.0538</td><td>-12.7</td><td>0</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>b_time_class1</td><td>0.0579</td><td>0.623</td><td>7.63</td><td>2.4e-14</td></tr>
+<tr class=biostyle><td>b_cost_class1</td><td>b_time_s_class1</td><td>-0.0288</td><td>-0.322</td><td>-16.2</td><td>0</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>score_class_0</td><td>0.00821</td><td>0.109</td><td>9.05</td><td>0</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_train_class0</td><td>0.0222</td><td>0.0974</td><td>3.76</td><td>0.000169</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_train_s_class0</td><td>-0.0453</td><td>-0.21</td><td>-1.8</td><td>0.0727</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>b_cost_class0</td><td>-0.00471</td><td>-0.0263</td><td>4.49</td><td>7.01e-06</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_sm_s_class0</td><td>0.0741</td><td>0.0348</td><td>0.26</td><td>0.795</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_car_class0</td><td>0.0238</td><td>0.0437</td><td>3.98</td><td>6.75e-05</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_car_s_class0</td><td>-0.0497</td><td>-0.0802</td><td>-2.29</td><td>0.0222</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_train_class1</td><td>0.0136</td><td>0.143</td><td>4.97</td><td>6.8e-07</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>asc_train_s_class1</td><td>-0.0684</td><td>-0.448</td><td>-0.0854</td><td>0.932</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>b_time_class1</td><td>-0.0284</td><td>-0.232</td><td>15.7</td><td>0</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>b_time_s_class1</td><td>0.000431</td><td>0.00365</td><td>-3.26</td><td>0.00111</td></tr>
+<tr class=biostyle><td>asc_sm_s_class1</td><td>b_cost_class1</td><td>-0.0187</td><td>-0.222</td><td>14</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>score_class_0</td><td>0.014</td><td>0.286</td><td>10.5</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_train_class0</td><td>-0.034</td><td>-0.231</td><td>2.71</td><td>0.00665</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_train_s_class0</td><td>0.00442</td><td>0.0317</td><td>-3.1</td><td>0.00195</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>b_cost_class0</td><td>-0.0139</td><td>-0.121</td><td>3.64</td><td>0.000268</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_sm_s_class0</td><td>-0.0166</td><td>-0.0121</td><td>0.154</td><td>0.878</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_car_class0</td><td>0.00655</td><td>0.0186</td><td>3.59</td><td>0.000327</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_car_s_class0</td><td>-0.0723</td><td>-0.18</td><td>-2.65</td><td>0.00806</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_train_class1</td><td>0.0193</td><td>0.315</td><td>4.5</td><td>6.92e-06</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_train_s_class1</td><td>-0.0129</td><td>-0.13</td><td>-1.39</td><td>0.166</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>b_time_class1</td><td>-0.0266</td><td>-0.336</td><td>16.5</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>b_time_s_class1</td><td>0.00813</td><td>0.106</td><td>-5.73</td><td>9.83e-09</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>b_cost_class1</td><td>-0.0121</td><td>-0.222</td><td>15.7</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_class1</td><td>asc_sm_s_class1</td><td>0.0183</td><td>0.254</td><td>-1.95</td><td>0.0515</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>score_class_0</td><td>-0.0072</td><td>-0.122</td><td>12.7</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_train_class0</td><td>-0.00262</td><td>-0.0147</td><td>5.34</td><td>9.31e-08</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_train_s_class0</td><td>0.00606</td><td>0.036</td><td>-0.344</td><td>0.731</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>b_cost_class0</td><td>0.00527</td><td>0.0377</td><td>6.89</td><td>5.5e-12</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_sm_s_class0</td><td>-0.0305</td><td>-0.0184</td><td>0.444</td><td>0.657</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_car_class0</td><td>0.0703</td><td>0.166</td><td>4.82</td><td>1.42e-06</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_car_s_class0</td><td>-0.0933</td><td>-0.193</td><td>-1.66</td><td>0.0965</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_train_class1</td><td>0.00303</td><td>0.0409</td><td>8.45</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_train_s_class1</td><td>0.0183</td><td>0.153</td><td>2.28</td><td>0.0227</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>b_time_class1</td><td>-0.0317</td><td>-0.331</td><td>19.1</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>b_time_s_class1</td><td>0.0252</td><td>0.273</td><td>-1.07</td><td>0.282</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>b_cost_class1</td><td>-0.0309</td><td>-0.469</td><td>17.3</td><td>0</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_sm_s_class1</td><td>-0.0283</td><td>-0.326</td><td>2.42</td><td>0.0154</td></tr>
+<tr class=biostyle><td>asc_car_s_class1</td><td>asc_car_class1</td><td>-0.00694</td><td>-0.123</td><td>5.18</td><td>2.26e-07</td></tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,166 @@
+schema_version: 1
+model_name: b27_monte_carlo
+original_number_of_draws: 2000
+draw_types:
+  b_time_rnd: NORMAL
+estimated_parameters:
+  asc_train: -0.40150922197774475
+  b_time: -2.2577862252779495
+  b_time_s: 1.6514748640709187
+  b_cost: -1.2846270849442458
+  asc_car: 0.136403794420629
+original_result:
+  objective: -5214.785394646063
+  gradient:
+  - -0.02966251411334042
+  - -0.0073310732957097
+  - 0.008013238604561934
+  - -0.018515288545174258
+  - 0.017560784452228972
+model_metadata:
+  data_name: swissmetro
+  sample_size: 6768
+  number_of_observations: 6768
+  parameter_names:
+  - asc_train
+  - b_time
+  - b_time_s
+  - b_cost
+  - asc_car
+created_at: '2026-08-11T17:12:34+00:00'
+updated_at: '2026-08-11T17:12:51+00:00'
+execution_status: completed
+diagnostic_conclusion: unstable
+recommendation: more_draws_recommended
+configuration:
+  draw_factors:
+  - 0.5
+  - 1.0
+  - 2.0
+  replications: 1
+  time_budget_seconds: 300.0
+  max_draws: 4000
+  safety_factor: 1.5
+  objective_tolerance: 0.001
+  gradient_tolerance: 1.0e-05
+  minimum_level_factor: 2.0
+base_seed: 1001226
+planned_evaluations:
+- draw_count: 1000
+  draw_factor: 0.5
+  replication: 1
+  draw_types: &id001
+    b_time_rnd: NORMAL
+  seed: 1584127666
+  randomization_identifier: diagnostic-seed-1584127666
+- draw_count: 2000
+  draw_factor: 1.0
+  replication: 1
+  draw_types: &id002
+    b_time_rnd: NORMAL
+  seed: 4260784625
+  randomization_identifier: diagnostic-seed-4260784625
+- draw_count: 4000
+  draw_factor: 2.0
+  replication: 1
+  draw_types: &id003
+    b_time_rnd: NORMAL
+  seed: 20440104
+  randomization_identifier: diagnostic-seed-20440104
+completed_evaluations:
+- draw_count: 1000
+  draw_factor: 0.5
+  replication: 1
+  draw_types: *id001
+  seed: 1584127666
+  randomization_identifier: diagnostic-seed-1584127666
+  objective: -5215.201649146643
+  gradient:
+  - 0.7957687984520518
+  - 0.6019471901027877
+  - 0.21753281037485195
+  - -0.3218487577625808
+  - -0.2919923062415464
+  objective_difference: 0.4162545005801803
+  relative_objective_difference: 7.982198097884185e-05
+  gradient_difference:
+  - 0.8254313125653923
+  - 0.6092782633984974
+  - 0.20951957177029001
+  - -0.30333346921740656
+  - -0.30955309069377535
+  gradient_linf_difference: 0.8254313125653923
+  gradient_l2_difference: 1.1332650239346738
+  elapsed_seconds: 2.715180268511176
+  started_at: '2026-08-11T17:12:34+00:00'
+  completed_at: '2026-08-11T17:12:36+00:00'
+  draw_design_methods:
+    b_time_rnd: fresh_native_design
+  limitations: []
+- draw_count: 2000
+  draw_factor: 1.0
+  replication: 1
+  draw_types: *id002
+  seed: 4260784625
+  randomization_identifier: diagnostic-seed-4260784625
+  objective: -5215.462062081483
+  gradient:
+  - 0.250058711721465
+  - 0.9907211361032076
+  - 0.6849138892903035
+  - -0.3072328169139382
+  - 0.461474529991321
+  objective_difference: 0.6766674354203133
+  relative_objective_difference: 0.0001297594022018695
+  gradient_difference:
+  - 0.2797212258348054
+  - 0.9980522093989173
+  - 0.6769006506857416
+  - -0.28871752836876396
+  - 0.443913745539092
+  gradient_linf_difference: 0.9980522093989173
+  gradient_l2_difference: 1.3464634760858836
+  elapsed_seconds: 5.127679196186364
+  started_at: '2026-08-11T17:12:36+00:00'
+  completed_at: '2026-08-11T17:12:41+00:00'
+  draw_design_methods:
+    b_time_rnd: fresh_native_design
+  limitations: []
+- draw_count: 4000
+  draw_factor: 2.0
+  replication: 1
+  draw_types: *id003
+  seed: 20440104
+  randomization_identifier: diagnostic-seed-20440104
+  objective: -5215.097229419275
+  gradient:
+  - -0.002606046086626179
+  - 0.5437733118950767
+  - 0.8553975378686367
+  - 0.10919048648678853
+  - 0.11186121641357971
+  objective_difference: 0.31183477321246755
+  relative_objective_difference: 5.979819870106704e-05
+  gradient_difference:
+  - 0.027056468026714242
+  - 0.5511043851907864
+  - 0.8473842992640748
+  - 0.1277057750319628
+  - 0.09430043196135074
+  gradient_linf_difference: 0.8473842992640748
+  gradient_l2_difference: 1.023576857359756
+  elapsed_seconds: 9.958949857391417
+  started_at: '2026-08-11T17:12:41+00:00'
+  completed_at: '2026-08-11T17:12:51+00:00'
+  draw_design_methods:
+    b_time_rnd: fresh_native_design
+  limitations: []
+skipped_evaluations: []
+timing:
+  elapsed_seconds: 17.801809322088957
+  projected_remaining_seconds: 0.0
+motivation_codes:
+- discrepancy_above_tolerance_at_higher_draw_count
+- objective_unstable_at_higher_draw_count
+- gradient_unstable_at_higher_draw_count
+limitations: []

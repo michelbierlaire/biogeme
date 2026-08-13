@@ -1,0 +1,118 @@
+# File b23a_logit.yaml has automatically been generated on 2026-08-11 19:12:06.404159
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- b_time_train
+- b_cost_train
+- asc_car
+- b_time_car
+- b_cost_car
+beta_values:
+- -1.1348674994046377
+- -2.393364144038765
+- -0.896101398205992
+- -0.38384693246641355
+- -1.0880535944833944
+bhhh:
+- - 647.0657165169896
+  - 300.2625549369759
+  - -373.52927610606764
+  - -600.3833191754773
+  - -340.00744374112026
+- - 300.2625549369759
+  - 263.71381219562227
+  - -188.53350909516277
+  - -267.63174582360506
+  - -175.7479345313497
+- - -373.52927610606764
+  - -188.53350909516277
+  - 255.17414729226428
+  - 346.68693322705775
+  - 201.31443161556848
+- - -600.3833191754773
+  - -267.63174582360506
+  - 346.68693322705775
+  - 924.1650270064939
+  - 304.7191975831984
+- - -340.0074437411205
+  - -175.7479345313497
+  - 201.3144316155685
+  - 304.71919758319854
+  - 215.34998813711397
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -872.9051769309275
+gradient:
+- -0.0018338849856860406
+- -0.0014525694552602886
+- 0.0009714831148635028
+- 0.0013862812701646021
+- 0.0008531111714198403
+gradient_bhhh_complete: true
+hessian:
+- - -656.7657992675215
+  - -266.93120438885853
+  - 397.9145073997776
+  - 517.7471315145118
+  - 336.72965324328254
+- - -266.9312043888585
+  - -155.37364160280976
+  - 173.58045560399222
+  - 215.63750321467393
+  - 148.01164885035172
+- - 397.9145073997776
+  - 173.58045560399222
+  - -280.22788004105615
+  - -317.6988751979591
+  - -207.80969732658556
+- - 517.7471315145119
+  - 215.63750321467393
+  - -317.6988751979591
+  - -475.0172996540795
+  - -274.1642777214923
+- - 336.72965324328254
+  - 148.01164885035172
+  - -207.80969732658556
+  - -274.1642777214923
+  - -197.88974878375052
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -1547.1045070097969
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b23a_logit
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 8496
+number_of_observations: 2232
+optimization_complete: true
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2.2e-06 <= 6.1e-06
+  Number of function evaluations: 16
+  Number of gradient evaluations: 11
+  Number of hessian evaluations: 5
+  Number of iterations: '5'
+  Optimization time: '0.706706'
+  Proportion of Hessian calculation: 5/5 = 100.0%
+  Relative gradient: 2.247118817891131e-06
+sample_size: 2232
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

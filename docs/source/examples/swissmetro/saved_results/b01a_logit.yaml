@@ -1,0 +1,95 @@
+# File b01a_logit.yaml has automatically been generated on 2026-08-11 19:10:11.250541
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_cost
+- asc_car
+beta_values:
+- -0.7011872849436404
+- -1.2778589565196716
+- -1.0837900371207714
+- -0.15463267198926287
+bhhh:
+- - 733.700844681151
+  - 451.05740861003596
+  - -42.95969357481062
+  - -119.73496095332902
+- - 451.05740861003596
+  - 1535.5998707479644
+  - -253.758451605532
+  - 381.5042636408422
+- - -42.95969357481062
+  - -253.758451605532
+  - 744.7565662034117
+  - -333.31136897938757
+- - -119.73496095332902
+  - 381.5042636408422
+  - -333.31136897938757
+  - 973.9543123555976
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5331.252006916163
+gradient:
+- -0.00016480759130388378
+- -0.0005774874303483557
+- -7.954730969572665e-05
+- -0.00016865400944254816
+gradient_bhhh_complete: true
+hessian:
+- - -761.3930729524459
+  - -452.9124370615299
+  - 59.4790034327136
+  - 197.068395085199
+- - -452.9124370615299
+  - -825.7767685469622
+  - 235.86930784824216
+  - -362.6823680036086
+- - 59.47900343271361
+  - 235.86930784824222
+  - -467.41847975363817
+  - 258.8164662874523
+- - 197.068395085199
+  - -362.6823680036086
+  - 258.8164662874523
+  - -1026.1866666977105
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6964.662979192191
+lower_bounds:
+- null
+- null
+- null
+- null
+model_name: b01a_logit
+monte_carlo: false
+null_log_likelihood: -6964.662979192191
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 1.1e-07 <= 6.1e-06
+  Number of function evaluations: 13
+  Number of gradient evaluations: 9
+  Number of hessian evaluations: 4
+  Number of iterations: '4'
+  Optimization time: '0.792921'
+  Proportion of Hessian calculation: 4/4 = 100.0%
+  Relative gradient: 1.0595595039600445e-07
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+user_notes: null

@@ -1,0 +1,103 @@
+# File b20multiple_models_000002.yaml has automatically been generated on 2026-08-11 19:11:32.896673
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_cost
+- asc_car
+beta_values:
+- -0.7266211292759913
+- -1.369914602107855
+- -1.0592187948371659
+- 1.428382600672105
+bhhh:
+- - 752.9323062193197
+  - 312.89164398549775
+  - -48.277303415765665
+  - -123.50011588880379
+- - 312.89164398549775
+  - 3312.352210734006
+  - -614.2663615692072
+  - 1499.2317710064672
+- - -48.277303415765665
+  - -614.2663615692072
+  - 743.7138329475822
+  - -326.4777851441286
+- - -123.50011588880379
+  - 1499.2317710064672
+  - -326.4777851441286
+  - 966.7885845161395
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5350.5947010119025
+gradient:
+- 0.00034288601730736445
+- -0.009819024823471523
+- -0.0042824901282330075
+- -0.0041577800844407875
+gradient_bhhh_complete: true
+hessian:
+- - -770.0071300381575
+  - -202.84875780256206
+  - 66.99046689110992
+  - 202.06013576361525
+- - -202.84875780256206
+  - -2800.1480463570747
+  - 506.021669337101
+  - -1496.2700704928268
+- - 66.99046689110992
+  - 506.021669337101
+  - -469.8003867262913
+  - 252.58807298525443
+- - 202.06013576361525
+  - -1496.2700704928266
+  - 252.58807298525437
+  - -1022.2294024273284
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6964.662979192191
+lower_bounds:
+- null
+- null
+- null
+- null
+model_name: b20multiple_models_000002
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 1.9e-06 <= 6.1e-06
+  Number of function evaluations: 13
+  Number of gradient evaluations: 9
+  Number of hessian evaluations: 4
+  Number of iterations: '4'
+  Optimization time: '0.593394'
+  Proportion of Hessian calculation: 4/4 = 100.0%
+  Relative gradient: 1.9313533941742922e-06
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+user_notes: '<p>Specification</p><p><ul>
+
+  <li>asc: no_seg</li>
+
+  <li>train_tt_catalog: log</li>
+
+  </ul></p>
+
+  '

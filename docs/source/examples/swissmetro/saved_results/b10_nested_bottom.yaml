@@ -1,0 +1,118 @@
+# File b10_nested_bottom.yaml has automatically been generated on 2026-08-11 19:11:15.234180
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- scale_parameter
+- asc_train
+- b_time
+- b_cost
+- asc_car
+beta_values:
+- 0.4868656086821869
+- -1.0514574266843757
+- -1.8459208092185402
+- -1.7595679662244423
+- -0.3432114194473425
+bhhh:
+- - 4705.865989614307
+  - -455.14385481312917
+  - -923.1141974718854
+  - -249.76764034040104
+  - -114.08802651961808
+- - -455.14385481312917
+  - 386.32757169752256
+  - 123.69836625599878
+  - -29.11417400074678
+  - -249.09019330769019
+- - -923.1141974718854
+  - 123.69836625599878
+  - 685.0749428648453
+  - -64.40407355476741
+  - 78.23857992784039
+- - -249.76764034040104
+  - -29.11417400074678
+  - -64.40407355476741
+  - 286.87967333309643
+  - -64.55478676059234
+- - -114.08802651961804
+  - -249.09019330769019
+  - 78.23857992784036
+  - -64.55478676059232
+  - 457.22644108777644
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5236.900015105495
+gradient:
+- -0.0027984423406621772
+- 0.005269159097174736
+- -0.003915596421204981
+- 0.0002785689516997536
+- -0.026574953406772295
+gradient_bhhh_complete: true
+hessian:
+- - -3137.2582105419715
+  - 465.1251681525239
+  - 509.78195052466606
+  - 110.45740617638836
+  - 142.08634762947634
+- - 465.1251681525236
+  - -408.8780798747579
+  - -160.7312617610099
+  - 36.23896962692092
+  - 270.8504849765572
+- - 509.7819505246665
+  - -160.73126176100993
+  - -252.8110863138114
+  - 74.92781263823579
+  - -43.403308520530175
+- - 110.45740617638843
+  - 36.23896962692095
+  - 74.92781263823575
+  - -170.69644819446145
+  - 51.31309581263321
+- - 142.08634762947617
+  - 270.8504849765572
+  - -43.40330852053018
+  - 51.31309581263326
+  - -483.99495227701647
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6520.157832553571
+lower_bounds:
+- 1.0e-06
+- null
+- null
+- null
+- null
+model_name: b10_nested_bottom
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 4.1e-06 <= 6.1e-06
+  Number of function evaluations: 100
+  Number of gradient evaluations: 53
+  Number of hessian evaluations: 0
+  Number of iterations: '47'
+  Optimization time: '0.485613'
+  Proportion of Hessian calculation: 0/26 = 0.0%
+  Relative gradient: 4.0758144341379415e-06
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- 1.0
+- null
+- null
+- null
+- null
+user_notes: null

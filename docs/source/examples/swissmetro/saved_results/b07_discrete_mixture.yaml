@@ -1,0 +1,118 @@
+# File b07_discrete_mixture.yaml has automatically been generated on 2026-08-11 19:11:13.865262
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- prob_class1
+- asc_train
+- b_cost
+- asc_car
+- b_time
+beta_values:
+- 0.25079202951102053
+- -0.39758592146553073
+- -1.2640646912110776
+- 0.12460519144869257
+- -2.797931897937431
+bhhh:
+- - 6604.220401874892
+  - 1030.252332825495
+  - -376.15726957273193
+  - 752.4078657788671
+  - 794.3563913618744
+- - 1030.252332825495
+  - 605.5344069470258
+  - -25.764705995950838
+  - -164.32824735041424
+  - 143.24710482529892
+- - -376.15726957273193
+  - -25.764705995950838
+  - 646.3201491083922
+  - -255.85623767343696
+  - -119.02167811548118
+- - 752.4078657788671
+  - -164.32824735041424
+  - -255.85623767343696
+  - 834.1235347566584
+  - 170.19157912792457
+- - 794.3563913618747
+  - 143.24710482529892
+  - -119.02167811548118
+  - 170.19157912792457
+  - 145.41930283238665
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -5208.498030429029
+gradient:
+- -0.00013494372157651924
+- -5.9222648800982824e-05
+- 3.0139093489367497e-05
+- -3.88909402175841e-05
+- -7.298691003310154e-05
+gradient_bhhh_complete: true
+hessian:
+- - -6604.220401874892
+  - -1095.4042456073585
+  - 394.4660967692694
+  - -582.7127641380384
+  - -794.3562939431163
+- - -1095.4042456073585
+  - -639.5649332683012
+  - 36.60617975518876
+  - 229.01877434152402
+  - -145.7320256345928
+- - 394.46609676926937
+  - 36.60617975518875
+  - -333.77091429646407
+  - 165.1168425046347
+  - 91.14514169668666
+- - -582.7127641380384
+  - 229.01877434152405
+  - 165.1168425046347
+  - -853.8747799393901
+  - -154.27599809580795
+- - -794.3562939431165
+  - -145.7320256345928
+  - 91.14514169668666
+  - -154.27599809580795
+  - -146.36169763033456
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6964.662979192191
+lower_bounds:
+- 0
+- null
+- null
+- null
+- null
+model_name: b07_discrete_mixture
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2.9e-08 <= 6.1e-06
+  Number of function evaluations: 83
+  Number of gradient evaluations: 55
+  Number of hessian evaluations: 27
+  Number of iterations: '28'
+  Optimization time: '1.336824'
+  Proportion of Hessian calculation: 27/27 = 100.0%
+  Relative gradient: 2.932121831878549e-08
+sample_size: 6768
+types_of_draws: null
+upper_bounds:
+- 1
+- null
+- null
+- null
+- null
+user_notes: null

@@ -1,0 +1,118 @@
+# File b23b_probit.yaml has automatically been generated on 2026-08-11 19:12:06.673635
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- b_time_train
+- b_cost_train
+- asc_car
+- b_time_car
+- b_cost_car
+beta_values:
+- -0.6497489985710297
+- -0.980475478354945
+- -0.35327582397869806
+- -0.18415225049846923
+- -0.5306721424234184
+bhhh:
+- - 2565.1090558102765
+  - 1772.8818105380167
+  - -1403.5963847304317
+  - -2335.545421925371
+  - -1377.8822031834293
+- - 1772.8818105380167
+  - 2399.8675344376134
+  - -987.721528455181
+  - -1496.189185950592
+  - -1074.5697848341633
+- - -1403.5963847304317
+  - -987.721528455181
+  - 899.5781613833021
+  - 1293.17272960017
+  - 772.3656610479567
+- - -2335.545421925371
+  - -1496.189185950592
+  - 1293.17272960017
+  - 3754.3812410957153
+  - 1202.3214937412858
+- - -1377.8822031834295
+  - -1074.5697848341638
+  - 772.3656610479567
+  - 1202.3214937412858
+  - 902.6822977219398
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '0.0'
+final_log_likelihood: -906.9459375681735
+gradient:
+- -1.2165106966222083e-07
+- -8.771757364911537e-08
+- 5.43652944884343e-08
+- 8.582907895515746e-08
+- 5.0506521631632495e-08
+gradient_bhhh_complete: true
+hessian:
+- - -2300.8834035965738
+  - -1103.4898094088148
+  - 1337.1542881438309
+  - 1869.5153682330601
+  - 1182.894645982027
+- - -1103.489809408815
+  - -793.1434423755475
+  - 678.8642484306808
+  - 898.5213685845277
+  - 609.39081289816
+- - 1337.1542881438309
+  - 678.8642484306808
+  - -899.5781614865361
+  - -1098.6717853197438
+  - -701.9541302821469
+- - 1869.5153682330606
+  - 898.5213685845277
+  - -1098.6717853197438
+  - -2059.4790237546595
+  - -970.8150038205289
+- - 1182.8946459820272
+  - 609.39081289816
+  - -701.9541302821472
+  - -970.8150038205291
+  - -706.3059719971167
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -1547.1045070097969
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b23b_probit
+monte_carlo: false
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 8496
+number_of_observations: 2232
+optimization_complete: true
+optimization_messages:
+  Algorithm: Newton with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 7.9e-11 <= 6.1e-06
+  Number of function evaluations: 16
+  Number of gradient evaluations: 11
+  Number of hessian evaluations: 5
+  Number of iterations: '5'
+  Optimization time: '0.9145'
+  Proportion of Hessian calculation: 5/5 = 100.0%
+  Relative gradient: 7.863144933715231e-11
+sample_size: 2232
+types_of_draws: null
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

@@ -1,0 +1,119 @@
+# File b07estimation_monte_carlo.yaml has automatically been generated on 2026-08-11 19:12:06.832239
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.4676775795677258
+- -1.8627254298393099
+- 1.2074809447956805
+- -0.8457407240166352
+- 0.17999957379392378
+bhhh:
+- - 1012.2614334771554
+  - 464.5260092211183
+  - 195.79506965771742
+  - -28.660913138701737
+  - -278.5090707849597
+- - 464.5260092211183
+  - 826.2543695947716
+  - 374.7686439006851
+  - -261.2859314806249
+  - 420.8599350060445
+- - 195.79506965771742
+  - 374.7686439006851
+  - 285.0532843740615
+  - 8.596671641152163
+  - 45.85973186026039
+- - -28.660913138701737
+  - -261.2859314806249
+  - 8.596671641152163
+  - 1533.6722238649504
+  - -536.9532523225222
+- - -278.5090707849597
+  - 420.8599350060445
+  - 45.85973186026038
+  - -536.9532523225223
+  - 1511.8463994034519
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '35.574274'
+final_log_likelihood: -8571.254613135166
+gradient:
+- -0.0009953170098597752
+- 0.020539809336930226
+- -0.017114217487666394
+- -0.011288912855249578
+- 0.009735260259361667
+gradient_bhhh_complete: true
+hessian:
+- - -1061.9071493768554
+  - -511.89423308573373
+  - -239.58242271074644
+  - 73.08372772806945
+  - 378.62778028755645
+- - -511.89423308573373
+  - -825.1502479684467
+  - -389.3012597550738
+  - 191.39308266858333
+  - -334.1638079770269
+- - -239.58242271074644
+  - -389.3012597550737
+  - -312.15190523483676
+  - 37.058247497144244
+  - -16.060769131013977
+- - 73.08372772806946
+  - 191.39308266858333
+  - 37.05824749714425
+  - -708.1318092715826
+  - 235.20820818241884
+- - 378.62778028755645
+  - -334.1638079770269
+  - -16.06076913101397
+  - 235.20820818241884
+  - -1529.5369776808818
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -10979.897105492677
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b07estimation_monte_carlo
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 9
+number_of_observations: 10719
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 3.5e-06 <= 6.1e-06
+  Number of function evaluations: 101
+  Number of gradient evaluations: 57
+  Number of hessian evaluations: 0
+  Number of iterations: '44'
+  Optimization time: '141.875174'
+  Proportion of Hessian calculation: 0/28 = 0.0%
+  Relative gradient: 3.48455225111743e-06
+sample_size: 10719
+types_of_draws:
+  b_time_rnd: NORMAL
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null

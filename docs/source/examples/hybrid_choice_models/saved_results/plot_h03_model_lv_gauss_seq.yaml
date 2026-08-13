@@ -1,0 +1,148 @@
+# File saved_results/plot_h03_model_lv_gauss_seq.yaml has automatically been generated on 2026-08-11 19:35:37.168189
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- choice_scale_parameter
+- choice_asc_pt
+- choice_beta_time_pt
+- choice_asc_car
+- choice_beta_time_car
+- choice_beta_car_centric_attitude_car
+- choice_beta_dist_work
+- choice_beta_dist_other_purposes
+beta_values:
+- 0.078268760757934
+- -8.822703494200963
+- -12.334780476948433
+- -2.8855589113894022
+- -26.299528202829983
+- 4.356381327871519
+- -2.6162263188006842
+- -4.142966401634875
+bhhh:
+- - 100706.08974315878
+  - -49.96691515567201
+  - -133.32430871272751
+  - 96.30473934451516
+  - -23.78079658959174
+  - -28.12140532547408
+  - -846.6960037842567
+  - -355.954968349101
+- - -49.96691515567201
+  - 0.6720928036056553
+  - 1.3104063722712338
+  - -0.6315309935713094
+  - -0.6209810950660517
+  - 0.06594904609208657
+  - -0.4254040895559088
+  - -0.10731321814689855
+- - -133.32430871272751
+  - 1.3104063722712338
+  - 3.5935524772061926
+  - -1.268606781357398
+  - -1.7194555133509795
+  - 0.14259407755181186
+  - -0.6552492657968145
+  - -0.14278735211694818
+- - 96.30473934451516
+  - -0.6315309935713094
+  - -1.268606781357398
+  - 0.8037299715205161
+  - 0.6604655939699042
+  - -0.08610710647099261
+  - -0.9229114243802723
+  - -0.6311862949422093
+- - -23.78079658959174
+  - -0.6209810950660517
+  - -1.7194555133509795
+  - 0.6604655939699042
+  - 1.141206581928585
+  - -0.041297933986702194
+  - -0.6610679313620512
+  - -0.2197231801115822
+- - -28.12140532547408
+  - 0.06594904609208657
+  - 0.14259407755181186
+  - -0.08610710647099261
+  - -0.041297933986702194
+  - 0.10383259093331634
+  - 0.07477361610967825
+  - 0.16352369030649527
+- - -846.6960037842567
+  - -0.4254040895559088
+  - -0.6552492657968145
+  - -0.9229114243802723
+  - -0.6610679313620512
+  - 0.07477361610967825
+  - 40.64538614473495
+  - 0.0
+- - -355.954968349101
+  - -0.10731321814689855
+  - -0.14278735211694818
+  - -0.6311862949422093
+  - -0.2197231801115822
+  - 0.16352369030649527
+  - 0.0
+  - 9.824837682600936
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: optima.dat
+draws_processing_time: '13.375733'
+final_log_likelihood: -507.2041869290292
+gradient:
+- 0.005320654334774133
+- -3.116334409003496e-05
+- 0.00047934425403972636
+- -0.000503565724900179
+- 0.00015510064508356125
+- -0.00013595782125520872
+- -0.005634120331586112
+- 0.001264215738520813
+gradient_bhhh_complete: true
+hessian: null
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -5607.637317260152
+lower_bounds:
+- 0.0001
+- null
+- null
+- null
+- null
+- null
+- null
+- null
+model_name: plot_h03_model_lv_gauss_seq
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 50000
+number_of_excluded_data: 0
+number_of_observations: 889
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2.6e-06 <= 6.1e-06
+  Number of function evaluations: 107
+  Number of gradient evaluations: 65
+  Number of hessian evaluations: 0
+  Number of iterations: '42'
+  Optimization time: '46.518227'
+  Proportion of Hessian calculation: 0/32 = 0.0%
+  Relative gradient: 2.628581889455248e-06
+sample_size: 889
+types_of_draws:
+  car_centric_attitude_draw: NORMAL_MLHS_ANTI
+upper_bounds:
+- null
+- null
+- 0
+- null
+- 0
+- null
+- 0
+- 0
+user_notes: null

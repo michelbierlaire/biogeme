@@ -1,0 +1,119 @@
+# File b05normal_mixture_algo_cg_True_radius_0.1_second_deriv_0.0.yaml has automatically been generated on 2026-08-11 19:14:39.267868
+# biogeme 3.3.4 [2026-08-11]
+
+analytical_hessian_mode: full
+beta_names:
+- asc_train
+- b_time
+- b_time_s
+- b_cost
+- asc_car
+beta_values:
+- -0.40264399121639255
+- -2.2567330473354366
+- 1.654220814799754
+- -1.2845593956128212
+- 0.1363036765549392
+bhhh:
+- - 583.3371604136162
+  - 268.0389109273869
+  - 140.63256951790845
+  - -22.40858109346298
+  - -162.80105610667732
+- - 268.0389109273869
+  - 418.0125674825927
+  - 209.89521027346743
+  - -118.46101595300433
+  - 211.288367470863
+- - 140.63256951790845
+  - 209.89521027346743
+  - 174.7975593724064
+  - 25.30749619494479
+  - 14.193125335221751
+- - -22.40858109346298
+  - -118.46101595300433
+  - 25.30749619494479
+  - 597.7605875342344
+  - -239.79277438725285
+- - -162.80105610667732
+  - 211.28836747086302
+  - 14.193125335221756
+  - -239.79277438725285
+  - 809.5589981435419
+bootstrap: []
+bootstrap_complete: true
+bootstrap_time: null
+convergence: true
+data_name: swissmetro
+draws_processing_time: '22.484453'
+final_log_likelihood: -5215.694233088363
+gradient:
+- -0.0036137166065088877
+- 0.007005628795631935
+- 0.004732643386969215
+- 0.011392924213829758
+- 0.006617974680033001
+gradient_bhhh_complete: true
+hessian:
+- - -612.3928556535283
+  - -287.0849738869019
+  - -162.97070627188154
+  - 34.36265343796609
+  - 224.33938696241094
+- - -287.08497388690193
+  - -417.6041991133584
+  - -208.6682420132678
+  - 112.45345268811656
+  - -172.20264580837818
+- - -162.9707062718815
+  - -208.66824201326781
+  - -177.48559261777172
+  - 3.3683264226257768
+  - 14.464346099992298
+- - 34.36265343796609
+  - 112.45345268811653
+  - 3.3683264226257763
+  - -323.07390412893744
+  - 158.4374969864458
+- - 224.33938696241094
+  - -172.20264580837818
+  - 14.464346099992294
+  - 158.4374969864458
+  - -828.8320974292546
+hessian_complete: true
+hessian_observation_batch_size: 100
+hessian_parameter_block_size: 4
+initial_log_likelihood: -6880.042509694934
+lower_bounds:
+- null
+- null
+- null
+- null
+- null
+model_name: b05normal_mixture_algo_cg_True_radius_0.1_second_deriv_0.0
+monte_carlo: true
+null_log_likelihood: null
+number_of_draws: 10000
+number_of_excluded_data: 3960
+number_of_observations: 6768
+optimization_complete: true
+optimization_messages:
+  Algorithm: BFGS with trust region for simple bound constraints
+  Cause of termination: Relative gradient = 2.3e-06 <= 6.1e-06
+  Number of function evaluations: 101
+  Number of gradient evaluations: 53
+  Number of hessian evaluations: 0
+  Number of iterations: '48'
+  Optimization time: '87.049912'
+  Proportion of Hessian calculation: 0/26 = 0.0%
+  Relative gradient: 2.297926793066917e-06
+sample_size: 6768
+types_of_draws:
+  b_time_rnd: NORMAL
+upper_bounds:
+- null
+- null
+- null
+- null
+- null
+user_notes: null
