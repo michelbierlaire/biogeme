@@ -79,8 +79,13 @@ def transfer_command(source: str, stage: Path) -> list[str]:
 
 def staged_artifacts_complete(stage: Path) -> bool:
     """Return whether the stage contains every manifest-declared artifact."""
+    return not staged_artifact_gaps(stage)
+
+
+def staged_artifact_gaps(stage: Path) -> dict[str, list[str]]:
+    """Return missing declared artifacts grouped by producing example."""
     if not stage.is_dir():
-        return False
+        return {'<stage>': ['staging directory is missing']}
     from tools import docs_examples, import_jed_results
 
     config = docs_examples.load_config()
@@ -92,9 +97,27 @@ def staged_artifacts_complete(stage: Path) -> bool:
         if spec.expected_outputs or spec.expected_output_globs
     ]
     if not with_outputs:
-        return False
+        return {'<manifest>': ['no declared outputs']}
     items = import_jed_results.build_plan(with_outputs, stage, stage)
-    return bool(items) and all(item.source is not None for item in items)
+    gaps: dict[str, list[str]] = {}
+    for item in items:
+        if item.source is None:
+            gaps.setdefault(item.script, []).append(item.expected)
+    return gaps
+
+
+def print_artifact_recovery(gaps: dict[str, list[str]]) -> None:
+    """Print targeted JED recovery instructions for missing artifacts."""
+    if not gaps:
+        return
+    print('\nMissing staged artifacts by producer:')
+    for script, outputs in sorted(gaps.items()):
+        print(f'  {script}: {", ".join(outputs)}')
+    print('\nOn JED, invalidate only these producers (dependents are invalidated automatically):')
+    print('  $PY jed_runs/jed_examples.py invalidate \\')
+    for index, script in enumerate(sorted(gaps), start=1):
+        suffix = ' \\' if index < len(gaps) else ''
+        print(f'      --script {script}{suffix}')
 
 
 def ensure_source(source: str, stage: Path, *, apply: bool) -> Path:
@@ -212,12 +235,16 @@ def phase2_run(args: argparse.Namespace) -> int:
     if not phase.get('imported'):
         code = import_artifacts(source, apply=args.apply)
         if code:
+            gaps = staged_artifact_gaps(source)
+            print_artifact_recovery(gaps)
             next_steps(
                 [
-                    'If JED reports all jobs OK, rerun this same command; it refreshes the '
-                    'persistent staging transfer before retrying strict import.',
-                    'If an artifact is still missing, inspect that example on JED and '
-                    'rerun release_phase1.py status there.',
+                    'On JED, invalidate only the listed producer scripts; do not reset '
+                    'the successful jobs.',
+                    'Run release_phase1.py run --apply on JED to resubmit those jobs '
+                    'and any required dependents.',
+                    'After they finish, rerun this same release_phase2.py command; '
+                    'the transfer is resumable.',
                 ]
             )
             return code
@@ -318,12 +345,16 @@ def phase2_step(args: argparse.Namespace) -> int:
                 save_release(release)
         code = import_artifacts(source, apply=args.apply)
         if code:
+            gaps = staged_artifact_gaps(source)
+            print_artifact_recovery(gaps)
             next_steps(
                 [
-                    'Rerun release_phase2.py import --apply; remote staging is refreshed '
-                    'until strict import succeeds.',
-                    'If an artifact is still missing, inspect that example on JED and '
-                    'rerun release_phase1.py status there.',
+                    'On JED, invalidate only the listed producer scripts; do not reset '
+                    'the successful jobs.',
+                    'Run release_phase1.py run --apply on JED to resubmit those jobs '
+                    'and any required dependents.',
+                    'After they finish, rerun release_phase2.py import --apply; the '
+                    'transfer is resumable.',
                 ]
             )
             return code

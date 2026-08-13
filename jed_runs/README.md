@@ -208,8 +208,11 @@ The JED status is not considered `OK` merely because Slurm returned
 example tree.  Phase 2 transfers root-level YAML/HTML/Pareto reports as well
 as files already below `saved_results`/`saved_html`; the importer then places
 them in the canonical laptop directories.  If a strict import finds a missing
-artifact, rerun the same phase-2 command.  Until import succeeds, it refreshes
-the persistent staging directory from JED rather than reusing a stale transfer.
+artifact, the Phase-2 wrapper prints the producing script.  On JED, invalidate
+only that producer (and its dependents), run `release_phase1.py run --apply`,
+and wait for it to finish.  Then rerun Phase 2.  Until import succeeds, it
+refreshes the persistent staging directory from JED rather than reusing a stale
+transfer.
 
 ## Monitor and diagnose
 

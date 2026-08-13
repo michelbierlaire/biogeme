@@ -265,6 +265,10 @@ If the command fails, do not manually repeat the individual operations as a
 first response. Read the error and follow the recovery procedures in
 [Appendix A](#appendix-a--phase-2-recovery-and-emergency-manual-transfer), then
 rerun the same `run --apply` command. Completed stages are recorded and reused.
+When strict import lists missing artifacts, the wrapper groups them by
+producer. On JED, invalidate only those producer scripts (and their dependent
+jobs), run `release_phase1.py run --apply`, and wait for them to finish. The
+successful jobs are not resubmitted.
 
 The phase-2 state is retained under `.jed_runs/releases`.  The wrapper never
 commits changes; after a successful build, review `git status --short` and
@@ -300,11 +304,13 @@ command from Phase 2.
 
 ### A.1 Recovering an interrupted or incomplete Phase 2
 
-If the transfer is interrupted, or strict import reports a missing artifact,
-rerun the same command. The wrapper refreshes the persistent staging directory
-from JED until strict import succeeds; `rsync --partial` preserves an
-interrupted file. Do not rerun successful examples merely because the laptop
-transfer was incomplete.
+If the transfer is interrupted, rerun the same command; the wrapper refreshes
+the persistent staging directory and `rsync --partial` preserves an interrupted
+file. If strict import reports a missing artifact, follow the producer-specific
+instructions printed by the wrapper: invalidate only that producer on JED,
+rerun `release_phase1.py run --apply`, wait for it to finish, and then rerun
+Phase 2. Do not rerun successful examples merely because the laptop transfer
+was incomplete.
 
 If only the documentation build failed, the individual build command may be
 used:
@@ -397,8 +403,10 @@ uv run --locked --group docs python tools/import_jed_results.py \
 ```
 
 Every declared output must be available. If anything is missing, return to
-Phase 1 and repair the relevant example. When the dry run is complete, apply
-the import and replace stale archived result files safely:
+Phase 1 and repair or rerun only the producer named by the diagnostic. Do not
+reset the whole JED tree merely because one artifact is missing. When the dry
+run is complete, apply the import and replace stale archived result files
+safely:
 
 ```bash
 uv run --locked --group docs python tools/import_jed_results.py \

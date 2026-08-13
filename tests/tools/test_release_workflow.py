@@ -296,6 +296,15 @@ def test_rsync_transfer_is_resumable():
     assert '--stats' in command
 
 
+def test_phase2_reports_missing_artifacts_by_producer(monkeypatch, capsys):
+    gaps = {'tutorials/plot_b01_first_model.py': ['first_model.yaml']}
+    monkeypatch.setattr(release_phase2, 'staged_artifact_gaps', lambda _: gaps)
+    release_phase2.print_artifact_recovery(gaps)
+    output = capsys.readouterr().out
+    assert 'Missing staged artifacts by producer:' in output
+    assert 'tutorials/plot_b01_first_model.py: first_model.yaml' in output
+
+
 def test_incomplete_recorded_stage_forces_refresh(monkeypatch, tmp_path):
     stage = tmp_path / 'examples'
     source = 'user@host:/home/user/examples'

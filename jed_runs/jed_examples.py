@@ -740,6 +740,10 @@ def job_finish(
                 + ', '.join(missing_declared)
             )
             exit_code = MISSING_OUTPUT_EXIT_CODE
+        # Root-level text reports are consumed by dependent examples.  They
+        # must also have an archived copy before the job can be considered OK;
+        # otherwise finalization would remove the only copy and Phase 2 could
+        # never import it.
         missing_archived = missing_archived_outputs(
             job.expected_outputs,
             job.expected_output_globs,
