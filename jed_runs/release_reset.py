@@ -36,15 +36,29 @@ from jed_runs.jed_fresh_start import (  # noqa: E402
 
 
 def slurm_jobs_running() -> bool:
-    result = subprocess.run(
-        ['squeue', '--noheader', '--user', str(__import__('getpass').getuser())],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        result = subprocess.run(
+            ['squeue', '--noheader', '--user', str(__import__('getpass').getuser())],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        # A laptop normally has no Slurm client.  The explicit --confirm flag
+        # is the user's acknowledgement that a reset is safe in that case.
+        print(
+            'WARNING: squeue is not available; Slurm jobs cannot be checked '
+            'from this machine. Continue only if you have confirmed that no '
+            'JED jobs are running.',
+            file=sys.stderr,
+        )
+        return False
     if result.returncode != 0:
-        # The reset may be run on a laptop, where Slurm is not installed.  The
-        # JED scope will still be protected by the explicit confirmation.
+        print(
+            'WARNING: squeue could not query Slurm; continue only if you have '
+            'confirmed that no JED jobs are running.',
+            file=sys.stderr,
+        )
         return False
     return bool(result.stdout.strip())
 
@@ -74,6 +88,12 @@ def local_targets(scope: str) -> list[Path]:
             path = PROJECT_ROOT / 'docs' / name
             if path.exists():
                 targets.append(path)
+    for pattern in ('biogeme-smoke-*.err', 'biogeme-smoke-*.out'):
+        targets.extend(
+            path
+            for path in PROJECT_ROOT.glob(pattern)
+            if path.is_file() and not path.is_symlink()
+        )
     # Remove nested targets when a parent directory is already selected.
     unique = sorted(set(targets), key=lambda path: (len(path.parts), str(path)))
     result: list[Path] = []

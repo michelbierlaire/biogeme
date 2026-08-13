@@ -10,8 +10,10 @@ Sat Jun 28 2025, 18:57:49
 """
 
 import sys
+from pathlib import Path
 
 import numpy as np
+
 from biogeme.biogeme import BIOGEME
 from biogeme.models import nested
 from biogeme.results_processing import EstimationResults
@@ -22,18 +24,21 @@ try:
     can_plot = True
 except ModuleNotFoundError:
     can_plot = False
-from biogeme.data.optima import read_data, normalized_weight
 from scenarios import scenario
+
+from biogeme.data.optima import normalized_weight, read_data
+
+EXAMPLE_DIRECTORY = Path(__file__).resolve().parent
 
 # %%
 # Read the estimation results from the file.
 try:
     results = EstimationResults.from_yaml_file(
-        filename='saved_results/b02estimation.yaml'
+        filename=EXAMPLE_DIRECTORY / 'saved_results' / 'b02estimation.yaml'
     )
 except FileNotFoundError:
     sys.exit(
-        'Run first the script b02simulation.py '
+        'Run first the script plot_b02estimation.py '
         'in order to generate the '
         'file b02estimation.yaml.'
     )
@@ -56,7 +61,7 @@ def revenues(factor: float) -> tuple[float, float, float]:
         the confidence interval.
 
     """
-    filename = f'revenue_{factor:.2f}.txt'
+    filename = EXAMPLE_DIRECTORY / f'revenue_{factor:.2f}.txt'
     SEPARATOR = '%'
     try:
         with open(filename, 'r') as f:
@@ -114,7 +119,7 @@ print(
 
 factors = np.arange(0.0, 5.0, 0.1)
 plot_revenues = [revenues(s) for s in factors]
-zipped = zip(*plot_revenues)
+zipped = zip(*plot_revenues, strict=True)
 rev = next(zipped)
 lower = next(zipped)
 upper = next(zipped)

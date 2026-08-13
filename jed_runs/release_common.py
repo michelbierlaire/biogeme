@@ -22,6 +22,10 @@ RELEASE_ROOT = PROJECT_ROOT / '.jed_runs' / 'releases'
 CURRENT_RELEASE = RELEASE_ROOT / 'current.json'
 
 
+class DirtyWorkingTreeError(RuntimeError):
+    """Raised when a release-start command finds uncommitted files."""
+
+
 def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat(timespec='seconds')
 
@@ -200,16 +204,83 @@ def python_command(script: str, *arguments: str) -> list[str]:
     return [sys.executable, str(PROJECT_ROOT / script), *arguments]
 
 
-def ensure_clean_tree(allow_dirty: bool) -> None:
+def _porcelain_path(status_line: str) -> Path:
+    """Extract the path from one ``git status --porcelain`` line."""
+    value = status_line[3:] if len(status_line) >= 3 else status_line
+    if ' -> ' in value:
+        value = value.rsplit(' -> ', 1)[-1]
+    return Path(value)
+
+
+def _is_generated_release_path(status_line: str) -> bool:
+    """Return whether a dirty path is an expected generated release artifact."""
+    path = _porcelain_path(status_line)
+    parts = path.parts
+    # Slurm smoke-test diagnostics are written at the repository root by the
+    # cluster wrapper.  They are disposable runtime artifacts, not source
+    # changes.  Keep the match deliberately narrow so an arbitrary root-level
+    # ``.err`` file still blocks a release.
+    if path.parent == Path('.') and path.name.startswith('biogeme-smoke-'):
+        return path.suffix in {'.err', '.out'}
+    if 'docs' in parts and 'source' in parts and 'examples' in parts:
+        if 'saved_results' in parts or 'saved_html' in parts:
+            return True
+        name = path.name
+        return (
+            name.startswith(('slurm-', 'revenue_', 'test~'))
+            or name.endswith(('.run', '_slurm.out'))
+        )
+    return False
+
+
+def ensure_clean_tree(*, allow_generated: bool = False) -> None:
     dirty = git_status()
-    if dirty and not allow_dirty:
-        preview = '\n'.join(dirty[:20])
-        suffix = '\n...' if len(dirty) > 20 else ''
-        raise RuntimeError(
-            'The Git working tree is not clean. Commit or stash changes before '
-            'a release, or use --allow-dirty for an explicitly provisional run.\n'
+    generated = [item for item in dirty if _is_generated_release_path(item)]
+    relevant = [item for item in dirty if item not in generated or not allow_generated]
+    if relevant:
+        preview = '\n'.join(relevant[:20])
+        suffix = '\n...' if len(relevant) > 20 else ''
+        preservation_hint = ''
+        if generated and not allow_generated:
+            preservation_hint = (
+                '\n\nExisting archived results are not removed by this check. To preserve '
+                'them while making the checkout clean, first inspect them with:\n'
+                '  $PY jed_runs/jed_commit_results.py --dry-run\n'
+                'Then either commit the reviewed archives, or stash the generated '
+                'files with `git stash push --include-untracked`. The root-level '
+                'copies can be removed separately with:\n'
+                '  $PY jed_runs/jed_cleanup.py\n'
+                '  $PY jed_runs/jed_cleanup.py --apply\n'
+                'Do not use release_reset.py or jed_fresh_start.py if the archived '
+                'results must be retained.'
+            )
+        elif generated:
+            preservation_hint = (
+                '\n\nThe generated paths may remain; they do not block the release. '
+                'The paths above are authored or unrecognized changes and must '
+                'be committed or stashed. If the generated archives are a '
+                'historical snapshot, preserve them before starting a fresh '
+                'release with:\n'
+                '  $PY jed_runs/jed_commit_results.py --dry-run\n'
+                'or:\n'
+                '  git stash push --include-untracked -m "Biogeme generated release artifacts"'
+            )
+        else:
+            preservation_hint = (
+                '\n\nIf the listed files are generated artifacts you want to retain, '
+                'inspect them first and either commit or stash them; do not reset '
+                'the release until they are safely preserved.'
+            )
+        raise DirtyWorkingTreeError(
+            'The Git working tree contains authored or unrecognized changes. '
+            'Release commands require a clean checkout; do not bypass this '
+            'check.\n'
             + preview
             + suffix
+            + preservation_hint
         )
-    if dirty:
-        print('WARNING: proceeding with a dirty working tree (--allow-dirty).')
+    if allow_generated and generated and not relevant:
+        print(
+            f'INFO: ignoring {len(generated)} generated release artifact(s); '
+            'they are handled by the release workflow.'
+        )

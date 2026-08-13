@@ -134,6 +134,16 @@ def collect_targets(
     )
 
 
+def root_smoke_artifacts(project_root: Path) -> list[Path]:
+    """Return narrowly named root-level Slurm smoke diagnostics."""
+    return sorted(
+        path
+        for pattern in ('biogeme-smoke-*.err', 'biogeme-smoke-*.out')
+        for path in project_root.glob(pattern)
+        if path.is_file() and not path.is_symlink()
+    )
+
+
 def validate_jed_state_path(jed_state: Path) -> None:
     """Refuse to remove a configured state directory outside this checkout."""
     project_root = PROJECT_ROOT.resolve()
@@ -173,6 +183,7 @@ def main(argv: list[str] | None = None) -> int:
     configured_state = state_root(load_config())
     validate_jed_state_path(configured_state)
     files, directories = collect_targets(EXAMPLES_ROOT, configured_state)
+    files = sorted(set(files + root_smoke_artifacts(PROJECT_ROOT)))
     print(f'Found generated files: {len(files)}')
     for path in files:
         print(f'  {relative(path)}')

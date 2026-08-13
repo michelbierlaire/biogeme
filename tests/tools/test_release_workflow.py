@@ -1,8 +1,12 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-from jed_runs import release_examples, release_phase2
-from jed_runs.release_common import run_command
+from jed_runs import release_examples, release_phase1, release_phase2, release_reset
+from jed_runs.release_common import (
+    DirtyWorkingTreeError,
+    ensure_clean_tree,
+    run_command,
+)
 
 
 def test_release_example_inventory_establishes_baseline(tmp_path: Path, monkeypatch):
@@ -106,6 +110,121 @@ def test_dry_run_command_does_not_execute(monkeypatch, capsys):
     monkeypatch.setattr('subprocess.run', fail)
     assert run_command(['sbatch', 'example.run'], apply=False) == 0
     assert '[PLAN] sbatch example.run' in capsys.readouterr().out
+
+
+def test_dirty_tree_explains_how_to_preserve_archived_results(monkeypatch):
+    monkeypatch.setattr(
+        'jed_runs.release_common.git_status',
+        lambda: ['?? docs/source/examples/indicators/saved_results/model.yaml'],
+    )
+
+    try:
+        ensure_clean_tree()
+    except RuntimeError as error:
+        message = str(error)
+    else:  # pragma: no cover - assertion keeps the failure message explicit.
+        raise AssertionError('Expected dirty-tree protection to reject the run')
+
+    assert 'jed_commit_results.py --dry-run' in message
+    assert 'git stash push --include-untracked' in message
+    assert 'Do not use release_reset.py or jed_fresh_start.py' in message
+
+
+def test_generated_artifacts_are_allowed(monkeypatch, capsys):
+    monkeypatch.setattr(
+        'jed_runs.release_common.git_status',
+        lambda: ['?? docs/source/examples/indicators/saved_results/model.yaml'],
+    )
+
+    ensure_clean_tree(allow_generated=True)
+    assert 'ignoring 1 generated release artifact' in capsys.readouterr().out
+
+
+def test_generated_smoke_diagnostic_is_allowed(monkeypatch, capsys):
+    monkeypatch.setattr(
+        'jed_runs.release_common.git_status',
+        lambda: ['?? biogeme-smoke-65991538.err'],
+    )
+
+    ensure_clean_tree(allow_generated=True)
+    assert 'ignoring 1 generated release artifact' in capsys.readouterr().out
+
+
+def test_authored_change_still_blocks_with_generated_artifacts(monkeypatch):
+    monkeypatch.setattr(
+        'jed_runs.release_common.git_status',
+        lambda: [
+            '?? biogeme-smoke-65991538.err',
+            ' M src/biogeme/biogeme.py',
+        ],
+    )
+
+    try:
+        ensure_clean_tree(allow_generated=True)
+    except DirtyWorkingTreeError as error:
+        message = str(error)
+    else:  # pragma: no cover - assertion keeps the failure message explicit.
+        raise AssertionError('Expected authored changes to block the run')
+
+    assert 'src/biogeme/biogeme.py' in message
+
+
+def test_existing_jed_attempts_are_detected(monkeypatch):
+    monkeypatch.setattr(
+        release_phase1,
+        'global_statuses',
+        lambda: {
+            'family/plot_example.py': {'record': {'job_id': '12345'}},
+            'family/plot_other.py': {'record': {}},
+        },
+    )
+
+    assert release_phase1.has_existing_jed_attempts() is True
+
+
+def test_reset_allows_laptop_without_slurm(monkeypatch, capsys):
+    def missing_squeue(*args, **kwargs):
+        raise FileNotFoundError('squeue')
+
+    monkeypatch.setattr(release_reset.subprocess, 'run', missing_squeue)
+
+    assert release_reset.slurm_jobs_running() is False
+    assert 'squeue is not available' in capsys.readouterr().err
+
+
+def test_phase1_adopts_existing_attempts_without_resetting(monkeypatch, capsys):
+    monkeypatch.setattr(release_phase1, 'ensure_clean_tree', lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        release_phase1,
+        'check_examples',
+        lambda **kwargs: {'new': [], 'changed': [], 'removed': [], 'unresolved': []},
+    )
+    monkeypatch.setattr(release_phase1, 'has_existing_jed_attempts', lambda: True)
+    monkeypatch.setattr(
+        release_phase1,
+        'ensure_release',
+        lambda **kwargs: {'phase1': {}},
+    )
+    monkeypatch.setattr(release_phase1, 'print_launch_plan', lambda: 0)
+
+    args = SimpleNamespace(apply=False, skip_slurm_check=False)
+    assert release_phase1.phase1_run(args) == 0
+    assert 'adopting them and skipping the fresh-start cleanup' in capsys.readouterr().out
+
+
+def test_phase1_dirty_tree_next_steps_distinguish_existing_release(monkeypatch, capsys):
+    monkeypatch.setattr(
+        release_phase1,
+        'ensure_clean_tree',
+        lambda **kwargs: (_ for _ in ()).throw(
+            DirtyWorkingTreeError('dirty tree')
+        ),
+    )
+
+    assert release_phase1.main(['run']) == 2
+    output = capsys.readouterr()
+    assert 'authored or unrecognized files' in output.out
+    assert 'release_phase1.py status instead' in output.out
 
 
 def test_phase2_parser_accepts_common_options_after_subcommand():

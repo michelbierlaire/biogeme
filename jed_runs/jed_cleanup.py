@@ -40,6 +40,12 @@ def generated_root_artifacts() -> list[Path]:
             candidates.append(path)
         elif path.name.startswith('revenue_') and path.suffix == '.txt':
             candidates.append(path)
+    for pattern in ('biogeme-smoke-*.err', 'biogeme-smoke-*.out'):
+        candidates.extend(
+            path
+            for path in PROJECT_ROOT.glob(pattern)
+            if path.is_file() and not path.is_symlink()
+        )
     return sorted(candidates)
 
 

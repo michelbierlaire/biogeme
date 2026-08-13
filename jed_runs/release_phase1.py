@@ -18,6 +18,7 @@ from typing import Any
 try:
     from .release_common import (
         PROJECT_ROOT,
+        DirtyWorkingTreeError,
         ensure_clean_tree,
         ensure_release,
         next_steps,
@@ -29,6 +30,7 @@ try:
 except ImportError:  # pragma: no cover - direct script execution
     from release_common import (  # type: ignore[no-redef]
         PROJECT_ROOT,
+        DirtyWorkingTreeError,
         ensure_clean_tree,
         ensure_release,
         next_steps,
@@ -114,8 +116,18 @@ def print_status_summary() -> dict[str, int]:
     return counts
 
 
+def has_existing_jed_attempts() -> bool:
+    """Return whether lower-level JED state already contains real attempts."""
+    return any(bool(item.get('record')) for item in global_statuses().values())
+
+
 def phase1_run(args: argparse.Namespace) -> int:
-    ensure_clean_tree(args.allow_dirty)
+    # Saved results, HTML, Slurm logs, and the narrow set of root-level smoke
+    # diagnostics are normal outputs of this phase. Authored
+    # source/configuration changes are still rejected by ensure_clean_tree.
+    ensure_clean_tree(
+        allow_generated=True,
+    )
     report = check_examples(apply=args.apply)
     if report['new'] or report['unresolved']:
         return 1
@@ -123,25 +135,48 @@ def phase1_run(args: argparse.Namespace) -> int:
     phase = release.setdefault('phase1', {})
 
     if not phase.get('prepared'):
-        if not args.skip_slurm_check and slurm_jobs_running():
-            raise RuntimeError(
-                'Slurm jobs are still running; refusing to prepare a fresh release.'
+        # A user may have launched jobs with jed_examples.py before adopting
+        # this wrapper.  Preserve those attempts and their successful outputs;
+        # starting a fresh cleaner here would erase useful release state.
+        adopt_existing = has_existing_jed_attempts()
+        if adopt_existing:
+            print(
+                'Existing JED attempts detected; adopting them and skipping '
+                'the fresh-start cleanup.'
             )
-        command = python_command('jed_runs/jed_fresh_start.py')
-        if args.apply:
-            command.append('--apply')
-        code = run_command(command, apply=args.apply)
-        if code:
-            next_steps(
-                [
-                    'Review the cleanup diagnostics.',
-                    'Rerun release_phase1.py run after correcting the problem.',
-                ]
-            )
-            return code
-        if args.apply:
-            phase['prepared'] = True
-            save_release(release)
+            if args.apply:
+                phase['prepared'] = True
+                save_release(release)
+        else:
+            if not args.skip_slurm_check and slurm_jobs_running():
+                print(
+                    'error: Slurm jobs are still running; refusing to prepare a '
+                    'fresh release.',
+                    file=sys.stderr,
+                )
+                next_steps(
+                    [
+                        'Run release_phase1.py status to monitor the existing jobs.',
+                        'After they finish, rerun release_phase1.py run --apply; '
+                        'successful jobs will not be resubmitted.',
+                    ]
+                )
+                return 2
+            command = python_command('jed_runs/jed_fresh_start.py')
+            if args.apply:
+                command.append('--apply')
+            code = run_command(command, apply=args.apply)
+            if code:
+                next_steps(
+                    [
+                        'Review the cleanup diagnostics.',
+                        'Rerun release_phase1.py run after correcting the problem.',
+                    ]
+                )
+                return code
+            if args.apply:
+                phase['prepared'] = True
+                save_release(release)
     else:
         print('Preparation was already completed; reusing the existing state.')
 
@@ -266,7 +301,6 @@ def build_parser() -> argparse.ArgumentParser:
     subparsers = parser.add_subparsers(dest='command', required=True)
     run = subparsers.add_parser('run', help='prepare and submit unfinished jobs')
     run.add_argument('--apply', action='store_true')
-    run.add_argument('--allow-dirty', action='store_true')
     run.add_argument('--skip-slurm-check', action='store_true')
     run.set_defaults(function=phase1_run)
 
@@ -293,6 +327,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return args.function(args)
+    except DirtyWorkingTreeError as error:
+        print(f'error: {error}', file=sys.stderr)
+        next_steps(
+            [
+                'The paths above include authored or unrecognized files. '
+                'Release commands require a clean checkout. Commit or stash '
+                'those files; generated JED outputs may remain.',
+                'If the listed paths are disposable generated files, inspect '
+                'release_reset.py --scope all and apply it with --confirm.',
+                'If archived results must be kept, use jed_commit_results.py '
+                'or stash them before cleaning.',
+                'Rerun release_phase1.py run; it resumes the release and submits '
+                'only unfinished jobs.',
+                'If jobs were already submitted and you only want their status, '
+                'run release_phase1.py status instead.',
+            ]
+        )
+        return 2
     except (OSError, ValueError, RuntimeError) as error:
         print(f'error: {error}', file=sys.stderr)
         next_steps(

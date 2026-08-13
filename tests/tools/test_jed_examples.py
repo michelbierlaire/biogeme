@@ -14,7 +14,7 @@ from jed_runs.jed_examples import (
     select_jobs,
     status_label,
 )
-from jed_runs.jed_fresh_start import collect_targets
+from jed_runs.jed_fresh_start import collect_targets, root_smoke_artifacts
 
 
 def test_high_draw_panel_simulation_uses_memory_profile(tmp_path: Path):
@@ -27,6 +27,17 @@ def test_high_draw_panel_simulation_uses_memory_profile(tmp_path: Path):
     assert '#SBATCH --cpus-per-task=36' in script
     assert '#SBATCH --mem-per-cpu=7000M' in script
     assert '--xla_force_host_platform_device_count=36' in script
+
+
+def test_root_smoke_artifacts_are_explicitly_allowlisted(tmp_path: Path):
+    error = tmp_path / 'biogeme-smoke-123.err'
+    output = tmp_path / 'biogeme-smoke-123.out'
+    unrelated = tmp_path / 'other.err'
+    error.write_text('error')
+    output.write_text('output')
+    unrelated.write_text('keep')
+
+    assert root_smoke_artifacts(tmp_path) == [error, output]
 
 
 def test_h04_uses_high_memory_profile(tmp_path: Path):

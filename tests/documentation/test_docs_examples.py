@@ -81,6 +81,18 @@ def test_indicators_dependency_chain_and_artifact_contract():
         'revenue_1.00.txt',
     )
 
+    revenues = specs['indicators/plot_b05revenues.py']
+    assert revenues.dependencies == ('indicators/plot_b02estimation.py',)
+    assert revenues.required_inputs == ('saved_results/b02estimation.yaml',)
+
+    selected_revenues = docs_examples.select_specs(
+        specs, None, ['indicators/plot_b05revenues.py']
+    )
+    assert [spec.script for spec in docs_examples.topological_order(selected_revenues)] == [
+        'indicators/plot_b02estimation.py',
+        'indicators/plot_b05revenues.py',
+    ]
+
 
 def test_generated_files_include_indicator_revenue_reports(tmp_path: Path):
     revenue = tmp_path / 'revenue_1.00.txt'

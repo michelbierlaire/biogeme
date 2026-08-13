@@ -15,6 +15,7 @@ from pathlib import Path
 try:
     from .release_common import (
         PROJECT_ROOT,
+        DirtyWorkingTreeError,
         ensure_clean_tree,
         ensure_release,
         next_steps,
@@ -26,6 +27,7 @@ try:
 except ImportError:  # pragma: no cover - direct script execution
     from release_common import (  # type: ignore[no-redef]
         PROJECT_ROOT,
+        DirtyWorkingTreeError,
         ensure_clean_tree,
         ensure_release,
         next_steps,
@@ -117,7 +119,9 @@ def build_docs(*, apply: bool) -> int:
 
 
 def phase2_run(args: argparse.Namespace) -> int:
-    ensure_clean_tree(args.allow_dirty)
+    # Imported fixtures and documentation outputs are generated release
+    # artifacts.  Permit those while continuing to reject authored changes.
+    ensure_clean_tree(allow_generated=True)
     release = ensure_release(apply=args.apply, phase='phase2')
     phase = release.setdefault('phase2', {})
     stage = Path(args.stage).expanduser().resolve()
@@ -190,6 +194,10 @@ def phase2_run(args: argparse.Namespace) -> int:
 
 
 def phase2_step(args: argparse.Namespace) -> int:
+    # Keep the individual transfer/import/build commands consistent with the
+    # combined command: generated release outputs are allowed, authored edits
+    # are still rejected by the clean-tree guard.
+    ensure_clean_tree(allow_generated=True)
     release = ensure_release(apply=args.apply, phase='phase2')
     phase = release.setdefault('phase2', {})
     stage = Path(args.stage).expanduser().resolve()
@@ -251,7 +259,6 @@ def build_parser() -> argparse.ArgumentParser:
     def add_common(step: argparse.ArgumentParser) -> None:
         step.add_argument('--source', default=str(DEFAULT_STAGE))
         step.add_argument('--stage', default=str(DEFAULT_STAGE))
-        step.add_argument('--allow-dirty', action='store_true')
 
     run = subparsers.add_parser('run', help='transfer, import, and build')
     add_common(run)
@@ -270,6 +277,19 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         return args.function(args)
+    except DirtyWorkingTreeError as error:
+        print(f'error: {error}', file=sys.stderr)
+        next_steps(
+            [
+                'Inspect git status --short and keep only intentional source changes.',
+                'For disposable generated outputs, run release_reset.py --scope all '
+                'as a dry run, then rerun it with --apply --confirm.',
+                'If archived results must be kept, commit them with '
+                'jed_commit_results.py or stash them before cleaning.',
+                'Rerun the same release_phase2.py command after the checkout is clean.',
+            ]
+        )
+        return 2
     except (OSError, ValueError, RuntimeError) as error:
         print(f'error: {error}', file=sys.stderr)
         next_steps(

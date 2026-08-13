@@ -38,7 +38,8 @@ uv sync --frozen
 .venv/bin/python -c "import sys, biogeme; print(sys.executable); print(biogeme.__file__)"
 ```
 
-The working tree should be clean apart from ignored runtime directories. On
+Authored files in the working tree should be clean; generated JED artifacts
+may be present and are handled by the release wrapper as described below. On
 JED, also confirm that no old Slurm job is still running:
 
 ```bash
@@ -46,6 +47,62 @@ squeue -u "$USER"
 ```
 
 Do not reset generated files while a job is running.
+
+Generated JED outputs are expected during this workflow. The release wrappers
+recognize `saved_results`, `saved_html`, generated `.run`, `slurm-*`,
+`*_slurm.out`, `revenue_*.txt`, and `test~*` files below the examples, plus the
+narrow `biogeme-smoke-*.err`/`.out` diagnostics, as generated artifacts.
+Authored changes such as Python, TOML, or documentation source edits still
+stop the command and must be committed or stashed first. There is no
+dirty-tree bypass in the official workflow.
+
+If you intentionally want to begin from a completely clean release state,
+use the reset script rather than removing files manually:
+
+```bash
+"$PY" jed_runs/release_reset.py --scope all
+"$PY" jed_runs/release_reset.py --scope all --apply --confirm
+```
+
+The first command is a dry run. The second removes generated result archives,
+temporary outputs, diagnostics, caches, and runner state, but never source
+code, input data, the manifest, or Git history. Do not apply it while Slurm
+jobs are running. If archived results must be retained, use
+`jed_commit_results.py --dry-run` and commit or stash them before applying the
+reset. On a laptop, `squeue` is normally unavailable; the script warns and
+continues only because `--confirm` explicitly acknowledges the reset. Confirm
+on JED (for example with `squeue -u "$USER"`) that no jobs are running before
+applying an `all` reset from the laptop.
+
+If a previous JED run has already produced archived results that you want to
+keep as a historical snapshot, inspect and commit only the reviewed fixtures
+before starting a fresh release:
+
+```bash
+"$PY" jed_runs/jed_commit_results.py --dry-run
+"$PY" jed_runs/jed_commit_results.py \
+    --message "Preserve JED example results"
+```
+
+Alternatively, stash the generated files (including untracked files) for
+later recovery:
+
+```bash
+git stash push --include-untracked -m "Biogeme generated release artifacts"
+```
+
+The root-level copies (including `biogeme-smoke-*.err`/`.out`) can be removed
+without touching `saved_results` or `saved_html`:
+
+```bash
+"$PY" jed_runs/jed_cleanup.py
+"$PY" jed_runs/jed_cleanup.py --apply
+```
+
+Do not use `jed_fresh_start.py` or `release_reset.py` when the archived results
+must be retained. If the JED jobs have already completed, use
+`release_phase1.py status` and then `release_phase1.py finalize --apply`; do
+not invoke `release_phase1.py run` again unless starting a new release.
 
 ## Detecting and registering new examples
 
@@ -78,8 +135,15 @@ submission, so a new example cannot silently be omitted from a release.
 
 ## Phase 1 — Run and repair all examples on JED
 
-The incremental wrapper is the recommended interface.  First inspect the
-plan:
+Choose the path that matches the state of the JED checkout:
+
+- For a new release, after the example inventory check and with no authored
+  working-tree changes, inspect the submission plan with `run`.
+- For a release that has already been submitted, use `status`; do not use
+  `run` merely to inspect its progress. `run` is the start/resume submission
+  command and performs the clean-tree safety check.
+
+For a new release, inspect the plan:
 
 ```bash
 "$PY" jed_runs/release_phase1.py run
@@ -91,10 +155,29 @@ Then execute it:
 "$PY" jed_runs/release_phase1.py run --apply
 ```
 
-The first applied run performs the fresh generated-output cleanup and submits
-unfinished jobs.  Repeating the same command is safe: successful jobs are
-not resubmitted, and only `NOT_DONE` jobs are selected.  The wrapper refuses
-to reset while Slurm jobs are running.
+When no previous JED attempts exist, the first applied run performs the fresh
+generated-output cleanup and submits unfinished jobs. Repeating the same
+command is safe: successful jobs are not resubmitted, and only `NOT_DONE` jobs
+are selected. Generated artifacts already present in the checkout are accepted
+by the wrapper and are either cleaned by the fresh-start step or retained when
+existing JED attempts are adopted.
+Preserve any old snapshot first if it must not be replaced.
+
+If jobs were launched earlier with the lower-level `jed_examples.py` command,
+the wrapper detects their recorded attempts and adopts them automatically. It
+does not reset their state or rerun successful examples. This is also safe when
+the earlier jobs are still running: use `release_phase1.py status` to monitor
+them, and rerun `release_phase1.py run --apply` only after repairs or when
+`NOT_DONE` jobs remain. To discard all old attempts intentionally, use the
+explicit `release_reset.py --scope all` procedure below first.
+
+If the command reports a dirty tree, inspect the paths in the message. Paths
+under the generated-artifact allowlist may remain. Only authored or
+unrecognized paths need action: commit or stash those files, then rerun the
+same command. If disposable generated files need removal, use the documented
+dry-run cleanup and then apply it. If the message shows only generated files,
+the wrapper will proceed and will either adopt existing attempts or perform
+the fresh-start cleanup.
 
 Monitor the release with:
 
@@ -102,6 +185,26 @@ Monitor the release with:
 "$PY" jed_runs/release_phase1.py status
 "$PY" jed_runs/release_phase1.py monitor --wait --poll-seconds 60
 ```
+
+`status` is read-only and may be run at any time while jobs are queued or
+running. It scans the global release state across all JED runs, so you do not
+need to provide a run identifier. It prints the per-job status and a summary
+such as `OK`, `ERROR`, `RUNNING`, `PENDING`, or `NOT_DONE`, followed by the
+next recommended action. The equivalent lower-level command, useful when
+more detail is needed, is:
+
+```bash
+"$PY" jed_runs/jed_examples.py status --verbose
+```
+
+Use the status result as follows:
+
+- `OK`: Slurm completed successfully and every declared output was produced;
+- `ERROR`: inspect the diagnostic and error report, repair the example, then
+  invalidate it before resubmitting;
+- `RUNNING` or `PENDING`: wait and run `release_phase1.py status` again;
+- `NOT_DONE` or `NOT_SCHEDULED`: run `release_phase1.py run --apply` to submit
+  the remaining work.
 
 If a job fails, inspect the diagnostics, repair the source, invalidate the
 failed job and its dependents, and rerun the wrapper:

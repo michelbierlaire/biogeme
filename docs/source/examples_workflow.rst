@@ -25,6 +25,17 @@ commands without specifying a release identifier:
    uv run --locked --group docs python jed_runs/release_phase1.py run --apply
    uv run --locked --group docs python jed_runs/release_phase1.py status
 
+The ``run`` commands are for starting or resuming submission and perform the
+clean-working-tree safety check.  If Phase 1 has already been submitted,
+start with the read-only ``status`` command; do not invoke ``run`` merely to
+inspect progress.  When every job is ``OK``, finalize Phase 1 before importing
+fixtures.
+
+The ``status`` command is read-only: it does not submit or restart jobs.  Use
+it after the JED jobs finish (or periodically while they run) to obtain the
+per-example statuses and the global summary.  When every job is ``OK``, run
+``release_phase1.py finalize --apply`` before transferring the fixtures.
+
 Phase 1 submits only unfinished JED jobs.  If a job fails, repair it, use
 ``jed_examples.py invalidate`` for that job, and rerun ``release_phase1.py``;
 successful jobs are not repeated.  After all jobs are ``OK``, finalize Phase 1

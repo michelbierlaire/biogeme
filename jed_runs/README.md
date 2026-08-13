@@ -38,10 +38,52 @@ repository root with `uv sync --frozen`. Do not run `uv` from a separate
 project directory; the golden-reference project is intentionally isolated
 under `tests/golden_reference/`.
 
+Generated JED outputs are normal during a release. The wrapper recognizes
+`saved_results`, `saved_html`, generated `.run`, `slurm-*`, `*_slurm.out`,
+`revenue_*.txt`, and `test~*` files below the examples, plus the narrow
+root-level `biogeme-smoke-*.err`/`.out` diagnostics. Authored Python, TOML,
+and documentation changes still block the command and must be committed or
+stashed; there is no dirty-tree bypass in the release workflow. If a previous
+run left archived results that must be kept as a historical snapshot, preserve them before
+starting a fresh release by reviewing and committing the archive directories,
+or stash generated files:
+
+```bash
+$PY jed_runs/jed_commit_results.py --dry-run
+$PY jed_runs/jed_commit_results.py --message "Preserve JED example results"
+
+# Alternative: preserve generated files in a recoverable Git stash.
+git stash push --include-untracked -m "Biogeme generated release artifacts"
+```
+
+For a genuinely new release, inspect and apply the guarded full reset instead
+of deleting files manually:
+
+```bash
+$PY jed_runs/release_reset.py --scope all
+$PY jed_runs/release_reset.py --scope all --apply --confirm
+```
+
+It removes generated archives, outputs, diagnostics, caches, and runner state
+only; it never removes source code or input data. Do not apply it while Slurm
+jobs are running. On a laptop, `squeue` is normally unavailable; the script
+warns and continues only because `--confirm` explicitly acknowledges the
+reset. Before applying an `all` reset from the laptop, confirm on JED with
+`squeue -u "$USER"` that no jobs are running. Preserve any historical result
+snapshot first.
+
+`jed_cleanup.py --apply` removes only root-level generated copies (including
+the narrow `biogeme-smoke-*.err`/`.out` diagnostics) and keeps the two archive
+directories. Do not use `jed_fresh_start.py` or
+`release_reset.py` if those archived results must be retained. If the jobs
+already finished, inspect them with `release_phase1.py status` rather than
+calling `release_phase1.py run` again.
+
 ## Start a run
 
-For the release workflow, first check the example inventory and inspect the
-Phase-1 plan:
+For a new release, first check the example inventory and inspect the Phase-1
+plan. Generated JED outputs may remain in the checkout; authored changes must
+still be committed or stashed:
 
 ```bash
 $PY jed_runs/release_examples.py --strict
@@ -53,6 +95,47 @@ The same applied command can be repeated after repairs; it submits only
 unfinished jobs.  Use `release_phase1.py status` and
 `release_phase1.py monitor --wait` while the jobs run.  After all jobs are
 `OK`, use `release_phase1.py finalize --apply` before transferring results.
+
+If jobs were started earlier with `jed_examples.py`, `release_phase1.py run`
+adopts the recorded attempts instead of resetting them. Successful examples
+are therefore preserved and only unfinished jobs can be submitted. Use
+`release_reset.py --scope all` only when an entirely fresh attempt is intended.
+
+If the dirty-tree check reports a mixture of paths, generated result files may
+remain; commit or stash only the authored or unrecognized paths it lists. For
+disposable generated files, use the documented dry-run cleanup before applying
+it; the release commands do not bypass the clean-tree check.
+
+If a release has already been submitted, start with the read-only status
+command instead of `release_phase1.py run`:
+
+```bash
+$PY jed_runs/release_phase1.py status
+```
+
+### Check the JED results
+
+The status command does not submit or restart anything.  It reads the runner
+state and prints the status of every discovered example, together with a
+summary and the next recommended action:
+
+```bash
+$PY jed_runs/release_phase1.py status
+```
+
+Use it after the jobs have finished, or periodically while they are running.
+For a continuously monitored run, use:
+
+```bash
+$PY jed_runs/release_phase1.py monitor --wait --poll-seconds 60
+```
+
+When the summary contains only `OK`, finalize the JED phase before transferring
+results:
+
+```bash
+$PY jed_runs/release_phase1.py finalize --apply
+```
 
 Make sure all jobs from an earlier run have finished before resetting outputs.
 For a recoverable reset, first inspect and then apply:
