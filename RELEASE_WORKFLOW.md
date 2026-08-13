@@ -35,7 +35,8 @@ Choose the release commit and use it on both machines:
 git rev-parse HEAD
 git status --short
 uv sync --frozen
-.venv/bin/python -c "import sys, biogeme; print(sys.executable); print(biogeme.__file__)"
+uv run --locked --group docs python -c \
+  "import sys, biogeme; print(sys.executable); print(biogeme.__file__)"
 ```
 
 Authored files in the working tree should be clean; generated JED artifacts
@@ -60,8 +61,9 @@ If you intentionally want to begin from a completely clean release state,
 use the reset script rather than removing files manually:
 
 ```bash
-"$PY" jed_runs/release_reset.py --scope all
-"$PY" jed_runs/release_reset.py --scope all --apply --confirm
+uv run --locked --group docs python jed_runs/release_reset.py --scope all
+uv run --locked --group docs python jed_runs/release_reset.py \
+    --scope all --apply --confirm
 ```
 
 The first command is a dry run. The second removes generated result archives,
@@ -307,7 +309,7 @@ run directly on the laptop only as an exception; after verifying its declared
 outputs, record it with:
 
 ```bash
-"$PY" jed_runs/jed_examples.py mark-ok \
+uv run --locked --group docs python jed_runs/jed_examples.py mark-ok \
     --script family/plot_fixed.py --source laptop
 ```
 
@@ -319,11 +321,12 @@ shown first:
 
 ```bash
 cd ~/MyFiles/github/biogeme
-PY=.venv/bin/python
 JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
 
-"$PY" jed_runs/release_phase2.py run --source "$JED_REMOTE"
-"$PY" jed_runs/release_phase2.py run --source "$JED_REMOTE" --apply
+uv run --locked --group docs python jed_runs/release_phase2.py \
+    run --source "$JED_REMOTE"
+uv run --locked --group docs python jed_runs/release_phase2.py \
+    run --source "$JED_REMOTE" --apply
 ```
 
 The transfer uses `rsync --partial`, so an interrupted copy can be resumed by
@@ -332,7 +335,7 @@ all declared artifacts are available.  If the documentation build fails, run
 only:
 
 ```bash
-"$PY" jed_runs/release_phase2.py build --apply
+uv run --locked --group docs python jed_runs/release_phase2.py build --apply
 ```
 
 The phase-2 state is retained under `.jed_runs/releases`.  The wrapper never
@@ -458,7 +461,7 @@ caches, or other transfer directories.
 If a genuinely fresh release is required, inspect the complete reset plan:
 
 ```bash
-"$PY" jed_runs/release_reset.py --scope all
+uv run --locked --group docs python jed_runs/release_reset.py --scope all
 ```
 
 The scopes are `jed`, `laptop`, and `all`.  The reset removes only generated
@@ -469,7 +472,8 @@ repository.  It refuses to clean the JED scope while Slurm jobs are running.
 Apply the reviewed plan explicitly:
 
 ```bash
-"$PY" jed_runs/release_reset.py --scope all --apply --confirm
+uv run --locked --group docs python jed_runs/release_reset.py \
+    --scope all --apply --confirm
 ```
 
 After a reset, the next release starts with `release_examples.py --apply` to
