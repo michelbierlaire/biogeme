@@ -193,8 +193,9 @@ Each submitted job copies its example into a job-specific temporary work
 directory (`$SLURM_TMPDIR`, or `$TMPDIR`/`/tmp`), runs there, and harvests only
 that job's outputs back into `saved_results` or `saved_html`. Declared
 root-level text reports (for example, `revenue_1.00.txt`) remain at the
-example root. This prevents concurrent jobs from seeing or harvesting one
-another's artifacts.
+example root for consumers and are also copied into `saved_results` for
+durable transfer. This prevents final cleanup from destroying a result that
+Phase 2 still needs.
 
 The JED status is not considered `OK` merely because Slurm returned
 `COMPLETED`: every declared output must also be present in the shared archived

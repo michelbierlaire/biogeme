@@ -18,6 +18,8 @@ from jed_examples import (
     INPUT_CSV_NAMES,
     PROJECT_ROOT,
     RESULT_DIRECTORIES,
+    copy_output,
+    discover_jobs,
 )
 
 
@@ -49,6 +51,34 @@ def generated_root_artifacts() -> list[Path]:
     return sorted(candidates)
 
 
+def archive_declared_root_outputs() -> list[Path]:
+    """Copy declared root outputs into their persistent archive first.
+
+    Older jobs may have completed before the runner started archiving every
+    declared output.  Promote those root-level files before cleanup so a
+    successful job is not made impossible to import merely by finalization.
+    """
+    promoted: list[Path] = []
+    for job in discover_jobs().values():
+        for expected in job.expected_outputs:
+            relative = Path(expected)
+            if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+                continue
+            source = job.directory / relative
+            if not source.is_file():
+                continue
+            destination_directory = (
+                job.directory / 'saved_html'
+                if source.suffix.lower() == '.html'
+                else job.directory / 'saved_results'
+            )
+            destination = destination_directory / source.name
+            if source.resolve() != destination.resolve():
+                copy_output(source, destination)
+                promoted.append(destination)
+    return promoted
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         description=(
@@ -72,6 +102,9 @@ def main(argv: list[str] | None = None) -> int:
         print('Dry run only. Re-run with --apply to delete these files.')
         return 0
 
+    promoted = archive_declared_root_outputs()
+    if promoted:
+        print(f'Archived {len(promoted)} declared root-level output(s).')
     for path in candidates:
         path.unlink()
     print(f'Deleted {len(candidates)} root-level generated artifact(s).')

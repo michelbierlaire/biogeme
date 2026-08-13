@@ -206,7 +206,8 @@ the ``expected_outputs`` and ``expected_output_globs`` entries for the selected
 profile.  A glob is used for estimators such as the all-algorithm and
 multi-model examples whose model names are generated at runtime.  YAML and
 Pareto files go to each example's ``saved_results/``, HTML files to
-``saved_html/``, and declared text reports remain at the example root.  Only
+``saved_html/``, and declared text reports remain at the example root while a
+copy is archived in ``saved_results/`` for transfer.  Only
 the two Bayesian examples that consume posterior draws declare NetCDF
 fixtures; all other Bayesian examples use YAML summaries.  The single
 ``rsync`` invocation transfers the selected archives and required NetCDF files

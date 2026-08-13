@@ -637,11 +637,26 @@ def harvest_outputs(
             # Keep the timestamp behavior for callers that do not provide the
             # lifecycle snapshots.
             continue
+        # Keep every declared output in the canonical archive.  Text reports
+        # are consumed at the example root, so retain that copy as well as an
+        # archived copy: ``jed_cleanup.py`` removes the root copy after a run,
+        # and Phase 2 must still be able to transfer the result later.
+        if path.suffix == '.txt':
+            root_destination = destination_root / path.name
+            if path.resolve() != root_destination.resolve():
+                copy_output(path, root_destination)
+            archive_destination = destination_root / 'saved_results' / path.name
+            copy_output(path, archive_destination)
+            harvested.extend(
+                [
+                    root_destination.relative_to(destination_root).as_posix(),
+                    archive_destination.relative_to(destination_root).as_posix(),
+                ]
+            )
+            continue
         destination_directory = (
             destination_root / 'saved_html'
             if path.suffix == '.html'
-            else destination_root
-            if path.suffix == '.txt'
             else destination_root / 'saved_results'
         )
         destination = destination_directory / path.name

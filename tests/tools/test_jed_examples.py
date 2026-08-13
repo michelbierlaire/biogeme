@@ -311,7 +311,7 @@ def test_job_lifecycle_archives_declared_root_text_report(tmp_path: Path):
 
     assert job_finish(job, state, 0, work) == 0
     assert (source / 'revenue_1.00.txt').is_file()
-    assert not (source / 'saved_results' / 'revenue_1.00.txt').exists()
+    assert (source / 'saved_results' / 'revenue_1.00.txt').is_file()
 
 
 def test_job_lifecycle_requires_all_declared_outputs(tmp_path: Path):

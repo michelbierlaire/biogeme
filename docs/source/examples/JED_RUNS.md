@@ -154,7 +154,8 @@ The importer accepts either a complete JED checkout or its
 `.release_staging/examples`. It imports only `expected_outputs` and
 `expected_output_globs` declared in `jed_runs/jed_examples.toml`:
 YAML and Pareto results are placed in `saved_results/`, HTML reports in
-`saved_html/`, and declared text reports at the example root. The first
+`saved_html/`, and declared text reports at the example root with a copy in
+`saved_results/`. The first
 command transfers only archived YAML/HTML/Pareto fixtures and
 declared root-level revenue reports; it does not copy source code, input data,
 logs, or any NetCDF file except the two explicitly included files. Only
@@ -459,9 +460,10 @@ input data, configuration files, and .run files. During a run, job-finish
 copies new root-level YAML/NetCDF/HTML/Pareto results into the saved_results
 or saved_html directory expected by dependent examples. Declared root-level
 text reports, such as `revenue_1.00.txt`, are kept at the example root because
-the importer and consumers expect them there. It deliberately leaves the
-root-level files in place so concurrent jobs cannot invalidate one another's
-harvest; same-named archive copies are replaced. Once all jobs have completed,
+the importer and consumers expect them there, and are also copied into
+`saved_results` for durable transfer. It deliberately leaves the root-level
+files in place so concurrent jobs cannot invalidate one another's harvest;
+same-named archive copies are replaced. Once all jobs have completed,
 run `python jed_runs/jed_cleanup.py`
 to review those root-level files and `python jed_runs/jed_cleanup.py --apply` to
 remove them.

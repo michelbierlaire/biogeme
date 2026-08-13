@@ -52,6 +52,7 @@ def transfer_command(source: str, stage: Path) -> list[str]:
         '-a',
         '--partial',
         '--progress',
+        '--stats',
         '--whole-file',
         '--delete',
         '-e',
@@ -74,6 +75,26 @@ def transfer_command(source: str, stage: Path) -> list[str]:
         source.rstrip('/') + '/',
         str(stage) + '/',
     ]
+
+
+def staged_artifacts_complete(stage: Path) -> bool:
+    """Return whether the stage contains every manifest-declared artifact."""
+    if not stage.is_dir():
+        return False
+    from tools import docs_examples, import_jed_results
+
+    config = docs_examples.load_config()
+    specs = docs_examples.discover_specs(config)
+    selected = docs_examples.select_specs(specs, None, [])
+    with_outputs = [
+        spec
+        for spec in selected.values()
+        if spec.expected_outputs or spec.expected_output_globs
+    ]
+    if not with_outputs:
+        return False
+    items = import_jed_results.build_plan(with_outputs, stage, stage)
+    return bool(items) and all(item.source is not None for item in items)
 
 
 def ensure_source(source: str, stage: Path, *, apply: bool) -> Path:
@@ -147,6 +168,16 @@ def phase2_run(args: argparse.Namespace) -> int:
     phase['source'] = source_key
 
     source = stage
+    # The release state is deliberately resumable, but the staging directory
+    # can be deleted or partially copied independently of that state. Never
+    # trust a recorded completed import when its declared inputs are absent.
+    if phase.get('imported') and not staged_artifacts_complete(stage):
+        print(
+            'Recorded Phase 2 import is incomplete: refreshing the JED '
+            'artifact transfer.'
+        )
+        phase['imported'] = False
+        phase['built'] = False
     # A transfer can succeed while the strict import still reports missing
     # artifacts (for example, when a JED job finished after the first rsync).
     # Until import has succeeded, always refresh a remote source.  rsync is
@@ -252,6 +283,13 @@ def phase2_step(args: argparse.Namespace) -> int:
         next_steps(['Run release_phase2.py import --apply.'])
         return 0
     if args.command == 'import':
+        if phase.get('imported') and not staged_artifacts_complete(stage):
+            print(
+                'Recorded Phase 2 import is incomplete: refreshing the JED '
+                'artifact transfer.'
+            )
+            phase['imported'] = False
+            phase['built'] = False
         if phase.get('imported'):
             source = Path(phase.get('artifact_root', str(stage)))
         else:

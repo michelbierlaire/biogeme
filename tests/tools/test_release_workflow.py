@@ -248,6 +248,35 @@ def test_rsync_transfer_is_resumable():
     assert '--include=*.yaml' in command
     assert '--include=*.html' in command
     assert command[-2] == 'user@host:/home/user/examples/'
+    assert '--stats' in command
+
+
+def test_incomplete_recorded_stage_forces_refresh(monkeypatch, tmp_path):
+    stage = tmp_path / 'examples'
+    source = 'user@host:/home/user/examples'
+    release = {
+        'phase2': {
+            'source': source,
+            'transferred': True,
+            'imported': True,
+            'built': True,
+            'artifact_root': str(stage),
+        }
+    }
+    calls = []
+    monkeypatch.setattr(release_phase2, 'ensure_clean_tree', lambda **_: None)
+    monkeypatch.setattr(release_phase2, 'ensure_release', lambda **_: release)
+    monkeypatch.setattr(release_phase2, 'save_release', lambda _: None)
+    monkeypatch.setattr(release_phase2, 'next_steps', lambda _: None)
+    monkeypatch.setattr(release_phase2, 'ensure_source', lambda *args, **kwargs: calls.append(args) or stage)
+    monkeypatch.setattr(release_phase2, 'staged_artifacts_complete', lambda _: False)
+    monkeypatch.setattr(release_phase2, 'clean_docs', lambda **_: 0)
+    monkeypatch.setattr(release_phase2, 'import_artifacts', lambda *_args, **_kwargs: 0)
+    monkeypatch.setattr(release_phase2, 'build_docs', lambda **_: 0)
+
+    args = SimpleNamespace(source=source, stage=str(stage), apply=True)
+    assert release_phase2.phase2_run(args) == 0
+    assert calls == [(source, stage.resolve())]
 
 
 def test_phase2_refreshes_incomplete_transfer_before_import(monkeypatch, tmp_path):
