@@ -339,6 +339,43 @@ def test_job_lifecycle_requires_all_declared_outputs(tmp_path: Path):
     assert 'model.html' in completion['diagnostics'][0]
 
 
+def test_completed_job_is_not_ok_when_declared_archive_is_missing(
+    tmp_path: Path, monkeypatch
+):
+    source = tmp_path / 'example'
+    work = tmp_path / 'work'
+    state = tmp_path / 'state'
+    run = tmp_path / 'run'
+    source.mkdir()
+    work.mkdir()
+    job = Job(
+        script='plot_model.py',
+        path=source / 'plot_model.py',
+        source='print("model")',
+        profile='light',
+        dependencies=(),
+        required_inputs=(),
+        requires_artifacts=True,
+        expected_outputs=('model.yaml',),
+    )
+    assert job_start(job, state, work) == 0
+    (work / 'model.yaml').write_text('result')
+    # Simulate a runner that reports completion before its archive copy.
+    monkeypatch.setattr(jed_examples, 'discover_jobs', lambda: {job.script: job})
+    assert job_finish(job, state, 0, work) == 0
+    (source / 'saved_results' / 'model.yaml').unlink()
+    job_state = run / 'jobs' / 'plot_model'
+    job_state.mkdir(parents=True)
+    for name in ('completion.json', 'diagnostic.json'):
+        (job_state / name).write_text((state / name).read_text())
+    monkeypatch.setattr(jed_examples, 'EXAMPLES_ROOT', source)
+    monkeypatch.setattr(jed_examples, 'slurm_state', lambda _: ('COMPLETED', '0:0'))
+    record = {'script': job.script, 'job_id': '123'}
+    status, detail = jed_examples.classify_job(record, run)
+    assert status == 'not done'
+    assert 'model.yaml' in detail
+
+
 def test_mark_ok_requires_declared_outputs(monkeypatch, tmp_path: Path):
     source = tmp_path / 'example'
     source.mkdir()

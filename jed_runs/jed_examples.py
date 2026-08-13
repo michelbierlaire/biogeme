@@ -474,6 +474,63 @@ def declared_output_files(job: Job, directory: Path) -> list[Path]:
     return sorted(result)
 
 
+def archived_output_candidates(directory: Path, expected: str) -> list[Path]:
+    """Return the possible archived locations for one declared output."""
+    relative = Path(expected)
+    if relative.is_absolute() or '..' in relative.parts:
+        return []
+    if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+        return [directory / relative]
+    if relative.suffix.lower() == '.html':
+        return [directory / 'saved_html' / relative, directory / relative]
+    if relative.suffix.lower() in DECLARED_RESULT_SUFFIXES:
+        return [directory / 'saved_results' / relative, directory / relative]
+    return [directory / relative, directory / 'saved_results' / relative]
+
+
+def archived_output_glob_matches(directory: Path, pattern: str) -> list[Path]:
+    """Return files matching a declared dynamic-output pattern."""
+    relative = Path(pattern)
+    if relative.is_absolute() or '..' in relative.parts:
+        return []
+    if relative.parts and relative.parts[0] in RESULT_DIRECTORIES:
+        roots = [directory]
+    elif relative.suffix.lower() == '.html':
+        roots = [directory / 'saved_html', directory]
+    elif relative.suffix.lower() in DECLARED_RESULT_SUFFIXES:
+        roots = [directory / 'saved_results', directory]
+    else:
+        roots = [directory, directory / 'saved_results']
+    return [
+        path
+        for root in roots
+        if root.is_dir()
+        for path in root.glob(pattern)
+        if path.is_file()
+    ]
+
+
+def missing_archived_outputs(
+    expected_outputs: tuple[str, ...],
+    expected_output_globs: tuple[str, ...],
+    directory: Path,
+) -> list[str]:
+    """Return declared outputs absent from the shared archived example tree."""
+    missing = [
+        expected
+        for expected in expected_outputs
+        if not any(
+            path.is_file() for path in archived_output_candidates(directory, expected)
+        )
+    ]
+    missing.extend(
+        pattern
+        for pattern in expected_output_globs
+        if not archived_output_glob_matches(directory, pattern)
+    )
+    return missing
+
+
 def remove_declared_outputs(job: Job) -> list[Path]:
     """Remove generated outputs so an invalidated example cannot reuse them."""
 
@@ -666,6 +723,17 @@ def job_finish(
             diagnostics.append(
                 'Missing or unchanged declared output(s): '
                 + ', '.join(missing_declared)
+            )
+            exit_code = MISSING_OUTPUT_EXIT_CODE
+        missing_archived = missing_archived_outputs(
+            job.expected_outputs,
+            job.expected_output_globs,
+            job.directory,
+        )
+        if missing_archived:
+            diagnostics.append(
+                'Declared output(s) were not archived in the shared example tree: '
+                + ', '.join(missing_archived)
             )
             exit_code = MISSING_OUTPUT_EXIT_CODE
         elif job.requires_artifacts and not changed:
@@ -1142,6 +1210,28 @@ def classify_job(record: dict[str, Any], run_directory: Path) -> tuple[str, str]
                     and normalized == 'COMPLETED'
                     and slurm_success
                 ):
+                    configured_job = discover_jobs().get(record['script'])
+                    expected_outputs = (
+                        configured_job.expected_outputs
+                        if configured_job is not None
+                        else tuple(record.get('expected_outputs', ()))
+                    )
+                    expected_output_globs = (
+                        configured_job.expected_output_globs
+                        if configured_job is not None
+                        else tuple(record.get('expected_output_globs', ()))
+                    )
+                    missing_archived = missing_archived_outputs(
+                        expected_outputs,
+                        expected_output_globs,
+                        EXAMPLES_ROOT / Path(record['script']).parent,
+                    )
+                    if missing_archived:
+                        return (
+                            'not done',
+                            'declared archived output(s) missing: '
+                            + ', '.join(missing_archived),
+                        )
                     return 'finished without error', 'outputs validated'
                 diagnostics = completion.get('diagnostics') or [
                     f'Slurm state={state}, detail={detail}'

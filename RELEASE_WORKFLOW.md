@@ -277,6 +277,13 @@ The status meanings are:
 - `RUNNING`: the job is active or waiting in Slurm;
 - `NOT_DONE`: it has not yet completed successfully.
 
+`OK` also means that every declared output is present in the JED example's
+`saved_results`/`saved_html` archive (or at its declared root location).  A
+Slurm `COMPLETED` record by itself is not sufficient.  After updating the
+runner, an older attempt that was previously shown as `OK` can therefore be
+reported as `NOT_DONE` if its archive is missing; `release_phase1.py run
+--apply` will submit only that example.
+
 When an example fails:
 
 1. Read the diagnostic report.
@@ -338,6 +345,14 @@ only:
 uv run --locked --group docs python jed_runs/release_phase2.py build --apply
 ```
 
+If strict import reports missing artifacts, do not rerun individual examples
+just for that message.  The phase-2 wrapper refreshes the persistent staging
+directory from JED on every retry until import succeeds.  This matters when a
+JED status was checked before the first transfer, or when an example writes a
+declared YAML/HTML file at its workspace root.  Rerun the same `run --apply`
+command after the JED results are available; the transfer is resumable and the
+successful JED jobs are not resubmitted.
+
 The phase-2 state is retained under `.jed_runs/releases`.  The wrapper never
 commits changes; after a successful build, review `git status --short` and
 commit manually.
@@ -375,6 +390,7 @@ JED_STAGE="$PWD/.release_staging/examples"
 mkdir -p "$JED_STAGE"
 JED_REMOTE='bierlair@jed.epfl.ch:/home/bierlair/github/biogeme/docs/source/examples'
 rsync -a --partial --progress --whole-file \
+    --delete \
     -e 'ssh -o Compression=no' \
     --include='*/' \
     --include='bayesian_swissmetro/saved_results/b01a_logit.nc' \
@@ -382,13 +398,16 @@ rsync -a --partial --progress --whole-file \
     --exclude='*.nc' \
     --include='*/saved_results/***' \
     --include='*/saved_html/***' \
+    --include='*.yaml' \
+    --include='*.html' \
+    --include='*.pareto' \
     --include='revenue_*.txt' \
     --exclude='*' \
     "$JED_REMOTE/" "$JED_STAGE/"
 ```
 
 This single `rsync` invocation transfers only archived YAML/HTML/Pareto
-fixtures, the declared root-level revenue reports, and the two NetCDF files
+fixtures, declared root-level YAML/HTML/Pareto/revenue reports, and the two NetCDF files
 required by the gallery. It does not copy source code, input data, logs, or any
 other NetCDF file. These are the only NetCDF files required by the gallery:
 `plot_b01c_logit_simul.py`
@@ -402,7 +421,9 @@ once. For unattended transfers, load the key into the macOS keychain first:
 ssh-add --apple-use-keychain ~/.ssh/id_rsa
 ```
 
-For a fresh staging directory, `--whole-file` avoids a delta-checksum pass. If
+The staging directory is dedicated to release artifacts; `--delete` removes
+stale selected files from an earlier transfer, while `--partial` preserves an
+interrupted file for the next attempt. `--whole-file` avoids a delta-checksum pass. If
 the transfer is interrupted, rerun the command; `--partial` keeps the partial
 files. To let rsync resume a large partial file block by block, remove
 `--whole-file` on the retry. Do not add `--compress` (`-z`): NetCDF is already

@@ -193,7 +193,9 @@ def test_reset_allows_laptop_without_slurm(monkeypatch, capsys):
 
 
 def test_phase1_adopts_existing_attempts_without_resetting(monkeypatch, capsys):
-    monkeypatch.setattr(release_phase1, 'ensure_clean_tree', lambda *args, **kwargs: None)
+    monkeypatch.setattr(
+        release_phase1, 'ensure_clean_tree', lambda *args, **kwargs: None
+    )
     monkeypatch.setattr(
         release_phase1,
         'check_examples',
@@ -209,16 +211,16 @@ def test_phase1_adopts_existing_attempts_without_resetting(monkeypatch, capsys):
 
     args = SimpleNamespace(apply=False, skip_slurm_check=False)
     assert release_phase1.phase1_run(args) == 0
-    assert 'adopting them and skipping the fresh-start cleanup' in capsys.readouterr().out
+    assert (
+        'adopting them and skipping the fresh-start cleanup' in capsys.readouterr().out
+    )
 
 
 def test_phase1_dirty_tree_next_steps_distinguish_existing_release(monkeypatch, capsys):
     monkeypatch.setattr(
         release_phase1,
         'ensure_clean_tree',
-        lambda **kwargs: (_ for _ in ()).throw(
-            DirtyWorkingTreeError('dirty tree')
-        ),
+        lambda **kwargs: (_ for _ in ()).throw(DirtyWorkingTreeError('dirty tree')),
     )
 
     assert release_phase1.main(['run']) == 2
@@ -241,5 +243,36 @@ def test_rsync_transfer_is_resumable():
         'user@host:/home/user/examples', Path('/tmp/stage')
     )
     assert '--partial' in command
+    assert '--delete' in command
     assert '--exclude=*.nc' in command
+    assert '--include=*.yaml' in command
+    assert '--include=*.html' in command
     assert command[-2] == 'user@host:/home/user/examples/'
+
+
+def test_phase2_refreshes_incomplete_transfer_before_import(monkeypatch, tmp_path):
+    stage = tmp_path / 'examples'
+    source = 'user@host:/home/user/examples'
+    calls = []
+    release = {
+        'phase2': {
+            'source': source,
+            'transferred': True,
+            'artifact_root': str(stage),
+        }
+    }
+    monkeypatch.setattr(release_phase2, 'ensure_clean_tree', lambda **_: None)
+    monkeypatch.setattr(release_phase2, 'ensure_release', lambda **_: release)
+    monkeypatch.setattr(release_phase2, 'save_release', lambda _: None)
+    monkeypatch.setattr(release_phase2, 'next_steps', lambda _: None)
+
+    def refresh(remote, destination, *, apply):
+        calls.append((remote, destination, apply))
+        return destination
+
+    monkeypatch.setattr(release_phase2, 'ensure_source', refresh)
+    monkeypatch.setattr(release_phase2, 'import_artifacts', lambda *_args, **_kwargs: 1)
+    args = SimpleNamespace(source=source, stage=str(stage), apply=True)
+
+    assert release_phase2.phase2_run(args) == 1
+    assert calls == [(source, stage.resolve(), True)]

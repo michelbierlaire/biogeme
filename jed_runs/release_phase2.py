@@ -53,6 +53,7 @@ def transfer_command(source: str, stage: Path) -> list[str]:
         '--partial',
         '--progress',
         '--whole-file',
+        '--delete',
         '-e',
         'ssh -o Compression=no',
         '--include=*/',
@@ -61,6 +62,13 @@ def transfer_command(source: str, stage: Path) -> list[str]:
         '--exclude=*.nc',
         '--include=*/saved_results/***',
         '--include=*/saved_html/***',
+        # Some examples write their declared result files at the example
+        # directory root.  The JED harvester accepts both layouts; retain
+        # root-level reports in the transfer so the strict importer can see
+        # them and move them into the canonical saved_* directories.
+        '--include=*.yaml',
+        '--include=*.html',
+        '--include=*.pareto',
         '--include=revenue_*.txt',
         '--exclude=*',
         source.rstrip('/') + '/',
@@ -134,7 +142,14 @@ def phase2_run(args: argparse.Namespace) -> int:
     phase['source'] = source_key
 
     source = stage
-    if not phase.get('transferred'):
+    # A transfer can succeed while the strict import still reports missing
+    # artifacts (for example, when a JED job finished after the first rsync).
+    # Until import has succeeded, always refresh a remote source.  rsync is
+    # resumable, so this does not discard an interrupted staging transfer and
+    # it ensures that rerunning the same command actually sees newly archived
+    # JED results.  Once import is complete, the immutable staged snapshot is
+    # reused for the documentation build.
+    if not phase.get('imported'):
         source = ensure_source(args.source, stage, apply=args.apply)
         if args.apply:
             phase['transferred'] = True
@@ -149,8 +164,10 @@ def phase2_run(args: argparse.Namespace) -> int:
         if code:
             next_steps(
                 [
-                    'Complete or repair the artifact transfer and strict import.',
-                    'Rerun release_phase2.py run --apply; completed stages are reused.',
+                    'If JED reports all jobs OK, rerun this same command; it refreshes the '
+                    'persistent staging transfer before retrying strict import.',
+                    'If an artifact is still missing, inspect that example on JED and '
+                    'rerun release_phase1.py status there.',
                 ]
             )
             return code
@@ -216,17 +233,27 @@ def phase2_step(args: argparse.Namespace) -> int:
         next_steps(['Run release_phase2.py import --apply.'])
         return 0
     if args.command == 'import':
-        if phase.get('transferred'):
+        if phase.get('imported'):
             source = Path(phase.get('artifact_root', str(stage)))
-            print(f'Reusing the completed transfer at {relative(source)}.')
         else:
-            source = ensure_source(args.source, stage, apply=False)
+            # Refresh a remote stage until strict import succeeds.  A prior
+            # transfer may have completed before a late JED result appeared.
+            source = ensure_source(args.source, stage, apply=args.apply)
+            if args.apply:
+                phase['source'] = args.source
+                phase['transferred'] = True
+                phase['artifact_root'] = str(source)
+                save_release(release)
+        if phase.get('imported'):
+            print(f'Reusing the completed transfer at {relative(source)}.')
         code = import_artifacts(source, apply=args.apply)
         if code:
             next_steps(
                 [
-                    'Complete or repair the artifact transfer and strict import.',
-                    'Rerun release_phase2.py import --apply.',
+                    'Rerun release_phase2.py import --apply; remote staging is refreshed '
+                    'until strict import succeeds.',
+                    'If an artifact is still missing, inspect that example on JED and '
+                    'rerun release_phase1.py status there.',
                 ]
             )
             return code
