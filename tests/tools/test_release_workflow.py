@@ -227,6 +227,31 @@ def test_active_phase1_state_from_older_revision_is_protected(monkeypatch):
         raise AssertionError('An active Phase 1 release must not be replaced')
 
 
+def test_phase1_adopts_attempts_from_older_runner_revision(monkeypatch, capsys):
+    monkeypatch.setattr('jed_runs.release_common.git_revision', lambda: 'new-revision')
+    monkeypatch.setattr('jed_runs.release_common.manifest_hash', lambda: 'manifest')
+    monkeypatch.setattr(
+        'jed_runs.release_common.load_current_release',
+        lambda: {
+            'release_id': 'old',
+            'revision': 'old-revision',
+            'manifest_sha256': 'manifest',
+            'phase': 'phase1',
+            'phase1': {'prepared': True},
+            'phase2': {},
+        },
+    )
+
+    release = ensure_release(
+        apply=False,
+        phase='phase1',
+        adopt_existing_attempts=True,
+    )
+
+    assert release['revision'] == 'new-revision'
+    assert 'without resetting them' in capsys.readouterr().out
+
+
 def test_reset_allows_laptop_without_slurm(monkeypatch, capsys):
     def missing_squeue(*args, **kwargs):
         raise FileNotFoundError('squeue')

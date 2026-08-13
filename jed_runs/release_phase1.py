@@ -131,14 +131,21 @@ def phase1_run(args: argparse.Namespace) -> int:
     report = check_examples(apply=args.apply)
     if report['new'] or report['unresolved']:
         return 1
-    release = ensure_release(apply=args.apply, phase='phase1')
+    # Existing JED attempts may have been created by an older runner revision.
+    # If the workload manifest is unchanged, adopt those attempts instead of
+    # forcing a destructive reset or blocking the targeted retry.
+    adopt_existing = has_existing_jed_attempts()
+    release = ensure_release(
+        apply=args.apply,
+        phase='phase1',
+        adopt_existing_attempts=adopt_existing,
+    )
     phase = release.setdefault('phase1', {})
 
     if not phase.get('prepared'):
         # A user may have launched jobs with jed_examples.py before adopting
         # this wrapper.  Preserve those attempts and their successful outputs;
         # starting a fresh cleaner here would erase useful release state.
-        adopt_existing = has_existing_jed_attempts()
         if adopt_existing:
             print(
                 'Existing JED attempts detected; adopting them and skipping '
@@ -268,7 +275,11 @@ def phase1_finalize(args: argparse.Namespace) -> int:
             ]
         )
         return 1
-    release = ensure_release(apply=args.apply, phase='phase1')
+    release = ensure_release(
+        apply=args.apply,
+        phase='phase1',
+        adopt_existing_attempts=has_existing_jed_attempts(),
+    )
     phase = release.setdefault('phase1', {})
     if phase.get('finalized'):
         print('Phase 1 was already finalized.')

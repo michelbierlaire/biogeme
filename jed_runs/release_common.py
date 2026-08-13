@@ -141,12 +141,16 @@ def release_directory(release: dict[str, Any]) -> Path:
     return RELEASE_ROOT / release_id
 
 
-def ensure_release(*, apply: bool, phase: str) -> dict[str, Any]:
+def ensure_release(
+    *, apply: bool, phase: str, adopt_existing_attempts: bool = False
+) -> dict[str, Any]:
     """Return the current release, creating it only in apply mode.
 
     A changed revision or manifest never silently reuses an active release.
-    This is the main guard against mixing artifacts from different source
-    trees.  The release identifier is kept internal to the state directory.
+    The only exception is an explicit Phase 1 adoption of existing JED
+    attempts with an unchanged manifest; this preserves historical statuses
+    while preventing a destructive reset.  The release identifier is kept
+    internal to the state directory.
     """
 
     revision = git_revision()
@@ -170,12 +174,22 @@ def ensure_release(*, apply: bool, phase: str) -> dict[str, Any]:
                 and existing.get('phase') == 'phase2'
                 and not existing.get('phase1')
             )
-            if complete or (phase2_only and not manifest_mismatch):
+            phase1_adoption = (
+                phase == 'phase1'
+                and adopt_existing_attempts
+                and not manifest_mismatch
+            )
+            if complete or (phase2_only and not manifest_mismatch) or phase1_adoption:
                 if phase2_only and not complete:
                     print(
                         'The previous incomplete Phase 2 state belongs to an '
                         'older Git revision; starting a new local Phase 2 '
                         'attempt.'
+                    )
+                elif phase1_adoption:
+                    print(
+                        'Existing JED attempts belong to an older Git revision; '
+                        'starting new release bookkeeping without resetting them.'
                     )
                 existing = None
             else:

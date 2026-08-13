@@ -283,6 +283,13 @@ is deliberately protected from this automatic replacement, because mixing
 results from two source revisions would be unsafe.  In that case, finish the
 active Phase 1 attempt or use the guarded reset procedure before continuing.
 
+The same adoption rule applies on JED: if the runner is updated while JED
+already contains recorded attempts and the workload manifest is unchanged,
+`release_phase1.py run --apply` starts new bookkeeping and adopts those global
+attempts. It submits only `NOT_DONE` jobs; it does not reset or resubmit the
+successful jobs. A changed manifest still requires an explicit fresh-release
+decision.
+
 The full HTML target executes the gallery. A failure is a release blocker.
 Review `docs/warnings.log`, then inspect the Git diff:
 

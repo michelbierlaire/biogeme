@@ -33,6 +33,11 @@ incomplete Phase 2 record from an older checkout and starts a fresh local Phase
 record with active Phase 1 state is not replaced automatically, because that
 could mix results from different source revisions.
 
+On JED, an updated runner can likewise adopt existing attempts when the
+manifest is unchanged. `release_phase1.py run --apply` then submits only
+`NOT_DONE` jobs, preserving successful attempts; it does not perform a fresh
+cleanup. A manifest change remains a deliberate release boundary.
+
 ## Prepare the checkout
 
 On JED:
