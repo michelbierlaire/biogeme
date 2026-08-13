@@ -27,6 +27,12 @@ transfer, the strict manifest import, and the full documentation build. Do not
 create the staging directory or invoke `rsync` manually unless diagnosing an
 exception; the emergency recipe is documented in `RELEASE_WORKFLOW.md`.
 
+If the tooling is updated after an interrupted Phase 2, the wrapper detects an
+incomplete Phase 2 record from an older checkout and starts a fresh local Phase
+2 attempt automatically.  It never resubmits JED jobs for this reason.  A
+record with active Phase 1 state is not replaced automatically, because that
+could mix results from different source revisions.
+
 ## Prepare the checkout
 
 On JED:

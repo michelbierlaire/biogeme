@@ -154,8 +154,29 @@ def ensure_release(*, apply: bool, phase: str) -> dict[str, Any]:
     existing = load_current_release()
     if existing is not None:
         complete = bool(existing.get('phase2', {}).get('built'))
-        if existing.get('revision') != revision:
-            if complete:
+        revision_mismatch = existing.get('revision') != revision
+        manifest_mismatch = existing.get('manifest_sha256') != current_manifest
+        if revision_mismatch:
+            # Phase 2 is a local, resumable operation.  Its state can be left
+            # behind when the release tooling itself is committed between an
+            # interrupted transfer/import and the next attempt.  When there
+            # is no Phase 1 state in the record, no JED jobs are being
+            # resumed, so it is safe to start a new local Phase 2 attempt and
+            # leave the old record as history.  An active Phase 1 record is
+            # deliberately still protected: silently mixing its artifacts
+            # with a different checkout would invalidate the release.
+            phase2_only = (
+                phase == 'phase2'
+                and existing.get('phase') == 'phase2'
+                and not existing.get('phase1')
+            )
+            if complete or (phase2_only and not manifest_mismatch):
+                if phase2_only and not complete:
+                    print(
+                        'The previous incomplete Phase 2 state belongs to an '
+                        'older Git revision; starting a new local Phase 2 '
+                        'attempt.'
+                    )
                 existing = None
             else:
                 raise RuntimeError(
@@ -163,7 +184,10 @@ def ensure_release(*, apply: bool, phase: str) -> dict[str, Any]:
                     'release reset command or finish that release before starting '
                     'another one.'
                 )
-        if existing is not None and existing.get('manifest_sha256') != current_manifest:
+        if existing is not None and manifest_mismatch:
+            # A manifest change can alter the declared workload or artifact
+            # contract.  Unlike a tooling-only revision change, it must never
+            # be silently adopted by an incomplete release.
             if complete:
                 existing = None
             else:

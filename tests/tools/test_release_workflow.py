@@ -5,6 +5,7 @@ from jed_runs import release_examples, release_phase1, release_phase2, release_r
 from jed_runs.release_common import (
     DirtyWorkingTreeError,
     ensure_clean_tree,
+    ensure_release,
     run_command,
 )
 
@@ -180,6 +181,50 @@ def test_existing_jed_attempts_are_detected(monkeypatch):
     )
 
     assert release_phase1.has_existing_jed_attempts() is True
+
+
+def test_incomplete_phase2_state_from_older_revision_is_replaced(monkeypatch, capsys):
+    monkeypatch.setattr('jed_runs.release_common.git_revision', lambda: 'new-revision')
+    monkeypatch.setattr('jed_runs.release_common.manifest_hash', lambda: 'manifest')
+    monkeypatch.setattr(
+        'jed_runs.release_common.load_current_release',
+        lambda: {
+            'release_id': 'old',
+            'revision': 'old-revision',
+            'manifest_sha256': 'manifest',
+            'phase': 'phase2',
+            'phase1': {},
+            'phase2': {'transferred': True},
+        },
+    )
+
+    release = ensure_release(apply=False, phase='phase2')
+
+    assert release['revision'] == 'new-revision'
+    assert release['phase1'] == {}
+    assert 'starting a new local Phase 2 attempt' in capsys.readouterr().out
+
+
+def test_active_phase1_state_from_older_revision_is_protected(monkeypatch):
+    monkeypatch.setattr('jed_runs.release_common.git_revision', lambda: 'new-revision')
+    monkeypatch.setattr('jed_runs.release_common.manifest_hash', lambda: 'manifest')
+    monkeypatch.setattr(
+        'jed_runs.release_common.load_current_release',
+        lambda: {
+            'release_id': 'old',
+            'revision': 'old-revision',
+            'manifest_sha256': 'manifest',
+            'phase1': {'launched': True},
+            'phase2': {},
+        },
+    )
+
+    try:
+        ensure_release(apply=False, phase='phase2')
+    except RuntimeError as error:
+        assert 'different Git revision' in str(error)
+    else:  # pragma: no cover - assertion keeps the failure explicit.
+        raise AssertionError('An active Phase 1 release must not be replaced')
 
 
 def test_reset_allows_laptop_without_slurm(monkeypatch, capsys):

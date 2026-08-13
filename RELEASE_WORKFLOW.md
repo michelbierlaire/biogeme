@@ -270,6 +270,15 @@ The phase-2 state is retained under `.jed_runs/releases`.  The wrapper never
 commits changes; after a successful build, review `git status --short` and
 commit manually.
 
+If the release tooling or documentation is committed after an interrupted
+Phase 2, the old local state may refer to an older Git revision.  When that
+record contains no Phase 1 state, the next `release_phase2.py run --apply`
+automatically starts a new local Phase 2 attempt and reuses the same persistent
+staging directory; it does not resubmit any JED jobs.  An active Phase 1 state
+is deliberately protected from this automatic replacement, because mixing
+results from two source revisions would be unsafe.  In that case, finish the
+active Phase 1 attempt or use the guarded reset procedure before continuing.
+
 The full HTML target executes the gallery. A failure is a release blocker.
 Review `docs/warnings.log`, then inspect the Git diff:
 
