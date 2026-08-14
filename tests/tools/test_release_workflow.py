@@ -256,6 +256,10 @@ def test_reset_allows_laptop_without_slurm(monkeypatch, capsys):
     def missing_squeue(*args, **kwargs):
         raise FileNotFoundError('squeue')
 
+    # Keep this test focused on the missing executable. Windows runners may
+    # also lack every username environment variable; that case is covered by
+    # ``test_reset_allows_windows_without_username`` below.
+    monkeypatch.setattr(release_reset.getpass, 'getuser', lambda: 'test-user')
     monkeypatch.setattr(release_reset.subprocess, 'run', missing_squeue)
 
     assert release_reset.slurm_jobs_running() is False
