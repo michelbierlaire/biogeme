@@ -23,7 +23,8 @@ second Python package and it does not contain an independent build system.
 | --- | --- | --- |
 | `webpage/generate.py` | Orchestrates generation and copies all inputs into the output tree | Only when changing the generator itself |
 | `webpage/sections.py` | Main page sections: installation, documentation, resources, archives, release information, and conditions of use | Yes |
-| `webpage/faq.py` | FAQ questions and answers, including release notes | Yes |
+| `webpage/faq.py` | Non-release FAQ questions and answers | Yes |
+| `RELEASE_NOTES.md` | Canonical current and historical release notes | Yes |
 | `webpage/index.html.orig` | Main HTML template | Yes, when changing layout or fixed text |
 | `webpage/card.html` | Template for one content card | Yes, when changing card layout |
 | `webpage/faq.html` | Template for one FAQ item | Yes, when changing FAQ layout |
@@ -135,16 +136,26 @@ release notes.
 
 ### 4.2 “What’s new” content
 
-The release description appears in both `webpage/sections.py` and
-`webpage/faq.py`. Keep the two entries synchronized:
+The current release description has one source:
+`RELEASE_NOTES.md` in the repository root. Its first heading must be exactly
+`# Biogeme major.minor.patch`, using the candidate version. The webpage
+generator converts the Markdown to HTML and inserts the same content into both
+the homepage card and the FAQ. This prevents the two public versions from
+drifting apart.
+
+Keep the notes focused on user-visible changes:
 
 - the title must use the exact release version;
-- the description must agree with the release notes;
 - claims must describe behavior that is actually present in the tagged code;
-- compatibility and migration information must be included when relevant.
+- compatibility and migration information must be included when relevant;
+- important bug fixes, performance changes, deprecations, and documentation
+  changes should be mentioned when useful.
 
-Do not copy generated HTML from a previous release. Edit the Python source and
-regenerate the site.
+Historical sections in `RELEASE_NOTES.md` are rendered as historical FAQ
+entries automatically. Keep the file append-only: put the new release section
+first, retain the previous sections below it, and do not copy generated HTML
+from a previous release. `webpage/faq.py` contains only non-release FAQ
+content.
 
 ### 4.3 Installation and documentation links
 
@@ -247,13 +258,15 @@ The generator performs these operations:
 
 1. parses `data.toml`;
 2. loads the content dictionaries from `sections.py` and `faq.py`;
-3. expands the HTML templates;
-4. expands the homepage and FAQ templates;
-5. creates a temporary staging directory;
-6. copies CSS, JavaScript, production assets, and `docs/build/html` to the
+3. reads and renders all sections from `RELEASE_NOTES.md` (the first section is
+   current; later sections become historical FAQ entries);
+4. expands the HTML templates;
+5. expands the homepage and FAQ templates;
+6. creates a temporary staging directory;
+7. copies CSS, JavaScript, production assets, and `docs/build/html` to the
    staging directory;
-7. validates local links, fragments, placeholders, and release-local paths;
-8. atomically replaces `website/` and keeps the prior site as `website.old/`.
+8. validates local links, fragments, placeholders, and release-local paths;
+9. atomically replaces `website/` and keeps the prior site as `website.old/`.
 
 Source-only asset templates and notes are not copied to the public asset tree.
 Obsolete FAQ links are removed from the FAQ source rather than retained as
@@ -497,7 +510,8 @@ on a maintainer’s shell history.
 
 - [ ] The package version and webpage candidate version agree.
 - [ ] `sections.py` release announcement is current.
-- [ ] `sections.py` and `faq.py` contain consistent release notes.
+- [ ] `RELEASE_NOTES.md` contains the new section first and retains all prior
+      historical sections; `faq.py` contains no duplicated release notes.
 - [ ] Installation, PyPI, GitHub, documentation, and users’ group links work.
 - [ ] Historical archive links remain valid.
 - [ ] Dataset descriptions, images, reports, and data links are correct.

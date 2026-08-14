@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 import tomlkit as tk
+from markdown_it import MarkdownIt
 
 from biogeme.version import __version__
 
@@ -26,6 +27,7 @@ ROOT = Path(__file__).resolve().parent
 SPHINX_BUILD = (ROOT / "../docs/build/html").resolve()
 TARGET_FILE = "index.html"
 DATA_FILE = ROOT / "data.toml"
+RELEASE_NOTES_FILE = ROOT.parent / "RELEASE_NOTES.md"
 PORTFOLIO_MODAL = ROOT / "portfolio_modal.html"
 PORTFOLIO_FILE = ROOT / "portfolio_grid.html.orig"
 PORTFOLIO_GRID_ITEM = ROOT / "portfolio_grid_item.html"
@@ -43,6 +45,9 @@ _BLOCK_ELEMENT = re.compile(
 _LOCAL_SCHEMES = {"", "file"}
 _ASSET_IGNORED_NAMES = {"README"}
 _FORBIDDEN_PATH_TEXT = ("file://", "/Users/bierlair/", "/home/bierlair/", "CloudStorage/")
+_RELEASE_HEADING = re.compile(
+    r"^# Biogeme (?P<version>\d+\.\d+\.\d+)\s*$", re.MULTILINE
+)
 
 
 def validate_release_version(version: str) -> str:
@@ -64,6 +69,80 @@ def validate_release_version(version: str) -> str:
 
 
 BIOGEME_VERSION = validate_release_version(__version__)
+
+
+def release_notes_title() -> str:
+    """Return the title used for the current release notes."""
+
+    return f"What's new in Biogeme {BIOGEME_VERSION}?"
+
+
+def load_release_note_sections() -> list[tuple[str, str]]:
+    """Load and render all release-note sections from the canonical Markdown.
+
+    The first heading identifies the current release and is required to match
+    the package version. Subsequent headings are historical FAQ entries.
+    """
+
+    if not RELEASE_NOTES_FILE.is_file():
+        raise RuntimeError(f"Release notes file is missing: {RELEASE_NOTES_FILE}")
+    source = RELEASE_NOTES_FILE.read_text(encoding="utf-8")
+    expected_heading = f"# Biogeme {BIOGEME_VERSION}"
+    matches = list(_RELEASE_HEADING.finditer(source))
+    if not matches or matches[0].group(0).strip() != expected_heading:
+        raise RuntimeError(
+            f"Release notes must begin with {expected_heading!r}; "
+            f"got {matches[0].group(0).strip()!r}"
+            if matches
+            else f"got no release heading in {RELEASE_NOTES_FILE}."
+        )
+
+    sections: list[tuple[str, str]] = []
+    markdown = MarkdownIt("commonmark", {"html": True})
+    seen_versions: set[str] = set()
+    for index, match in enumerate(matches):
+        version = match.group("version")
+        if version in seen_versions:
+            raise RuntimeError(f"Duplicate release-note section for {version}.")
+        seen_versions.add(version)
+        end = matches[index + 1].start() if index + 1 < len(matches) else len(source)
+        body = source[match.end() : end].strip()
+        if not body:
+            raise RuntimeError(f"Release notes section for {version} is empty.")
+        rendered = markdown.render(body).strip()
+        if not rendered:
+            raise RuntimeError(
+                f"Release notes section for {version} renders to empty HTML."
+            )
+        sections.append((version, rendered))
+    return sections
+
+
+def load_release_notes() -> str:
+    """Return the rendered notes for the current release."""
+
+    return load_release_note_sections()[0][1]
+
+
+def with_current_release_notes(content: dict, notes: str) -> dict:
+    """Return *content* with the current release notes inserted first."""
+
+    title = release_notes_title()
+    historical = {key: value for key, value in content.items() if key != title}
+    return {title: notes, **historical}
+
+
+def with_historical_release_notes(
+    content: dict[str, str], sections: list[tuple[str, str]]
+) -> dict[str, str]:
+    """Insert archived release-note sections before ordinary FAQ entries."""
+
+    historical = {
+        f"What's new in Biogeme {version}?": notes
+        for version, notes in sections[1:]
+    }
+    remaining = {key: value for key, value in content.items() if key not in historical}
+    return {**historical, **remaining}
 
 
 def replace(orig_text: str, dictionary: dict[str, str]) -> str:
@@ -103,11 +182,12 @@ def get_section(content: dict[str, tuple[str, ...] | str]) -> str:
     return all_html
 
 
-def get_faq() -> str:
+def get_faq(content: dict[str, str] | None = None) -> str:
     """Render all FAQ entries."""
 
     all_html = ""
-    for item_id, (question, answer) in enumerate(faq.items(), start=1):
+    entries = faq if content is None else content
+    for item_id, (question, answer) in enumerate(entries.items(), start=1):
         with FAQ_FILE.open(encoding="utf-8") as file:
             html = file.read()
         replacements = {
@@ -179,6 +259,13 @@ def get_portfolio_modals(doc: dict) -> str:
 def build_homepage() -> str:
     """Expand the homepage templates and source dictionaries."""
 
+    release_sections = load_release_note_sections()
+    release_notes = release_sections[0][1]
+    homepage_about = with_current_release_notes(about, release_notes)
+    homepage_faq = with_current_release_notes(
+        with_historical_release_notes(faq, release_sections), release_notes
+    )
+
     with DATA_FILE.open(encoding="utf-8") as file:
         doc = tk.parse(file.read())
 
@@ -203,8 +290,8 @@ def build_homepage() -> str:
     replacements = {
         "__PORTFOLIO_MODALS__": get_portfolio_modals(doc),
         "__PORTFOLIO__": portfolio_html,
-        "__FAQ__": get_faq(),
-        "__ABOUT__": get_section(about),
+        "__FAQ__": get_faq(homepage_faq),
+        "__ABOUT__": get_section(homepage_about),
         "__INSTALL__": get_section(install),
         "__DOC__": get_section(documentation),
         "__RES__": get_section(resources),

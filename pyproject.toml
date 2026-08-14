@@ -127,4 +127,5 @@ dev = [
     "myst-parser",
     "furo",
     "twine>=6.2.0",
+    "markdown-it-py>=4.0.0",
 ]
