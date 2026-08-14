@@ -23,7 +23,7 @@ from biogeme.results_processing import (
 )
 
 # %%
-# See the data processing script: :ref:`swissmetro_binary`.
+# See the data processing script ``swissmetro_binary.py``.
 from swissmetro_binary import (
     CAR_CO_SCALED,
     CAR_TT_SCALED,

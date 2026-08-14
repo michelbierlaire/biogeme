@@ -154,6 +154,10 @@ testing = [
 ]
 
 [package.dev-dependencies]
+ci = [
+    { name = "tox" },
+    { name = "tox-gh-actions" },
+]
 dev = [
     { name = "black" },
     { name = "furo" },
@@ -206,6 +210,10 @@ requires-dist = [
 provides-extras = ["testing"]
 
 [package.metadata.requires-dev]
+ci = [
+    { name = "tox", specifier = ">=4.35.0" },
+    { name = "tox-gh-actions", specifier = ">=3.2.0" },
+]
 dev = [
     { name = "black", specifier = ">=26.3.1" },
     { name = "furo" },
@@ -2646,6 +2654,18 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/a9/7c/d2b9d58c7fe3a36224a71c86fc7072936af126425b7af40ca18103f6f691/tox-4.35.0.tar.gz", hash = "sha256:74d2fe33eb37233d506f854196bd7bd7e2fbb79e8d9b4bed214ab3da98740876", size = 205701, upload-time = "2026-02-12T22:47:29.036Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/f5/5f/8df349c4e9ea0747cfc12a44c2e952c2f7a1a12fb54f36543dae17638a57/tox-4.35.0-py3-none-any.whl", hash = "sha256:282aa2e1f96328ad197ee09878ff241610426cd8ec01e62a04eb51c987da922d", size = 176999, upload-time = "2026-02-12T22:47:27.768Z" },
+]
+
+[[package]]
+name = "tox-gh-actions"
+version = "3.5.0"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "tox" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/9c/11/6c3f818887c37a144a4b48bfc440150f006bdac7a68d92de1046680f578f/tox_gh_actions-3.5.0.tar.gz", hash = "sha256:cc8e148c4513042e5019973e5672594c3df241b035e7fb550f6f778588110051", size = 18815, upload-time = "2025-10-22T14:12:24.846Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/fd/9e/8d50f3b3fc4af8c73154f64d4a2293bfa2d517a19000e70ef2d614254084/tox_gh_actions-3.5.0-py3-none-any.whl", hash = "sha256:070790114c92f4c94337047515ca5e077ceb269a5cb9366e0a0b3440a024eca1", size = 9910, upload-time = "2025-10-22T14:12:23.405Z" },
 ]
 
 [[package]]

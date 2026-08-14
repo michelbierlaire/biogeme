@@ -1,4 +1,5 @@
-"""File gamma_forecasting.py
+"""Gamma-profile MDCEV forecasting
+==================================
 
 Michel Bierlaire, EPFL
 Fri Jul 25 2025, 16:38:12

@@ -3,7 +3,7 @@
 Combine many specifications: exception is raised
 ================================================
 
-We combine many specifications, defined in :ref:`everything_spec_section`.
+We combine many specifications, defined in ``everything_spec.py``.
 This leads to a total of 432 specifications.
 When the total number of specifications exceeds 100, Biogeme raises an
 ValueOutOfRange exception when the estimate_catalog is called.
@@ -18,7 +18,7 @@ from biogeme.biogeme import BIOGEME
 from biogeme.exceptions import BiogemeError
 
 # %%
-# See :ref:`everything_spec_section`.
+# See ``everything_spec.py``.
 from everything_spec import database, model_catalog
 
 # %%

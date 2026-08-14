@@ -40,10 +40,11 @@ second Python package and it does not contain an independent build system.
 | `old_webpage/` | Legacy website generator | No; it is not part of the current release workflow |
 
 The generator expects to be run from inside `webpage/`. It reads the Sphinx
-output from `../docs/build/html`, creates a new `website/` directory, copies
-the CSS, JavaScript, and assets, and copies the Sphinx site to
-`website/sphinx/`. Before doing so, it renames the existing `website/` to
-`website.old/`.
+output from `../docs/build/html`, expands the homepage templates, copies the
+CSS, JavaScript, production assets, and Sphinx site to a temporary staging
+directory, validates that staging directory, and only then replaces
+`website/`. A successful replacement keeps the previous site in
+`website.old/`; a failed generation leaves the existing site untouched.
 
 The generated directories are ignored by Git. Commit the source files and
 release content, not `webpage/website/` or `webpage/website.old/`.
@@ -52,17 +53,17 @@ release content, not `webpage/website/` or `webpage/website.old/`.
 
 There are two different version mechanisms on the website:
 
-1. `generate.py` substitutes a version into the HTML title and generated
-   cards using `BIOGEME_VERSION`.
+1. `generate.py` reads `biogeme.version.__version__` and substitutes that
+   value into the HTML title and generated cards.
 2. `js/get_version.js` queries the live PyPI JSON endpoint and fills the
    visible version in the homepage header at runtime. It caches that value in
    the browser for one day.
 
 Before every release, verify that the generated static version and the
-published package version agree. In particular, the current generator has a
-hard-coded `BIOGEME_VERSION` value. It must be updated for the release, or,
-preferably, changed to obtain the value from `biogeme.version.__version__` so
-that the webpage cannot silently display an obsolete version.
+published package version agree. The generator rejects every version that is
+not a plain `major.minor.patch` value. Alpha, beta, release-candidate,
+development, post-release, and local versions therefore stop generation with
+a clear error instead of producing a publishable webpage.
 
 Run this check from the repository root:
 
@@ -247,10 +248,16 @@ The generator performs these operations:
 1. parses `data.toml`;
 2. loads the content dictionaries from `sections.py` and `faq.py`;
 3. expands the HTML templates;
-4. renames the previous `website/` to `website.old/`;
-5. creates a new `website/`;
-6. copies CSS, JavaScript, and assets;
-7. copies `docs/build/html` to `website/sphinx/`.
+4. expands the homepage and FAQ templates;
+5. creates a temporary staging directory;
+6. copies CSS, JavaScript, production assets, and `docs/build/html` to the
+   staging directory;
+7. validates local links, fragments, placeholders, and release-local paths;
+8. atomically replaces `website/` and keeps the prior site as `website.old/`.
+
+Source-only asset templates and notes are not copied to the public asset tree.
+Obsolete FAQ links are removed from the FAQ source rather than retained as
+broken historical links.
 
 If the generated site is important before the next generation, copy or archive
 `webpage/website.old/` separately. The next invocation removes and recreates
@@ -268,17 +275,19 @@ test -f webpage/website/js/get_version.js
 test -f webpage/website/assets/favicon.ico
 ```
 
-Check for unresolved template markers and accidental local paths:
+The generator performs these checks automatically. They can also be inspected
+manually:
 
 ```bash
-rg -n '__[A-Z][A-Z0-9_]*__' webpage/website
-rg -n 'file:///|/Users/|/home/|C:\\\\Users\\\\' webpage/website
+rg -n '__[A-Z][A-Z0-9_]*__' webpage/website --glob '!sphinx/**'
+rg -n 'file://|/Users/bierlair/|/home/bierlair/|CloudStorage/' webpage/website \
+  --glob '!sphinx/**'
 ```
 
-The first command should return no unresolved placeholders. The second
-command should return no release-specific local paths. Existing historical
-FAQ text should be reviewed if it contains a local path; public pages must not
-expose a maintainer’s filesystem.
+Both commands should return no matches. The generated Sphinx pages may contain
+filesystem paths in source-code examples; the generator validates those pages
+for links while applying release-content path checks to the webpage-owned
+HTML.
 
 Check the generated static version and release text:
 

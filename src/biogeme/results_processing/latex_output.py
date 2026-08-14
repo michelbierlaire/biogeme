@@ -493,9 +493,11 @@ def get_sign_for_p_value(p_value: float, p_thresholds: list[tuple[float, str]]) 
     """
 
     :param p_value: p-value to be treated
-    :param p_thresholds: list of tuple establishing the coding convention for the p-value threshold. Assume that the
-    list is composed of pairs (t_i, sign_i), and that the p-value of a parameter is p. Among all i such that p <=
-    t_i, select index k associated with the minimum t_k. Then the p-value is coded using sign_k.
+    :param p_thresholds: list of tuple establishing the coding convention for
+        the p-value threshold. Assume that the list is composed of pairs
+        (t_i, sign_i), and that the p-value of a parameter is p. Among all i
+        such that p <= t_i, select index k associated with the minimum t_k.
+        Then the p-value is coded using sign_k.
     :return: sign to be used
     """
     try:
@@ -526,9 +528,11 @@ def compare_parameters(
     """
 
     :param estimation_results: dict mapping model names with estimation results
-    :param p_thresholds: list of tuple establishing the coding convention for the p-value threshold. Assume that the
-    list is composed of pairs (t_i, sign_i), and that the p-value of a parameter is p. Among all i such that p <=
-    t_i, select index k associated with the minimum t_k. Then the p-value is coded using sign_k.
+    :param p_thresholds: list of tuple establishing the coding convention for
+        the p-value threshold. Assume that the list is composed of pairs
+        (t_i, sign_i), and that the p-value of a parameter is p. Among all i
+        such that p <= t_i, select index k associated with the minimum t_k.
+        Then the p-value is coded using sign_k.
     :param renumbering_parameters: a dict that suggests new numbers for parameters
     :param renaming_parameters: a dict that suggests new names for some or all parameters.
     :return: the LaTeX code of a tabular object compile the estimation results.

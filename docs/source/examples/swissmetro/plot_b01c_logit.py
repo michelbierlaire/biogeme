@@ -1,7 +1,7 @@
 """
 
 1c. Illustration of the quick_estimate method in Biogeme
-=======================================================
+========================================================
 
 This example estimates the same logit model as in Example 1a, but uses
 `quick_estimate`, a lightweight estimation procedure designed for cases

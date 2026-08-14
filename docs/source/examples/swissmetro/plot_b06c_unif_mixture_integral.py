@@ -1,4 +1,4 @@
-""" "
+"""
 
 6c. Mixture of logit models with uniform distribution and numerical integration
 ===============================================================================

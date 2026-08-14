@@ -11,7 +11,9 @@ resources = {}
 
 
 special['New release'] = (
-    'The new version of Biogeme allows Bayesian estimation of the models.'
+    'Biogeme __VERSION__ is the current stable release. It includes improved '
+    'JAX-based model evaluation, Bayesian estimation, and more robust '
+    'estimation diagnostics.'
 )
 # special['Users meeting'] = 'Biogeme users\' meeting, September 5, 2023, Zurich, Switzerland, from 10:00 to 13:00. <a href="https://transp-or-academia.epfl.ch/biogeme">Click here to register.</a>'
 # special['EPFL Short Course'] = (
@@ -68,15 +70,15 @@ Biogeme 3.3.4 introduces a new expression-based computational backend for nested
 sampled choice models. These dedicated expressions preserve the model structure during JAX compilation, provide 
 more efficient function, gradient, and Hessian evaluations, and support numerically stable log-domain calculations. 
 The existing public model interfaces remain available for backward compatibility.
-A new sparse cross-nested logit implementation, available through `sparse_cnl`, avoids evaluating structurally zero 
+A new sparse cross-nested logit implementation, available through <code>sparse_cnl</code>, avoids evaluating structurally zero
 allocation terms while preserving all parameter-dependent memberships. The original `cnl` implementation remains 
 unchanged, and Biogeme reports when the sparsity pattern suggests that the sparse implementation may be advantageous.
 The calculation of analytical Hessians has been substantially improved. Biogeme now supports exact chunked Hessian 
 calculations based on JAX Hessian-vector products, configurable parameter and observation blocks, and an automatic 
 memory-aware strategy that accounts for the effective memory available to the process, including resource limits 
 imposed by systems such as Slurm. These options are exposed through the estimation parameters 
-`analytical_hessian_mode`, `hessian_parameter_block_size`, `hessian_observation_batch_size`, and 
-`hessian_memory_fraction`. Chunked calculations report their progress and estimated completion time.
+<code>analytical_hessian_mode</code>, <code>hessian_parameter_block_size</code>, <code>hessian_observation_batch_size</code>, and
+<code>hessian_memory_fraction</code>. Chunked calculations report their progress and estimated completion time.
 Estimation results are now written as recoverable checkpoints throughout the estimation and post-estimation phases. 
 If the calculation of gradients, BHHH matrices, Hessians, or bootstrap results is interrupted or fails, Biogeme can 
 resume the missing phases without repeating the optimization. Result serialization is also performed atomically, 
@@ -195,21 +197,19 @@ influence that they had and still have on my work.
 
 install['Install Python'] = (
     """
-Biogeme is an open source Python package, that relies on the version 3
-of Python. Make sure that Python 3.x is installed on your
+Biogeme is an open source Python package that requires Python 3.12 or newer.
+Make sure that a supported Python version is installed on your
 computer. If you have never used Python before, you may
 want to consider a complete platform such
 as <a href="https://www.anaconda.com/" target="_blank">Anaconda</a>.
 """,
     """
-If Python is already installed on your computer, verify
-the version. Two versions of Python are distributed:
-version 2 and version 3. Biogeme  works only
-with version 3.
+If Python is already installed on your computer, verify that its version is
+3.12 or newer before installing Biogeme.
 """,
 )
 
-install['Installing PandasBiogeme on MaxOSX'] = (
+install['Installing Biogeme on macOS'] = (
     """
 <p class='text-center'>
 <iframe width="560" height="315" src="https://www.youtube.com/embed/Z1hkeWP0k9A" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
@@ -265,8 +265,8 @@ that must be executed in the root directory containing the
 pyproject.toml file.
 """,
     """
-Note that it does not require to compile C++ code (thanks to CythonBiogeme) and should be working in any environment 
-where Python and CythonBiogeme are properly installed.
+The package uses its current JAX-based numerical backend. The required
+dependencies are installed automatically by the package manager.
 """,
 )
 
@@ -281,11 +281,11 @@ following commands in Python:
 </ul>
 The result should look like the following:
 <pre>
-Python 3.13.1 (v3.13.1:06714517797, Dec  3 2024, 14:00:22) [Clang 15.0.0 (clang-1500.3.9.4)] on darwin
+Python 3.14.x (CPython)
 Type "help", "copyright", "credits" or "license" for more information.
 >>> from biogeme.version import get_text
 >>> print(get_text())
-biogeme 3.3.2 [2025-12-24]
+biogeme 3.3.4 [release date]
 Home page: http://biogeme.epfl.ch
 Submit questions to https://groups.google.com/d/forum/biogeme
 Michel Bierlaire, Transport and Mobility Laboratory, Ecole Polytechnique Fédérale de Lausanne (EPFL)

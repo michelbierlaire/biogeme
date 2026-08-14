@@ -3,7 +3,7 @@
 Combine many specifications: assisted specification algorithm
 =============================================================
 
-We combine many specifications, defined in :ref:`everything_spec_section`.
+We combine many specifications, defined in ``everything_spec.py``.
 This leads to a total of 432 specifications.
 The algorithm implemented in the AssistedSpecification object is used to
 investigate some of these specifications.

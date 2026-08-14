@@ -296,8 +296,8 @@ class Generalized(Mdcev):
         :param chosen_alternatives: list of alternatives that are chosen at the optimal solution
         :param one_observation: data for one observation.
         :param epsilon: draws from the error term.
-        :return: a lower bound on the dual variable, such that the expenditure calculated for any larger value is
-        well-defined and non negative.
+        :return: a lower bound on the dual variable, such that the expenditure
+            calculated for any larger value is well-defined and non negative.
         """
         return 0.0
 

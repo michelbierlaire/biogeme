@@ -1,4 +1,4 @@
-""".. _plot_b22multiple_models:
+""".. _plot_b22a_multiple_models:
 
 Assisted specification
 ======================
@@ -6,7 +6,7 @@ Assisted specification
 Example of the estimation of several versions of the model using
 assisted specification algorithm. The catalog of specifications is
 defined in :ref:`plot_b22multiple_models_spec` . Compared to
-:ref:`plot_b21multiple_models`, the number fo specifications exceeds
+:ref:`plot_b21a_multiple_models`, the number of specifications exceeds
 the maximum limit, so a heuristic is applied.  See `Bierlaire and
 Ortelli, 2023
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_

@@ -6,7 +6,7 @@ Specification of a catalog of models
 Specification of the Catalog of expressions for the assisted
 specification algorithm. Note that this script does not perform any
 estimation. It is imported by other scripts:
-:ref:`plot_b22multiple_models`, :ref:`plot_b22process_pareto`.
+:ref:`plot_b22a_multiple_models`, :ref:`plot_b22process_pareto`.
 
 Michel Bierlaire, EPFL
 Sat Jun 28 2025, 12:32:54

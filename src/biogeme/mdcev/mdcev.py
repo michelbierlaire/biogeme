@@ -322,7 +322,7 @@ class Mdcev(ABC):
         :param database: data needed for the estimation of the parameters, in Biogeme format.
         :param number_of_chosen_alternatives: see the module documentation :mod:`biogeme.mdcev_no_outside_good`
         :param consumed_quantities: see the module documentation :mod:`biogeme.mdcev_no_outside_good`
-        :param **kwargs: additional parameters that are transmitted as such to the constructor of the Biogeme object.
+        :param kwargs: additional parameters that are transmitted as such to the constructor of the Biogeme object.
 
 
         A detailed explanation is provided in the technical report
@@ -573,8 +573,8 @@ class Mdcev(ABC):
         :param chosen_alternatives: list of alternatives that are chosen at the optimal solution
         :param one_observation: data for one observation.
         :param epsilon: draws from the error term.
-        :return: a lower bound on the dual variable, such that the expenditure calculated for any larger value is
-        well-defined and non negative.
+        :return: a lower bound on the dual variable, such that the expenditure
+            calculated for any larger value is well-defined and non negative.
         """
         raise NotImplementedError
 
@@ -877,14 +877,16 @@ class Mdcev(ABC):
              to an observation in the database, and consists of a data frame of
              size=(number_of_draws, self.number_of_alternatives).
         :param brute_force: if True, the brute force algorithm is applied. It solves each optimization problem using
-            the scipy optimization algorithm. If False, the method proposed by Pinjari and Bhat (2021) is used.
+            the scipy optimization algorithm. If False, the method proposed by
+            Pinjari and Bhat (2021) is used [PinjBhat21]_.
         :param tolerance_dual: convergence criterion for the estimate of the dual variable.
         :param tolerance_budget: convergence criterion for the estimate of the total budget.
         :return: a list of data frames, each containing the results for each draw
 
-        .. [PinjBhat21] A. R. Pinjari, C. Bhat, Computationally efficient forecasting procedures for Kuhn-Tucker
-            consumer demand model systems: Application to residential energy consumption analysis, Journal of Choice
-            Modelling, Volume 39, 2021, 100283.
+        .. [PinjBhat21] A. R. Pinjari, C. Bhat, Computationally efficient
+            forecasting procedures for Kuhn-Tucker consumer demand model
+            systems: Application to residential energy consumption analysis,
+            Journal of Choice Modelling, Volume 39, 2021, 100283.
         """
 
         rows_of_database = [
@@ -1100,7 +1102,7 @@ class Mdcev(ABC):
         :param number_of_observations: number of entries in the database.
         :param number_of_draws: number of draws to generate
         :return: a list of length "number_of_observations". Each element is a
-        number_of_draws x self.number_of_alternatives array.
+            number_of_draws x self.number_of_alternatives array.
         """
         return [
             np.random.gumbel(

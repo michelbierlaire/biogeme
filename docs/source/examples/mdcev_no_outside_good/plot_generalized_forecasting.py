@@ -1,4 +1,5 @@
-"""File generalized_forecasting.py
+"""Generalized translated MDCEV forecasting
+============================================
 
 Michel Bierlaire, EPFL
 Fri Jul 25 2025, 17:05:32

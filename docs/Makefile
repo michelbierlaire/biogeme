@@ -5,6 +5,7 @@ SHELL := /bin/bash
 UVRUN ?= uv run --locked --group docs
 SPHINXBUILD ?= $(UVRUN) sphinx-build
 DOCSEXAMPLES ?= $(UVRUN) python ../tools/docs_examples.py
+CLEANEXAMPLES ?= $(UVRUN) python ../tools/clean_example_artifacts.py
 SOURCEDIR = source
 BUILDDIR = build
 GALLERYDIR = $(SOURCEDIR)/auto_examples
@@ -12,7 +13,7 @@ PROFILE ?= full
 DOCS_CACHE ?= $(CURDIR)/.cache
 DOCS_ENV = MPLCONFIGDIR=$(DOCS_CACHE)/matplotlib XDG_CACHE_HOME=$(DOCS_CACHE)
 
-.PHONY: help generate examples-fast examples-full html html-fast check-html linkcheck doctest clean
+.PHONY: help generate check-code examples-fast examples-full html html-fast check-html linkcheck doctest clean
 
 help:
 	@$(SPHINXBUILD) -M help "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
@@ -21,6 +22,9 @@ generate:
 	@mkdir -p "$(DOCS_CACHE)/matplotlib"
 	@$(DOCS_ENV) $(UVRUN) python create_code_rst.py --force
 
+check-code:
+	@$(UVRUN) python create_code_rst.py --check
+
 examples-fast:
 	@$(DOCSEXAMPLES) run --profile fast
 
@@ -28,10 +32,22 @@ examples-full:
 	@$(DOCSEXAMPLES) run --profile full
 
 html: generate
-	@set -o pipefail; $(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=$(PROFILE) $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log
+	@set -o pipefail; \
+	status=0; \
+	$(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=$(PROFILE) $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log || status=$$?; \
+	cleanup_status=0; $(CLEANEXAMPLES) --apply || cleanup_status=$$?; \
+	rm -rf "$(GALLERYDIR)"; \
+	if [ $$status -eq 0 ]; then status=$$cleanup_status; fi; \
+	exit $$status
 
 html-fast: generate
-	@set -o pipefail; $(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=none $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log
+	@set -o pipefail; \
+	status=0; \
+	$(DOCS_ENV) BIOGEME_DOCS_GALLERY_PROFILE=none $(SPHINXBUILD) -M html "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O) 2>&1 | tee warnings.log || status=$$?; \
+	cleanup_status=0; $(CLEANEXAMPLES) --apply || cleanup_status=$$?; \
+	rm -rf "$(GALLERYDIR)"; \
+	if [ $$status -eq 0 ]; then status=$$cleanup_status; fi; \
+	exit $$status
 
 check-html:
 	@$(UVRUN) python check_generated_html.py "$(BUILDDIR)/html"
@@ -45,6 +61,7 @@ doctest: generate
 clean:
 	@$(SPHINXBUILD) -M clean "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 	@$(DOCSEXAMPLES) clean --apply
+	@$(CLEANEXAMPLES) --apply
 	@echo "Removing generated Sphinx-Gallery output: $(GALLERYDIR)"
 	@rm -rf "$(GALLERYDIR)"
 	@rm -rf "$(DOCS_CACHE)"

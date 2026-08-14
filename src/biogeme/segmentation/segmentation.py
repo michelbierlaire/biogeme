@@ -125,8 +125,8 @@ class Segmentation:
         """Calculates the estimated values of the parameter for each segment.
 
         :param estimation_results: results of the estimation
-        :return: a pandas data frame with the definition of the segments and the corresponding values for the
-        coefficient
+        :return: a pandas data frame with the definition of the segments and
+            the corresponding values for the coefficient.
         """
 
         class SegmentationValue(NamedTuple):

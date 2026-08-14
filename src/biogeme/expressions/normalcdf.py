@@ -50,7 +50,7 @@ class NormalCdf(UnaryOperator):
         return f'NormalCdf({repr(self.child)})'
 
     def recursive_construct_jax_function(
-        self, numerically_safe: book
+        self, numerically_safe: bool
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded

@@ -34,7 +34,7 @@ class UnaryMinus(UnaryOperator):
         """
         super().__init__(child)
 
-    def deep_flat_copy(self) -> cos:
+    def deep_flat_copy(self) -> UnaryMinus:
         """Provides a copy of the expression. It is deep in the sense that it generates copies of the children.
         It is flat in the sense that any `MultipleExpression` is transformed into the currently selected expression.
         The flat part is irrelevant for this expression.

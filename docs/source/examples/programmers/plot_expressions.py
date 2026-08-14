@@ -77,7 +77,8 @@ x = Beta('x', 2, None, None, 1)
 display(x)
 
 # %%
-# The `get_value`function simply returns the value of the expression if it can be evaluated.
+# The ``get_value`` function simply returns the value of the expression if it
+# can be evaluated.
 display(x.get_value())
 
 # %%

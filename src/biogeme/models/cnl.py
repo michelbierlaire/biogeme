@@ -144,7 +144,7 @@ def get_mev_for_cross_nested(
     :param nests: object describing the nesting structure.
 
     :return: dictionary mapping each alternative to
-        :math:`\log G_i(e^{V_1},\ldots,e^{V_J})`.
+        :math:`\\log G_i(e^{V_1},\\ldots,e^{V_J})`.
     """
     nests = _normalize_and_check_nests(util, nests)
 
@@ -278,7 +278,7 @@ def cnlmu(
     :param choice: id of the alternative for which the probability must be
               calculated.
 
-    :param mu: Homogeneity parameter :math:`\mu`.
+    :param mu: Homogeneity parameter :math:`\\mu`.
 
     :return: choice probability for the cross-nested logit model.
     """
@@ -308,10 +308,10 @@ def get_mev_for_cross_nested_mu(
 
     :param nests: object describing the nesting structure.
 
-    :param mu: Homogeneity parameter :math:`\mu`.
+    :param mu: Homogeneity parameter :math:`\\mu`.
 
     :return: dictionary mapping each alternative to
-        :math:`\log G_i(e^{V_1},\ldots,e^{V_J})`.
+        :math:`\\log G_i(e^{V_1},\\ldots,e^{V_J})`.
     """
     nests = _normalize_and_check_nests(util, nests)
 
@@ -392,7 +392,7 @@ def logcnlmu(
     :param choice: id of the alternative for which the probability must be
               calculated.
 
-    :param mu: Homogeneity parameter :math:`\mu`.
+    :param mu: Homogeneity parameter :math:`\\mu`.
 
     :return: log of the choice probability for the cross-nested logit model.
 

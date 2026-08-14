@@ -29,6 +29,10 @@ if errorlevel 9009 (
 if "%1" == "" goto help
 
 if "%1" == "clean" goto clean
+if "%1" == "check-code" (
+	%PYTHON% create_code_rst.py --check
+	goto end
+)
 
 %PYTHON% create_code_rst.py --force
 
@@ -41,6 +45,12 @@ if "%1" == "html-fast" (
 )
 
 %SPHINXBUILD% -M %TARGET% %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
+set BUILD_STATUS=%ERRORLEVEL%
+%PYTHON% ..\tools\clean_example_artifacts.py --apply
+set CLEANUP_STATUS=%ERRORLEVEL%
+if exist "%SOURCEDIR%\auto_examples" rmdir /s /q "%SOURCEDIR%\auto_examples"
+if not "%BUILD_STATUS%" == "0" exit /b %BUILD_STATUS%
+if not "%CLEANUP_STATUS%" == "0" exit /b %CLEANUP_STATUS%
 goto end
 
 :help
@@ -50,6 +60,7 @@ goto end
 :clean
 %SPHINXBUILD% -M clean %SOURCEDIR% %BUILDDIR% %SPHINXOPTS% %O%
 %PYTHON% ..\tools\docs_examples.py clean --apply
+%PYTHON% ..\tools\clean_example_artifacts.py --apply
 
 :end
 popd

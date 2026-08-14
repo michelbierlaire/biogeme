@@ -25,7 +25,7 @@ from scenarios import scenario
 
 # %%
 # Obtain the specification for the default scenario
-# The definition of the scenarios is available in :ref:`scenarios`.
+# The definition of the scenarios is available in ``scenarios.py``.
 v, nests, _, MarginalCostPT = scenario()
 
 # %%

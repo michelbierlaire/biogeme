@@ -248,6 +248,7 @@ examples/swissmetro/04validation~10.html
 examples/_tmp.py
 webpage/website.old/
 webpage/website/
+webpage/.website-*/
 Hamabs.ipynb
 reports/pandasfirstmodel.aux
 reports/pandasfirstmodel.dvi

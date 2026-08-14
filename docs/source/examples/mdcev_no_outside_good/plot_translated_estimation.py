@@ -1,4 +1,5 @@
-"""File translated_estimation.py
+"""Translated MDCEV estimation
+==============================
 
 Michel Bierlaire, EPFL
 Fri Jul 25 2025, 17:28:50

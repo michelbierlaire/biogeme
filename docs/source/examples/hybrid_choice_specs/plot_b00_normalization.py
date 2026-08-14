@@ -1,4 +1,7 @@
 """
+Resolve latent-variable measurement specifications
+===================================================
+
 Resolve several latent-variable measurement specifications.
 
 This script is an illustration of specification resolution only. It does not

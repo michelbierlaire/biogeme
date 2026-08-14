@@ -35,27 +35,24 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          cache: 'pip'              # pip cache for faster installs
 
       # Cache tox environments, keyed by OS, Python, and lockfiles
       - name: Cache .tox
         uses: actions/cache@v5
         with:
           path: .tox
-          key: tox-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'tox.ini', 'requirements*.txt', 'setup.cfg') }}
+          key: tox-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('pyproject.toml', 'uv.lock', 'tox.ini') }}
           restore-keys: |
             tox-${{ runner.os }}-${{ matrix.python-version }}-
 
-      # Install tooling with pipx (isolated, fast)
-      - name: Install test tooling
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install --upgrade wheel
-          python -m pip install tox tox-gh-actions
+      - name: Install uv
+        run: python -m pip install --upgrade pip uv
 
-      # If your tox.ini maps envs via tox-gh-actions this just works
+      - name: Synchronize the locked CI environment
+        run: uv sync --locked --only-group ci --no-install-project
+
       - name: Run test suite
-        run: tox -p auto
+        run: uv run --locked --no-sync tox -p auto
 
       # Optional: upload junit/coverage if you generate them in tox
       # - name: Upload test reports

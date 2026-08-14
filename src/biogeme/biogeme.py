@@ -2112,6 +2112,7 @@ class BIOGEME:
 
         The validation procedure operates by dividing the dataset into a number of slices.
         For each slice:
+
           - The slice is used as the validation set.
           - The remaining data forms the estimation set.
           - The model is re-estimated on the estimation set.

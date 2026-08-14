@@ -53,6 +53,7 @@ class MonteCarlo(UnaryOperator):
     ) -> JaxFunctionType:
         """
         Generates a function to be used by biogeme_jax. Must be overloaded by each expression
+
         :return: the function takes two parameters: the parameters, and one row of the database.
         """
         child_jax = self.child.recursive_construct_jax_function(
@@ -83,6 +84,7 @@ class MonteCarlo(UnaryOperator):
         """
         Generates recursively a function to be used by PyMc. Must be overloaded by each expression
         In PyMC, the MonteCarlo integration must not be performed. It will be handled by the Gibbs sampling.
+
         :return: the expression in TensorVariable format, suitable for PyMc
         """
         child_tensor = self.child.recursive_construct_pymc_model_builder()

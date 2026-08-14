@@ -1,4 +1,5 @@
-"""Simultaneous hybrid choice model with ordered-probit indicators.
+"""Simultaneous hybrid choice model with ordered-probit indicators
+===================================================================
 
 
 This example estimates a hybrid choice model where a latent variable,

@@ -7,7 +7,7 @@ import argparse
 import sys
 from pathlib import Path
 
-REQUIRED_PAGES = ('index.html', 'examples.html', 'examples_workflow.html')
+REQUIRED_PAGES = ('index.html', 'examples.html')
 
 
 def check_site(root: Path) -> list[str]:

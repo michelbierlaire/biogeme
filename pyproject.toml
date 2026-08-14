@@ -102,6 +102,10 @@ indent-style = "space"
 pythonpath = ["."]
 
 [dependency-groups]
+ci = [
+    "tox>=4.35.0",
+    "tox-gh-actions>=3.2.0",
+]
 docs = [
     "furo",
     "myst-parser",

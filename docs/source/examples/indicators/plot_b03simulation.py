@@ -23,7 +23,7 @@ from biogeme.results_processing import EstimationResults
 
 # %%
 # Obtain the specification for the default scenario.
-# The definition of the scenarios is available in :ref:`scenarios`.
+# The definition of the scenarios is available in ``scenarios.py``.
 v, nests, _, _ = scenario()
 
 v_pt = v[0]

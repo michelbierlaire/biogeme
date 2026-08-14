@@ -1,6 +1,6 @@
 """
 Ordered-probit hybrid mode choice model: simultaneous maximum likelihood estimation
-==================================================================================
+===================================================================================
 
 This example estimates a hybrid mode choice model with one latent variable and
 ordered-probit measurement equations. The observed Likert indicators are treated
@@ -133,6 +133,7 @@ context = BuildContext(
 #    The latent variable itself is not directly observed, so its location and
 #    orientation must also be fixed. We use indicator ``Envir01`` as the
 #    reference indicator:
+#
 #    - its intercept is fixed to 0.0, which anchors the location of the latent
 #      variable;
 #    - its loading on ``car_centric_attitude`` is fixed to -1.0, which anchors

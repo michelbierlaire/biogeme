@@ -115,7 +115,7 @@ class RegularAdapter:
 
         :param expressions: Mapping of expression names to expressions.
 
-        :return: Registry bound to :pyattr:`database`.
+        :return: Registry bound to :attr:`database`.
         :rtype: ExpressionRegistry
         """
         return ExpressionRegistry(expressions.values(), self._db)
@@ -140,7 +140,7 @@ class FlatPanelAdapter:
     expression with the maximum number of observations per individual.
 
     :note:
-        * After :meth:`prepare`, :pyattr:`database` points to the flat database.
+        * After :meth:`prepare`, :attr:`database` points to the flat database.
         * ``sample_size`` is the number of rows in the flat database.
           ``number_of_observations`` is the number of rows in the original database.
     """
@@ -205,7 +205,7 @@ class FlatPanelAdapter:
 
         :param expressions: Mapping of expression names to expressions.
 
-        :return: Registry bound to :pyattr:`database`.
+        :return: Registry bound to :attr:`database`.
         :rtype: ExpressionRegistry
         """
         return ExpressionRegistry(expressions.values(), self.database)

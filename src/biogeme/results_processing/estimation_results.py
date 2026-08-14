@@ -365,14 +365,11 @@ class EstimationResults:
     def calculate_test(self, i: int, j: int, matrix: np.ndarray) -> float:
         """Calculates a t-test comparing two coefficients
 
-        Args:
-           i: index of first coefficient \f$\\beta_i\f$.
-           j: index of second coefficient \f$\\beta_i\f$.
-           matrix: estimate of the variance-covariance matrix \f$m\f$.
-
-        :return: t test
-            ..math::  \f[\\frac{\\beta_i-\\beta_j}
-                  {\\sqrt{m_{ii}+m_{jj} - 2 m_{ij} }}\f]
+        :param i: index of first coefficient ``beta_i``.
+        :param j: index of second coefficient ``beta_j``.
+        :param matrix: estimate of the variance-covariance matrix ``m``.
+        :return: t test, computed as
+            ``(beta_i - beta_j) / sqrt(m_ii + m_jj - 2*m_ij)``.
         :rtype: float
 
         """

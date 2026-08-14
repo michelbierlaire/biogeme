@@ -4,10 +4,10 @@ from sphinx.application import Sphinx
 
 def process_docstring(app, what, name, obj, options, lines):
     if hasattr(obj, '__deprecated__'):
-        lines.insert(
-            0,
-            f'.. warning:: This function is deprecated. Use :func:`{obj.__newname__}` instead.\n',
-        )
+        lines[0:0] = [
+            f'.. warning:: This function is deprecated. Use :func:`{obj.__newname__}` instead.',
+            '',
+        ]
 
 
 def setup(app: Sphinx):

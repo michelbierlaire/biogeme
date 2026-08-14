@@ -1,4 +1,5 @@
-"""File non_monotonic_estimation.py
+"""Non-monotonic MDCEV estimation
+================================
 
 Michel Bierlaire, EPFL
 Fri Jul 25 2025, 17:14:53

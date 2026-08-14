@@ -5,6 +5,7 @@ Thu Apr 3 09:55:57 2025
 """
 
 import warnings
+from textwrap import indent
 
 from .binary_max import BinaryMax
 from .binary_min import BinaryMin
@@ -30,10 +31,10 @@ def deprecated_wrapper(old_name, new_class, comment=None):
     doc = (
         f"Deprecated wrapper for :class:`{new_class.__name__}`.\n\n"
         f".. warning::\n   This function is deprecated and will be removed in a future version.\n"
-        f"   Use :class:`{new_class.__name__}` instead.\n"
+        f"   Use :class:`{new_class.__name__}` instead.\n\n"
     )
     if comment:
-        doc += f"\n   {comment}\n"
+        doc += f"{indent(comment, '   ')}\n"
     wrapper.__doc__ = doc
     return wrapper
 

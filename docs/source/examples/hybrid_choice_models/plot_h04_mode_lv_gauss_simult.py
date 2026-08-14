@@ -1,6 +1,6 @@
 """
 Gaussian hybrid mode choice model: simultaneous maximum likelihood estimation
-============================================================================
+=============================================================================
 
 This example estimates a hybrid mode choice model with one latent variable and
 Gaussian measurement equations. The observed Likert indicators are treated as
@@ -122,6 +122,7 @@ context = BuildContext(
 # not identified unless normalization constraints are imposed.
 #
 # We use a reference-indicator strategy based on ``Envir01``:
+#
 # - the intercept of ``Envir01`` is fixed to 0.0, which anchors the location
 #   of the latent-variable scale;
 # - the loading of ``Envir01`` on ``car_centric_attitude`` is fixed to -1.0,

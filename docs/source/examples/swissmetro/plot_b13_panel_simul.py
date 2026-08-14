@@ -26,7 +26,7 @@ from biogeme.results_processing import EstimationResults
 from biogeme.second_derivatives import SecondDerivativesMode
 
 # %%
-# See the data processing script: :ref:`swissmetro_panel`.
+# See the data processing script ``swissmetro_panel.py``.
 from swissmetro_panel import (
     CAR_AV_SP,
     CAR_CO_SCALED,

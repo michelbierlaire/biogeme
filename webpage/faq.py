@@ -5,15 +5,15 @@ Biogeme 3.3.4 introduces a new expression-based computational backend for nested
 sampled choice models. These dedicated expressions preserve the model structure during JAX compilation, provide 
 more efficient function, gradient, and Hessian evaluations, and support numerically stable log-domain calculations. 
 The existing public model interfaces remain available for backward compatibility.
-A new sparse cross-nested logit implementation, available through `sparse_cnl`, avoids evaluating structurally zero 
+A new sparse cross-nested logit implementation, available through <code>sparse_cnl</code>, avoids evaluating structurally zero
 allocation terms while preserving all parameter-dependent memberships. The original `cnl` implementation remains 
 unchanged, and Biogeme reports when the sparsity pattern suggests that the sparse implementation may be advantageous.
 The calculation of analytical Hessians has been substantially improved. Biogeme now supports exact chunked Hessian 
 calculations based on JAX Hessian-vector products, configurable parameter and observation blocks, and an automatic 
 memory-aware strategy that accounts for the effective memory available to the process, including resource limits 
 imposed by systems such as Slurm. These options are exposed through the estimation parameters 
-`analytical_hessian_mode`, `hessian_parameter_block_size`, `hessian_observation_batch_size`, and 
-`hessian_memory_fraction`. Chunked calculations report their progress and estimated completion time.
+<code>analytical_hessian_mode</code>, <code>hessian_parameter_block_size</code>, <code>hessian_observation_batch_size</code>, and
+<code>hessian_memory_fraction</code>. Chunked calculations report their progress and estimated completion time.
 Estimation results are now written as recoverable checkpoints throughout the estimation and post-estimation phases. 
 If the calculation of gradients, BHHH matrices, Hessians, or bootstrap results is interrupted or fails, Biogeme can 
 resume the missing phases without repeating the optimization. Result serialization is also performed atomically, 
@@ -94,7 +94,7 @@ faq['What was new in Biogeme 3.2.13?'] = """
 <dt>Local-sensitivity hashing</dt>
 <dd>The data reduction method introduced by <a href='https://transp-or.epfl.ch/documents/technicalReports/OrteLappBier2023.pdf'>Ortelli et al. (2023)</a> has been implemented. It has not yet been integrated in the optimization framework.</dd>
 <dt>Nests definition</dt>
-<dd>The definition of the nests for the nested logit and the cross-nested logit models has been improved, using specific objects. See <a href="sphinx/nests.html">the module documentation.</a> The calculation of the correlation structure among the alternatives is now performed by those objects, and not anymore by the <samp>bioResults</samp> object as in previous versions.</dd>
+<dd>The definition of the nests for the nested logit and the cross-nested logit models has been improved, using specific objects. The calculation of the correlation structure among the alternatives is now performed by those objects, and not anymore by the <samp>bioResults</samp> object as in previous versions.</dd>
 <dt>Sampling of alternatives</dt>
 <dd>The methods for the sampling of alternatives have been completely reimplemented. A report with a complete documentation will be available soon.</dd>
 <dt>Examples</dt>
@@ -123,7 +123,7 @@ faq['What was new in Biogeme 3.2.11?'] = """
 <dd>It is now possible to estimate logit, nested logit and cross-nested logit models using only a sample of alternatives. </dd>
 
 <dt>Assisted specification</dt>
-<dd>The assisted specification algorithm has been completely redesigned. The concept of <a href="sphinx/catalog.html#biogeme.catalog.Catalog"><samp>Catalog</samp></a> has been introduced to allow the modeler to suggest several versions of the model specification. The possible versions can either be fully enumerated (if their number allows for it) or can be algorithmically investigated. </dd>
+<dd>The assisted specification algorithm has been completely redesigned. The concept of <samp>Catalog</samp> has been introduced to allow the modeler to suggest several versions of the model specification. The possible versions can either be fully enumerated (if their number allows for it) or can be algorithmically investigated. </dd>
 
 <dt>Pareto optimality</dt>
 <dd>It is possible to extract the Pareto optimal models from a list of estimation results.</dd>
@@ -137,7 +137,7 @@ faq['What was new in Biogeme 3.2.11?'] = """
 <dd>The <samp>simulate</samp> function now requires an explicit definition for the value of the parameters. The initial values can be retrieved from the <samp>get_beta_values</samp> function of a Biogeme expression. The estimated values can be retrieved from the <samp>getBetaValues</samp> function of the <samp>bioResult</samp> object.</dd>
 
 <dt>Use of the standard Python logging system</dt>
-<dd>The <samp>messaging</samp> module used to control the verbosity of Biogeme is now obsolete. Biogeme implements the standard Python logging system. If you do not know what it is, Biogeme includes a simple <a href="sphinx/logging.html"><samp>logging</samp></a> module, that provides simple access to the logging system.
+<dd>The <samp>messaging</samp> module used to control the verbosity of Biogeme is now obsolete. Biogeme implements the standard Python logging system. If you do not know what it is, Biogeme includes a simple <samp>logging</samp> module, that provides simple access to the logging system.
 </dd>
 
 <dt>Naming conventions</dt>
@@ -170,42 +170,37 @@ faq['What was new in Biogeme 3.2.10?'] = """
 	    </dd>
 	    <dt>Likelihood ratio test</dt>
 	    <dd>It is now possible to perform a likelihood ratio test
-	    directly from the estimation results. <a href="sphinx/results.html#biogeme.results.bioResults.likelihood_ratio_test">See
-		documentation here. </a> It relies on a function that can
-	    be used in more general context. <a href="sphinx/tools.html#biogeme.tools.likelihood_ratio_test"> See
-	    documentation here.<a></dd>
+	    directly from the estimation results. See the documentation. It relies on a function that can
+	    be used in more general context.</dd>
 	    <dt>Comparing several models</dt>
 	    <dd>It is now possible to compile the estimation results
-	    from several models into a single data frame. <a href="sphinx/results.html#biogeme.results.compileEstimationResults">See
-		documentation here. </a> </dd>
+	    from several models into a single data frame. See the documentation. </dd>
 	    <dt>Automatic segmentation</dt>
 	    <dd>It is now possible to define a parameter such that it
 	    has a different value for each segment in the
-	    population. See the example <a href="examples/swissmetro/01logitBis.py"><code>01logitBis.py</code></a>.</dd>
+	    population. </dd>
 	    <dt>Simulation of panel data</dt>
 	    <dd>It is now possible to use Biogeme in simulation mode
 	    for panel data. See the following
-	      example: <a href="examples/swissmetro/13panel_simul.py"><code>13panel_simul.py</code></a>.</dd>
+	      example.</dd>
 	    <dt>Flattening panel data</dt>
 	    <dd>This new feature transforms a database organized in
 	    panel mode (that is, one row per observation) into a
 	    database organized in normal mode (that is, one row per
 	    individual, and the observations of each individual
 	    across columns). See documentation
-	    <a href="sphinx/database.html#biogeme.database.Database.generateFlatPanelDataframe">here</a> and <a href="sphinx/tools.html#biogeme.tools.flatten_database">here</a></dd>
+	    the documentation.</dd>
 	    <dt>Covariance and correlation matrix of the nested and
 	      the cross-nested logit
 	      models</dt>
 	    <dd>These new functions calculate the covariance and the correlation matrix
 	    of the error terms of a cross-nested logit model from the
 	    estimated parameters. See
-	    documentation <a href="sphinx/tools.html#biogeme.tools.calculate_correlation">here</a>,
-	    <a href="sphinx/tools.html#biogeme.tools.correlation_nested">here</a>, <a href="sphinx/tools.html#biogeme.tools.covariance_cross_nested">here</a> and <a href="sphinx/tools.html#biogeme.tools.correlation_cross_nested">here</a>.</dd>
+	    documentation.</dd>
 	    <dt>Recycling estimation results</dt>
 	    <dd>It is now possible to skip estimation and read the
 	    estimation results from the pickle file by setting the
-	    parameter <code>recycle=True</code>. See the online
-	    documentation [<a href="sphinx/biogeme.html#biogeme.biogeme.BIOGEME.estimate">here</a>].</dd>
+	    parameter <code>recycle=True</code>. See the online documentation.</dd>
 	    <dt>The feature removing unused variables has been
 	      canceled.</dt>
 	    <dd>The parameters <code>removeUnusedVariables</code>
@@ -220,8 +215,7 @@ faq['What was new in Biogeme 3.2.10?'] = """
 	    <dt>New syntax for the assisted specification algorithm</dt>
 	    <dd>The new syntax involves <code>NamedTuple</code> to make the code
 	      more readable. Refer to the examples, such as
-	      <a href="examples/assisted/optima.py"
-		 target="_blank"><code>optima.py</code></a>.</dd>
+	      <code>optima.py</code>.</dd>
 	    
 	  </dl>
 
@@ -237,14 +231,11 @@ faq['What was new in Biogeme 3.2.8?'] = """
 	    <dt>Optimization</dt>
 	    <dd>The optimization algorithms have been organized into
 	      two modules. The
-	      module <a href="sphinx/algorithms.html"><code>algorithms.py</code></a>
+	      module <code>algorithms.py</code>
 	      contains generic optimization algorithms. The
-	      module <a href="sphinx/optimization.html"><code>optimization.py</code></a>
+	      module <code>optimization.py</code>
 	      contains the functions that can be called directly by
-	      Biogeme [<a href="sphinx/biogeme.html?highlight=estimate#biogeme.biogeme.BIOGEME.estimate">Click here for the documentation of
-	      the <code>estimate</code>
-	      function</a>]. [<a href="examples/swissmetro/01logit_allAlgos.py">Click
-	      here for an example.</a>]</dd>
+	      Biogeme. The old example is no longer distributed.</dd>
 	    <dt>CFSQP</dt>
 	    <dd>The CFSQP algorithm has been removed from the
 	    distribution. </dd>
@@ -262,28 +253,22 @@ faq['What was new in Biogeme 3.2.8?'] = """
               using randomly generated values. The value is drawn from a
               uniform distribution on the interval defined by the
               bounds (by default [-100, 100].)
-              [<a href="sphinx/biogeme.html?highlight=setrandominitvalue#biogeme.biogeme.BIOGEME.setRandomInitValues">Click
-              here for the documentation</a>].
+              See the current Biogeme documentation.
 	      <dt>Sensitivity analysis</dt>
 	    <dd>The betas for sensitivity analysis are now generated
 	      by bootstrapping.
-	      [<a href="sphinx/results.html?highlight=sensitivityanalysis#biogeme.results.bioResults.getBetasForSensitivityAnalysis">Click
-	      here for the documentation</a>].</dd>
+		      See the current results documentation.</dd>
 	    <dt>Box-Cox</dt>
 	    <dd>The implementation of
-	      the <a href="sphinx/models.html?highlight=boxcox#biogeme.models.boxcox">Box-Cox
-		transform</a> was  incorrect and has been corrected.
+		      the Box-Cox transform was incorrect and has been corrected.
 	      <dt>Validation</dt>
 	    <dd>The out-of-sample validation has been
-	      improved. [<a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">Click
-	      here for the documentation</a>]. It
-	      has to be compined with the <a href="sphinx/database.html?highlight=split#biogeme.database.Database.split"><code>split</code></a> function
+		      improved. It has to be combined with the <code>split</code> function
 	      of the database object.
 	      <dt>Statistics about chosen alternatives</dt>
 	    <dd>It is now possible to calculate the number of time
 	      each alternative is chosen and available in the
-	      sample. [<a href="sphinx/database.html?highlight=choiceavailability#biogeme.database.Database.choiceAvailabilityStatistics">Click
-	      here for the documentation</a>].</dd>
+		      sample.</dd>
 	    <dt>Validity check for the nests</dt>
 	    <dd> The validity of the specification of the nests
 	      for nested and cross nested logit models is new
@@ -291,13 +276,11 @@ faq['What was new in Biogeme 3.2.8?'] = """
 	    <dt>ALOGIT file</dt>
 	    <dd>Output .py in F12 format compatible with ALOGIT can
 	      now be
-	      produced. [<a href="sphinx/results.html?highlight=f12#biogeme.results.bioResults.writeF12">Click
-	      here for the documentation</a>. </dd>
+		      produced.</dd>
 	    <dt>Likelihood ratio test</dt>
 	    <dd>A function to perform the likelihood ratio test has
 	      been
-	      implemented. [<a href="sphinx/tools.html?highlight=likelihood_ratio#biogeme.tools.likelihood_ratio_test">Click
-	      here for the documentation</a>].</dd>
+			  implemented.</dd>
 	  </dl>
 
 """
@@ -307,51 +290,44 @@ faq['What was new in Biogeme 3.2.6?'] = """
 	    <dt>Optimization</dt>
 	    <dd>New optimization algorithms are
 	      available for estimation See the documentation of
-	      the <a href="sphinx/biogeme.html?highlight=algorithm#biogeme.biogeme.BIOGEME.estimate"><code>estimate</code></a>
+	      the <code>estimate</code>
 	      function, and
-	      the <a href="sphinx/biogeme.html#module-biogeme.optimization"><code>optimization</code>
-		module</a>. See also an
-	      <a href="examples/swissmetro/01logit_allAlgos.py">example.</a></dd>
+	      the <code>optimization</code> module.</dd>
 	    <dt>Stochastic log likelihood</dt>
 	    <dd>It is now possible to calculate the log likelihood
 	      function on a sample (a batch) of the full data
 	      file. This is particularly useful with large
 	      databases. It can be used in the implementation of a
-	      stochastic gradient algorithm, for instance. See <a href="sphinx/biogeme.html?highlight=calculatelikelihood#biogeme.biogeme.BIOGEME.calculateLikelihoodAndDerivatives">documentation</a>.</dd>
+	      stochastic gradient algorithm, for instance.</dd>
 	    <dt>User's notes</dt>
 	    <dd>It is possible to include your own notes in the HTML
 	      file using the <code>user_notes</code> parameter of the
 	      <code>biogeme</code>
-	      object. See <a href="sphinx/biogeme.html?highlight=usernotes#biogeme.biogeme.BIOGEME"
-			     target="_blank">documentation</a>. See
-	      <a href="examples/swissmetro/01logitBis.py">example</a>.</dd>
+	      object. See the current documentation. The old example is no longer distributed.</dd>
 	    <dt>Scaling</dt>
 	    <dd>It is possible to have Biogeme suggesting the scales
 	      of the variables in the database using
 	      the <code>suggestScales</code> parameter of
 	      the <code>biogeme</code>
-	      object. See <a href="sphinx/biogeme.html?highlight=suggestscales#biogeme.biogeme.BIOGEME.__init__"
-			     target="_blank">documentation</a>.</dd>
+	      object. See the current documentation.</dd>
 	    <dt>Estimation</dt>
 	    <dd>A new function <code>quickEstimate</code> performs
 	      the estimation of the parameters, and skips the
 	      calculation of the
-	      statistics. See <a href="sphinx/biogeme.html?highlight=quickestimate#biogeme.biogeme.BIOGEME.quickEstimate">documentation</a>. </dd>
+	      statistics. </dd>
 	    <dt>Validation</dt>
 	    <dd>A new function in the <code>database</code> module allows to split the database in order to
 	      prepare an estimation and a validation sets, for
 	      out-of-sample
-	      validation. See <a href="sphinx/biogeme.html?highlight=split#biogeme.database.Database.split">documentation</a>. It
+	      validation. It
 	      is used by the new function <code>validate</code> in the
-	      <code>biogeme</code> module. See <a href="sphinx/biogeme.html?highlight=validate#biogeme.biogeme.BIOGEME.validate">documentation</a>. See <a href="examples/swissmetro/b04validation.py">example</a>.</dd>
+	      <code>biogeme</code> module. The old example is no longer distributed.</dd>
 	    <dt>Messages</dt>
 	    <dd>A new function allows to extract all the messages
 	      generated during a
-	      run. See <a href="sphinx/biogeme.html?highlight=allmessages#biogeme.messaging.bioMessage.allMessages">documentation</a>. See
-	      <a href
-		 ="https://github.com/michelbierlaire/biogeme/blob/master/examples/notebooks/biogeme.messaging.ipynb">example</a>. It
+	      run. See the current documentation. It
 	      is also possible to make the logger temporarily silent
-	      using the functions <a href="sphinx/biogeme.html?highlight=temporarysilent#biogeme.messaging.bioMessage.temporarySilence"><code>temporarySilence</code></a> and <a href="sphinx/biogeme.html?highlight=resume#biogeme.messaging.bioMessage.resume"><code>resume</code>.</a></dd>
+	      using the functions <code>temporarySilence</code> and <code>resume</code>.</dd>
 	  </dl>
 
 """
@@ -456,14 +432,13 @@ iteration, Biogeme creates a
 file <code>__myModel.iter</code>. This file will be read the
 next time Biogeme tries to estimate the same model. If you want to turn this
 feature off, set the parameter <code>save_iterations</code> to <code>False</code> in the <code>biogeme.toml</code>
-file. See <a href="file:///Users/bierlair/Library/CloudStorage/OneDrive-epfl.ch/github/biogeme/webpage/website/sphinx/code/toml.html">
-the documentation</a> for details.
+file. See the <a href="sphinx/code/toml.html">documentation</a> for details.
 </p>
 """
 faq['Does Biogeme provide support for out-of-sample validation?'] = """
 <p>
 Yes.  See
-<a href="sphinx/auto_examples/swissmetro/plot_b04validation.html#sphx-glr-auto-examples-swissmetro-plot-b04validation-py">this example</a>.
+<a href="sphinx/auto_examples/swissmetro/plot_b04_validation.html">this example</a>.
 """
 
 faq[

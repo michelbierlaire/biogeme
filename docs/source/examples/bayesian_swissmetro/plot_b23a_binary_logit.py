@@ -16,7 +16,7 @@ from pathlib import Path
 from IPython.core.display_functions import display
 
 # %%
-# See the data processing script: :ref:`swissmetro_binary`.
+# See the data processing script ``swissmetro_binary.py``.
 from swissmetro_binary import (
     CAR_AV_SP,
     CAR_CO_SCALED,

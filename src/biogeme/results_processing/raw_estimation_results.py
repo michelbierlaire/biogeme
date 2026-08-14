@@ -124,7 +124,7 @@ def serialize_to_yaml(data: RawEstimationResults, filename: str) -> None:
 
 
 # To deserialize the RawEstimationResults instance from a YAML file
-def deserialize_from_yaml(filename) -> RawEstimationResults:
+def deserialize_from_yaml(filename: str) -> RawEstimationResults:
     """Restore data from a YAML file
 
     :param filename: name of the file

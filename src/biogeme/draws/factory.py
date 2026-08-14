@@ -6,6 +6,7 @@ the creation of random draws used in simulation-based estimation.
 
 It distinguishes between native and user-defined draw generators,
 validates inputs, and constructs a final tensor of draws with shape:
+
     (sample_size, number_of_draws, number_of_variables)
 
 Michel Bierlaire

@@ -1,7 +1,7 @@
 """
 
 1d. Simulation of a logit model
-==============================
+===============================
 
 This example illustrates how to simulate choice probabilities and
 point elasticities for a logit model using previously estimated

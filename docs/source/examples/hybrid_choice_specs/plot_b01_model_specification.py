@@ -1,4 +1,7 @@
 """
+Generate files from latent-variable measurement specifications
+===============================================================
+
 Generate files from latent-variable measurement specifications.
 
 This script illustrates the latent-variables specification API. It does not

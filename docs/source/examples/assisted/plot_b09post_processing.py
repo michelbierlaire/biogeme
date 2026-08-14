@@ -4,7 +4,7 @@ Re-estimation of best models
 ============================
 
 After running the assisted specification algorithm for the 432
-specifications in :ref:`everything_spec_section`, we use post-processing to
+specifications in ``everything_spec.py``, we use post-processing to
 re-estimate all Pareto optimal models, and display some information
 about the algorithm.
 See `Bierlaire and Ortelli (2023)

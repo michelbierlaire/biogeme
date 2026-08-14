@@ -4,7 +4,7 @@ One model among many
 ====================
 
 We consider the model with 432 specifications defined in
-:ref:`everything_spec_section`. We select one specification and estimate it.
+``everything_spec.py``. We select one specification and estimate it.
 See `Bierlaire and Ortelli (2023)
 <https://transp-or.epfl.ch/documents/technicalReports/BierOrte23.pdf>`_.
 

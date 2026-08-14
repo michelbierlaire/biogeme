@@ -1,4 +1,5 @@
-"""File non_monotonic_forecasting.py
+"""Non-monotonic MDCEV forecasting
+=================================
 
 Michel Bierlaire, EPFL
 Fri Jul 25 2025, 17:27:35

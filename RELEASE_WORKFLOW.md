@@ -13,6 +13,10 @@ Git revision and locked `uv` environment. The runner discovers every
 directory. That directory is internal bookkeeping; it is not part of the
 release procedure.
 
+The hermetic-execution contract and the developer-only example checklist are
+also summarized in [`EXAMPLES_WORKFLOW.md`](EXAMPLES_WORKFLOW.md). Neither
+document is included in the public Sphinx documentation.
+
 The recommended interface is now provided by three incremental commands:
 
 ```text
@@ -259,7 +263,14 @@ The first applied Phase 2 run also performs the equivalent of
 build state, the generated `docs/source/auto_examples` gallery directory, and
 local documentation-run state without removing the imported result
 directories. The next Sphinx build recreates `auto_examples` from the source
-examples. The wrapper then runs the full gallery and the generated-HTML check.
+examples. During both `html` and `html-fast`, the documentation Makefile also
+removes disposable outputs written directly below `docs/source/examples`
+(iteration files, root-level YAML/HTML files, logs, caches, and similar
+intermediates), even when the Sphinx build fails. It preserves source/input
+files and the committed `saved_results` and `saved_html` fixtures. The
+Makefile also removes the intermediate `docs/source/auto_examples` tree after
+the build; the final HTML remains under `docs/build/html`. The wrapper then
+runs the full gallery and the generated-HTML check.
 
 If the command fails, do not manually repeat the individual operations as a
 first response. Read the error and follow the recovery procedures in
