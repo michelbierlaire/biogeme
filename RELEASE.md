@@ -195,47 +195,33 @@ pass before tagging it.
 ### 7.1 Create and verify the tag
 
 Tag only the commit for which the final tox, documentation, JED, webpage, and
-GitHub checks have passed. Do not tag a moving branch name such as `master`:
-record the full commit identifier and verify the tag against that identifier.
+GitHub checks have passed. Record the full 40-character commit hash from the
+final successful GitHub Actions run. Do not tag a moving branch name without
+first confirming that its tip is exactly that hash.
 
-From the repository root, replace `3.3.4` with the release version and replace
-the value of `VALIDATED_COMMIT` with the full 40-character hash reported by the
-final successful GitHub Actions run:
+The recommended way to create a tag at an exact commit is
+[GitHub Desktop's tag management](https://docs.github.com/en/desktop/managing-commits/managing-tags-in-github-desktop):
 
-~~~bash
-VERSION=3.3.4
-TAG="v${VERSION}"
-VALIDATED_COMMIT=0123456789abcdef0123456789abcdef01234567
-VALIDATED_REMOTE_REF=origin/master
+1. Open the local Biogeme repository in GitHub Desktop and click **Fetch
+   origin**.
+2. Open **History** and locate the commit whose full hash matches the validated
+   GitHub Actions commit. Select the commit itself, not merely the current
+   branch label.
+3. Confirm in the **Changes** tab that there are no uncommitted changes.
+4. Right-click the validated commit and select **Create Tag...**.
+5. Enter the release tag, for example `v3.3.4`, and create it. Use the tag
+   name exactly once; do not add a second tag for the same release.
+6. Push the tag to GitHub. GitHub Desktop normally pushes a newly created tag
+   together with its associated commit; if the tag shows an upward arrow in
+   **History**, use **Push origin** before continuing.
+7. On the repository webpage, open **Code → Tags**, open `v3.3.4`, and verify
+   that the tag points to the same full commit hash. Stop if it does not.
 
-git fetch origin --tags
-test -z "$(git status --porcelain)"
-test "$(git rev-parse "${VALIDATED_COMMIT}^{commit}")" = \
-     "$(git rev-parse "${VALIDATED_REMOTE_REF}^{commit}")"
-test "$(git rev-parse --verify "${TAG}^{commit}" 2>/dev/null || true)" = ""
-
-git tag -a "$TAG" "$VALIDATED_COMMIT" -m "Biogeme $VERSION"
-test "$(git rev-parse "${TAG}^{commit}")" = \
-     "$(git rev-parse "${VALIDATED_COMMIT}^{commit}")"
-git show --no-patch --decorate "$TAG"
-git push origin "$TAG"
-~~~
-
-The first equality check prevents tagging a local commit that is not the
-validated remote branch commit. Set `VALIDATED_REMOTE_REF` to the remote
-release branch if it is not `origin/master`. The second check prevents
-accidentally reusing an existing release tag. The final check verifies that
-the annotated tag points to the intended commit; use `TAG^{commit}` because an
-annotated tag itself is a tag object, not the commit object.
-
-After pushing, verify the remote tag before creating the release:
-
-~~~bash
-REMOTE_TAG_COMMIT=$(git ls-remote --exit-code origin "refs/tags/${TAG}^{}" \
-    | cut -f1)
-test "$REMOTE_TAG_COMMIT" = \
-     "$(git rev-parse "${VALIDATED_COMMIT}^{commit}")"
-~~~
+The GitHub release page can create a new tag while publishing, but its
+**Target** selector is branch-based. Use that option only when the validated
+commit is demonstrably the tip of the selected release branch. If the
+validated commit is not the branch tip, create and push the tag from GitHub
+Desktop first, then select the existing tag when creating the release.
 
 Do not force-move a tag after it has been published. If the wrong commit was
 tagged, stop and resolve the release attempt explicitly; never silently make a
@@ -247,36 +233,22 @@ The release must be created from the already pushed tag. Creating a release
 from a branch or from a different commit breaks the correspondence between the
 validated source, the tag, the PyPI package, and the webpage.
 
-There are two equivalent ways to create it.
-
-Using the GitHub website:
+Using the [GitHub release page](https://docs.github.com/en/repositories/releasing-projects-on-github/managing-releases-in-a-repository):
 
 1. Open the Biogeme repository on GitHub and select **Releases**.
 2. Select **Draft a new release**.
 3. In **Choose a tag**, select the existing tag `v3.3.4`; do not create a new
    tag from the release dialog.
 4. Confirm that the displayed target commit is the full
-   `VALIDATED_COMMIT` recorded above.
+   validated commit hash recorded above.
 5. Set the release title to `Biogeme 3.3.4`.
 6. Paste the corresponding section of `RELEASE_NOTES.md` into the release
    description and review the formatting.
 7. Select **Publish release**. Do not leave it as a draft: the publishing
    workflow is triggered by a release whose state changes to `created`.
 
-If the GitHub CLI is installed and authenticated, the same operation can be
-performed from the repository root:
-
-~~~bash
-gh auth status
-gh release create "$TAG" \
-    --repo michelbierlaire/biogeme \
-    --verify-tag \
-    --title "Biogeme $VERSION" \
-    --notes-file "/tmp/biogeme-${VERSION}-release-notes.md"
-~~~
-
-The notes file should contain only the release section intended for GitHub;
-the command does not generate or edit `RELEASE_NOTES.md`. If `gh` reports that
+The release description should contain only the corresponding release section
+from `RELEASE_NOTES.md`; it does not modify that file. If GitHub reports that
 the tag or release already exists, stop rather than creating a second release
 or moving the tag.
 
