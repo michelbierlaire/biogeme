@@ -262,6 +262,26 @@ def test_reset_allows_laptop_without_slurm(monkeypatch, capsys):
     assert 'squeue is not available' in capsys.readouterr().err
 
 
+def test_reset_allows_windows_without_username(monkeypatch, capsys):
+    def missing_username():
+        raise OSError('No username set in the environment')
+
+    monkeypatch.setattr(release_reset.getpass, 'getuser', missing_username)
+
+    assert release_reset.slurm_jobs_running() is False
+    assert 'username could not be determined' in capsys.readouterr().err
+
+
+def test_phase1_allows_windows_without_username(monkeypatch, capsys):
+    def missing_username():
+        raise OSError('No username set in the environment')
+
+    monkeypatch.setattr(release_phase1.getpass, 'getuser', missing_username)
+
+    assert release_phase1.slurm_jobs_running() is False
+    assert 'username could not be determined' in capsys.readouterr().out
+
+
 def test_phase1_adopts_existing_attempts_without_resetting(monkeypatch, capsys):
     monkeypatch.setattr(
         release_phase1, 'ensure_clean_tree', lambda *args, **kwargs: None

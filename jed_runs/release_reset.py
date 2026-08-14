@@ -10,6 +10,7 @@ Git repository, and the release manifest are never targets.
 from __future__ import annotations
 
 import argparse
+import getpass
 import shutil
 import subprocess
 import sys
@@ -37,8 +38,23 @@ from jed_runs.jed_fresh_start import (  # noqa: E402
 
 def slurm_jobs_running() -> bool:
     try:
+        username = getpass.getuser()
+    except (ImportError, OSError):
+        # ``getpass.getuser`` falls back to the POSIX ``pwd`` module when
+        # none of the usual environment variables is set.  That module is
+        # unavailable on Windows.  In that situation Slurm cannot be
+        # queried reliably, so apply the same conservative laptop behavior
+        # as when the ``squeue`` executable is absent.
+        print(
+            'WARNING: the current username could not be determined; Slurm '
+            'jobs cannot be checked from this machine. Continue only if you '
+            'have confirmed that no JED jobs are running.',
+            file=sys.stderr,
+        )
+        return False
+    try:
         result = subprocess.run(
-            ['squeue', '--noheader', '--user', str(__import__('getpass').getuser())],
+            ['squeue', '--noheader', '--user', username],
             text=True,
             capture_output=True,
             check=False,

@@ -53,12 +53,28 @@ from jed_runs.jed_examples import (  # noqa: E402
 
 
 def slurm_jobs_running() -> bool:
-    result = subprocess.run(
-        ['squeue', '--noheader', '--user', getpass.getuser()],
-        text=True,
-        capture_output=True,
-        check=False,
-    )
+    try:
+        username = getpass.getuser()
+    except (ImportError, OSError):
+        # Windows may have neither the POSIX ``pwd`` module nor a username
+        # environment variable.  There is then no safe Slurm query to make,
+        # so treat this as the normal laptop/no-Slurm case.
+        print(
+            'WARNING: the current username could not be determined; Slurm '
+            'jobs cannot be checked from this machine. Continue only if you '
+            'have confirmed that no JED jobs are running.'
+        )
+        return False
+    try:
+        result = subprocess.run(
+            ['squeue', '--noheader', '--user', username],
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+    except FileNotFoundError:
+        print('WARNING: squeue is unavailable; skipping the running-job check.')
+        return False
     if result.returncode:
         print('WARNING: squeue is unavailable; skipping the running-job check.')
         return False
