@@ -245,7 +245,8 @@ Using the [GitHub release page](https://docs.github.com/en/repositories/releasin
 6. Paste the corresponding section of `RELEASE_NOTES.md` into the release
    description and review the formatting.
 7. Select **Publish release**. Do not leave it as a draft: the publishing
-   workflow is triggered by a release whose state changes to `created`.
+   workflow listens for the `published` release event, including when a draft
+   is published.
 
 The release description should contain only the corresponding release section
 from `RELEASE_NOTES.md`; it does not modify that file. If GitHub reports that

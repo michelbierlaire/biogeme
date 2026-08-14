@@ -46,7 +46,7 @@ jobs:
             tox-${{ runner.os }}-${{ matrix.python-version }}-
 
       - name: Install uv
-        run: python -m pip install --upgrade pip uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
       - name: Synchronize the locked CI environment
         run: uv sync --locked --only-group ci --no-install-project

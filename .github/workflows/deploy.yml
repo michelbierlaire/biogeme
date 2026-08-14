@@ -1,54 +1,90 @@
-name: Build & publish (pure Python)
+name: Build and publish Biogeme
 
 on:
-  workflow_dispatch:
+  # Publishing a draft release emits ``published``. This also covers a
+  # release published directly without first saving it as a draft.
   release:
-    types: [created]
+    types: [published]
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build sdist + universal wheel
+    name: Build distributions from the release tag
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Clean dist
-        run: rm -rf dist && mkdir -p dist   # 👈 this ensures it's empty
+      - name: Check out the released tag
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event.release.tag_name }}
+          fetch-depth: 1
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.13'   # any supported version is fine for pure-python
+          python-version-file: .python-version
 
-      - name: Install build tooling
-        run: python -m pip install --upgrade pip build
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
 
-      - name: Build distributions
-        run: python -m build --sdist --wheel --outdir dist/
+      - name: Verify release tag and package version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          case "$RELEASE_TAG" in
+            v*) ;;
+            *) echo "Release tag must start with v: $RELEASE_TAG" >&2; exit 1 ;;
+          esac
+          expected_version="${RELEASE_TAG#v}"
+          package_version="$(PYTHONPATH=src python -c \
+            'from biogeme.version import __version__; print(__version__)')"
+          if [[ "$package_version" != "$expected_version" ]]; then
+            echo "Release tag $RELEASE_TAG does not match package version $package_version" >&2
+            exit 1
+          fi
+          echo "Building Biogeme $package_version from $RELEASE_TAG"
 
-      - name: Show artifacts
-        run: ls -l dist
+      - name: Build sdist and wheel
+        run: uv build --sdist --wheel --out-dir dist
 
-      - name: Upload artifacts
+      - name: Validate distribution files
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name }}
+        run: |
+          set -euo pipefail
+          expected_version="${RELEASE_TAG#v}"
+          test -f "dist/biogeme-${expected_version}.tar.gz"
+          test -f "dist/biogeme-${expected_version}-py3-none-any.whl"
+          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 2
+          ls -lh dist
+
+      - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
-          name: dist
+          name: biogeme-distributions
           path: dist/*
+          if-no-files-found: error
 
   pypi-publish:
-    name: Publish to PyPI
+    name: Publish distributions to PyPI
     needs: build
     runs-on: ubuntu-latest
-    environment: release
+    environment:
+      name: release
+      url: https://pypi.org/project/biogeme/
     permissions:
-      id-token: write    # required for Trusted Publishing (OIDC)
       contents: read
+      id-token: write
     steps:
-      - name: Download built dists
+      - name: Download distributions
         uses: actions/download-artifact@v4
         with:
-          name: dist
+          name: biogeme-distributions
           path: dist
 
       - name: Publish package distributions to PyPI
         uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          packages-dir: dist/
