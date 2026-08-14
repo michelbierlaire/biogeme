@@ -57,6 +57,7 @@ GENERATED_SUFFIXES = {
 HARVEST_SUFFIXES = {'.html', '.nc', '.pareto', '.yaml'}
 INPUT_CSV_NAMES = {'data.csv', 'optima.csv'}
 INPUT_RESULT_DIRECTORIES = {'saved_results', 'saved_html'}
+GENERATED_PLOT_FILES = {'autocorr.png', 'energy.png', 'rank.png', 'trace.png'}
 
 
 def now_iso() -> str:
@@ -221,6 +222,8 @@ def should_copy(path: Path, source_directory: Path) -> bool:
         return False
     if any(part in INPUT_RESULT_DIRECTORIES for part in relative_parts):
         return False
+    if path.name in {'.DS_Store', *GENERATED_PLOT_FILES}:
+        return False
     if path.name.startswith('slurm-') or path.name.endswith('_slurm.out'):
         return False
     if path.suffix == '.csv' and path.name in INPUT_CSV_NAMES:
@@ -273,6 +276,9 @@ def generated_files(workspace: Path) -> list[Path]:
         ):
             continue
         if any(part in INPUT_RESULT_DIRECTORIES for part in relative_parts):
+            files.append(path)
+            continue
+        if path.name in {'.DS_Store', *GENERATED_PLOT_FILES}:
             files.append(path)
             continue
         if path.suffix in GENERATED_SUFFIXES or (

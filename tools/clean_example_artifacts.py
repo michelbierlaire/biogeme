@@ -23,6 +23,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES_ROOT = PROJECT_ROOT / 'docs' / 'source' / 'examples'
 RESULT_DIRECTORIES = {'saved_results', 'saved_html'}
 CACHE_DIRECTORIES = {'__pycache__', '.pytest_cache'}
+GENERATED_PLOT_FILES = {'autocorr.png', 'energy.png', 'rank.png', 'trace.png'}
 GENERATED_SUFFIXES = {
     '.F12',
     '.csv',
@@ -109,6 +110,8 @@ def is_disposable(
         return False
     if any(_is_result_directory(part) for part in relative.parts):
         return False
+    if path.name in {'.DS_Store', *GENERATED_PLOT_FILES}:
+        return True
     if path.name == 'biogeme.toml' or path.name.endswith('.run'):
         return True
     if path.name.startswith('slurm-') or path.name.endswith('_slurm.out'):

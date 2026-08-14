@@ -22,6 +22,8 @@ from jed_examples import (
     discover_jobs,
 )
 
+GENERATED_PLOT_FILES = {'autocorr.png', 'energy.png', 'rank.png', 'trace.png'}
+
 
 def generated_root_artifacts() -> list[Path]:
     """Return generated artifacts outside ``saved_results``/``saved_html``."""
@@ -31,6 +33,9 @@ def generated_root_artifacts() -> list[Path]:
             continue
         relative_parts = path.relative_to(EXAMPLES_ROOT).parts
         if any(part in RESULT_DIRECTORIES for part in relative_parts):
+            continue
+        if path.name in {'.DS_Store', *GENERATED_PLOT_FILES}:
+            candidates.append(path)
             continue
         if path.name.endswith('.run'):
             continue

@@ -16,13 +16,21 @@ def test_collect_preserves_sources_inputs_and_archived_results(tmp_path: Path):
     (examples / 'family' / 'model.yaml').write_text('generated\n')
     (examples / 'family' / 'test~02.dat').write_text('generated\n')
     (examples / 'family' / 'revenue_1.00.txt').write_text('generated\n')
+    (examples / 'family' / 'trace.png').write_bytes(b'generated')
+    (examples / 'family' / '.DS_Store').write_bytes(b'generated')
 
     files, directories = clean_example_artifacts.collect_targets(
         examples, tracked_paths={'family/plot_model.py', 'family/test~00.dat'}
     )
 
     assert directories == []
-    assert {path.name for path in files} == {'model.yaml', 'test~02.dat', 'revenue_1.00.txt'}
+    assert {path.name for path in files} == {
+        '.DS_Store',
+        'model.yaml',
+        'revenue_1.00.txt',
+        'test~02.dat',
+        'trace.png',
+    }
 
 
 def test_collect_removes_cache_directories_but_not_symlinks(tmp_path: Path):

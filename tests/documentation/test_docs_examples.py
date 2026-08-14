@@ -101,6 +101,23 @@ def test_generated_files_include_indicator_revenue_reports(tmp_path: Path):
     assert docs_examples.generated_files(tmp_path) == [revenue]
 
 
+def test_copy_source_excludes_generated_bayesian_figures_and_macos_metadata(
+    tmp_path: Path,
+):
+    source = tmp_path / 'source'
+    destination = tmp_path / 'destination'
+    source.mkdir()
+    (source / 'plot_model.py').write_text('print(1)\n')
+    (source / 'trace.png').write_bytes(b'generated')
+    (source / '.DS_Store').write_bytes(b'metadata')
+
+    docs_examples.copy_source(source, destination)
+
+    assert (destination / 'plot_model.py').is_file()
+    assert not (destination / 'trace.png').exists()
+    assert not (destination / '.DS_Store').exists()
+
+
 def test_archived_estimation_outputs_are_harvested_and_validated(tmp_path: Path):
     workspace = tmp_path / 'workspace'
     (workspace / 'saved_results').mkdir(parents=True)
