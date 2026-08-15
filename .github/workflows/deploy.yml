@@ -5,6 +5,14 @@ on:
   # release published directly without first saving it as a draft.
   release:
     types: [published]
+  # Temporary recovery path for an already-published GitHub release whose
+  # first publishing run failed. Remove this trigger after the recovery.
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Existing release tag to publish (for example, v3.3.4)
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -17,7 +25,7 @@ jobs:
       - name: Check out the released tag
         uses: actions/checkout@v6
         with:
-          ref: ${{ github.event.release.tag_name }}
+          ref: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
           fetch-depth: 1
 
       - name: Set up Python
@@ -30,7 +38,7 @@ jobs:
 
       - name: Verify release tag and package version
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
           case "$RELEASE_TAG" in
@@ -51,7 +59,7 @@ jobs:
 
       - name: Validate distribution files
         env:
-          RELEASE_TAG: ${{ github.event.release.tag_name }}
+          RELEASE_TAG: ${{ github.event_name == 'release' && github.event.release.tag_name || inputs.tag }}
         run: |
           set -euo pipefail
           expected_version="${RELEASE_TAG#v}"
