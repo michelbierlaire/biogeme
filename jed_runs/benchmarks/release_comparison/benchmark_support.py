@@ -473,7 +473,20 @@ def run_case(*, release: str, model: str, legacy: bool) -> int:
     if number_of_draws is not None:
         kwargs['number_of_draws'] = number_of_draws
     kwargs['seed'] = 1223
-    biogeme = api.BIOGEME(data.database, log_probability, **kwargs)
+    # Do not let a release read or generate the optional working-directory
+    # ``biogeme.toml``. It is ignored by Git and is absent on a clean JED
+    # checkout; older tomlkit versions can also fail while generating their
+    # default file. An in-memory Parameters object gives all releases the
+    # same explicit configuration without touching the filesystem.
+    from biogeme.parameters import Parameters
+
+    parameters = Parameters()
+    biogeme = api.BIOGEME(
+        data.database,
+        log_probability,
+        parameters=parameters,
+        **kwargs,
+    )
     model_name = f'release_benchmark_{release.replace(".", "_")}_{model}'
     if legacy:
         biogeme.modelName = model_name

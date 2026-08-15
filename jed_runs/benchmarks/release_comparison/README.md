@@ -15,7 +15,9 @@ The nine generated entry points are pure estimations. They do not call
 `estimate_or_load`, do not read YAML/pickle/iteration files, and disable HTML
 and result-file generation. Each writes one JSON record containing the timing,
 solution, convergence information, executable path, imported module path, and
-the effective estimation configuration.
+the effective estimation configuration. The harness supplies an in-memory
+parameter object, so it does not require or generate a working-directory
+`biogeme.toml` file.
 
 ## 1. Prepare the release environments on JED
 
