@@ -17,6 +17,12 @@ release_phase2.py    transfer, clean, import, and build the laptop documentation
 release_reset.py     remove generated state for a completely fresh attempt
 ```
 
+For a controlled performance comparison of the Biogeme 3.3.4 Swissmetro
+models across releases 3.2.14, 3.3.3, and 3.3.4, see
+`jed_runs/benchmarks/release_comparison/README.md`.  That benchmark has its
+own isolated environments, generated estimators, comparison report, and Slurm
+submission script; it is separate from the documentation-example runner.
+
 They are dry runs unless `--apply` is supplied.  Release identifiers and
 resume state are stored automatically below the ignored `.jed_runs/releases`
 directory.

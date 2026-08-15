@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# Run the nine release-comparison estimators sequentially on JED.
+#
+# Submit from the repository root with:
+#   sbatch jed_runs/benchmarks/release_comparison/biogeme_release_benchmark.run
+
+#SBATCH --job-name=biogeme-release-benchmark
+#SBATCH --partition=standard
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=56000M
+#SBATCH --time=12:00:00
+#SBATCH --output=slurm-%x-%j.out
+#SBATCH --error=slurm-%x-%j.err
+
+set -euo pipefail
+
+REPO_ROOT="${BIOGEME_REPO_ROOT:-/home/bierlair/github/biogeme}"
+ENV_ROOT="${BIOGEME_BENCHMARK_ENV_ROOT:-/home/bierlair/venvs/biogeme-benchmark}"
+RESULTS_ROOT="${BIOGEME_BENCHMARK_RESULTS_ROOT:-/home/bierlair/biogeme-benchmark-results/${SLURM_JOB_ID}}"
+PY="${BIOGEME_RUNNER_PYTHON:-${REPO_ROOT}/.venv/bin/python}"
+RUNNER="${REPO_ROOT}/jed_runs/benchmarks/release_comparison/run_benchmark.py"
+COMPARER="${REPO_ROOT}/jed_runs/benchmarks/release_comparison/compare_results.py"
+
+test -x "$PY"
+test -f "$RUNNER"
+mkdir -p "$RESULTS_ROOT"
+
+export BIOGEME_BENCHMARK_DATA="${BIOGEME_BENCHMARK_DATA:-${REPO_ROOT}/docs/source/examples/swissmetro/swissmetro.dat}"
+export XLA_PYTHON_CLIENT_PREALLOCATE=false
+
+"$PY" "$RUNNER" \
+  --env-root "$ENV_ROOT" \
+  --output-root "$RESULTS_ROOT/raw" \
+  --data "$BIOGEME_BENCHMARK_DATA" \
+  --threads 1
+
+"$PY" "$COMPARER" \
+  --results-root "$RESULTS_ROOT/raw" \
+  --markdown "$RESULTS_ROOT/report.md" \
+  --csv "$RESULTS_ROOT/timings.csv" \
+  --strict
+
+echo "Benchmark results: $RESULTS_ROOT"
+
