@@ -47,7 +47,7 @@ jobs:
           echo "Building Biogeme $package_version from $RELEASE_TAG"
 
       - name: Build sdist and wheel
-        run: uv build --sdist --wheel --out-dir dist
+        run: uv build --no-create-gitignore --sdist --wheel --out-dir dist
 
       - name: Validate distribution files
         env:
@@ -57,7 +57,9 @@ jobs:
           expected_version="${RELEASE_TAG#v}"
           test -f "dist/biogeme-${expected_version}.tar.gz"
           test -f "dist/biogeme-${expected_version}-py3-none-any.whl"
-          test "$(find dist -maxdepth 1 -type f | wc -l)" -eq 2
+          test "$(find dist -maxdepth 1 -type f \
+            \( -name "biogeme-${expected_version}.tar.gz" \
+            -o -name "biogeme-${expected_version}-*.whl" \) | wc -l)" -eq 2
           ls -lh dist
 
       - name: Upload distributions
