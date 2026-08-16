@@ -4,6 +4,13 @@ from webpage import generate
 from webpage.generate import validate_release_version
 
 
+@pytest.fixture(autouse=True)
+def release_version_for_rendering_tests(monkeypatch: pytest.MonkeyPatch) -> None:
+    """Render the checked-in 3.3.4 release notes on development checkouts."""
+
+    monkeypatch.setattr(generate, 'BIOGEME_VERSION', '3.3.4')
+
+
 def test_plain_release_version_is_accepted() -> None:
     assert validate_release_version('3.3.4') == '3.3.4'
 
@@ -59,3 +66,12 @@ def test_release_notes_must_match_the_package_version(
 
     with pytest.raises(RuntimeError, match='must begin'):
         generate.load_release_notes()
+
+
+def test_generation_rejects_a_provisional_package_version(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(generate, '__version__', '3.3.5a0')
+
+    with pytest.raises(RuntimeError, match='not publishable'):
+        generate.generate()

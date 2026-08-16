@@ -68,7 +68,11 @@ def validate_release_version(version: str) -> str:
     return normalized
 
 
-BIOGEME_VERSION = validate_release_version(__version__)
+# Keep the module importable while the repository is on a development
+# version.  The publishability check belongs at the generation boundary below,
+# so unit tests can exercise the rendering helpers without making an alpha
+# checkout look like a releasable webpage.
+BIOGEME_VERSION = str(__version__)
 
 
 def release_notes_title() -> str:
@@ -409,6 +413,9 @@ def _ignore_nonproduction_assets(_directory: str, names: list[str]) -> set[str]:
 
 def generate() -> Path:
     """Generate and validate ``website/`` atomically."""
+
+    global BIOGEME_VERSION
+    BIOGEME_VERSION = validate_release_version(__version__)
 
     if not SPHINX_BUILD.is_dir() or not (SPHINX_BUILD / "index.html").is_file():
         raise RuntimeError(
