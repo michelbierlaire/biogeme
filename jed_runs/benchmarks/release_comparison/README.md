@@ -104,8 +104,19 @@ $PY jed_runs/benchmarks/release_comparison/run_benchmark.py \
 ## 4. Interpret the report
 
 The timing table reports total wall-clock time around `estimate()`. The JSON
-also records Biogeme's internal optimization time and evaluation counts. The
-correctness section uses Biogeme 3.3.4 as the reference and reports differences
+also records Biogeme's internal optimization time and evaluation counts. It
+records the warm time for one likelihood/gradient evaluation and one
+likelihood/gradient/Hessian evaluation. The latter is `null` when the model
+was configured with `calculating_second_derivatives='never'`. The warm
+evaluation timings exclude the first-call JAX compilation; the total wall
+time includes it. The supplementary diagnostic calls are made after
+`estimate()` and are not added to the total estimation time.
+
+The normal-mixture model uses 2,000 draws. This common draw count is used for
+all three releases: the original 10,000-draw configuration caused Biogeme
+3.3.3's full analytical-Hessian implementation to exceed the 56 GB JED
+allocation. The panel model continues to use 5,000 draws. The correctness
+section uses Biogeme 3.3.4 as the reference and reports differences
 in the final log likelihood and every estimated parameter.
 
 The CNL model is deterministic and should agree to numerical precision. The

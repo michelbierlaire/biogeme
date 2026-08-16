@@ -28,7 +28,11 @@ def load_records(root: Path) -> dict[tuple[str, str], list[dict[str, Any]]]:
 
 
 def median_time(values: list[dict[str, Any]]) -> float | None:
-    times = [record.get('wall_time_seconds') for record in values]
+    return median_metric(values, 'wall_time_seconds')
+
+
+def median_metric(values: list[dict[str, Any]], key: str) -> float | None:
+    times = [record.get(key) for record in values]
     times = [float(value) for value in times if isinstance(value, (int, float))]
     return statistics.median(times) if times else None
 
@@ -118,6 +122,35 @@ def report_markdown(
         ]
         lines.append(f'| `{model}` | {values[0]} | {values[1]} | {values[2]} |')
 
+    for key, title in (
+        ('likelihood_gradient_seconds', 'one likelihood/gradient evaluation'),
+        (
+            'likelihood_gradient_hessian_seconds',
+            'one likelihood/gradient/Hessian evaluation',
+        ),
+    ):
+        lines.extend(
+            [
+                '',
+                f'## Median warm time for {title} (seconds)',
+                '',
+                'The first call is intentionally excluded from these measurements '
+                'because it can include JAX compilation. The total wall-clock '
+                'time above includes compilation.',
+                '',
+                '| Model | 3.2.14 | 3.3.3 | 3.3.4 |',
+                '|---|---:|---:|---:|',
+            ]
+        )
+        for model in MODELS:
+            values = [
+                format_seconds(
+                    median_metric(records.get((release, model), []), key)
+                )
+                for release in RELEASES
+            ]
+            lines.append(f'| `{model}` | {values[0]} | {values[1]} | {values[2]} |')
+
     lines.extend(
         [
             '',
@@ -146,7 +179,9 @@ def report_markdown(
             '',
             'Each JSON record contains the executable path, imported Biogeme '
             'module path, package version, seed, draw count, configuration, '
-            'convergence flag, and Biogeme-reported optimization diagnostics.',
+            'convergence flag, Biogeme-reported optimization diagnostics, and '
+            'warm evaluation timings. Hessian timing is `n/a` when second '
+            'derivatives were disabled for that model.',
             '',
         ]
     )
@@ -197,17 +232,35 @@ def main(argv: list[str] | None = None) -> int:
         args.csv.parent.mkdir(parents=True, exist_ok=True)
         with args.csv.open('w', newline='') as stream:
             writer = csv.writer(stream)
-            writer.writerow(['model', *RELEASES])
+            columns = ['model']
+            for release in RELEASES:
+                columns.append(f'{release}_wall_seconds')
+            for release in RELEASES:
+                columns.append(f'{release}_likelihood_gradient_seconds')
+            for release in RELEASES:
+                columns.append(f'{release}_likelihood_gradient_hessian_seconds')
+            writer.writerow(columns)
             for model in MODELS:
-                writer.writerow(
-                    [
-                        model,
-                        *[
-                            median_time(records.get((release, model), []))
-                            for release in RELEASES
-                        ],
-                    ]
+                row: list[Any] = [model]
+                row.extend(
+                    median_time(records.get((release, model), []))
+                    for release in RELEASES
                 )
+                row.extend(
+                    median_metric(
+                        records.get((release, model), []),
+                        'likelihood_gradient_seconds',
+                    )
+                    for release in RELEASES
+                )
+                row.extend(
+                    median_metric(
+                        records.get((release, model), []),
+                        'likelihood_gradient_hessian_seconds',
+                    )
+                    for release in RELEASES
+                )
+                writer.writerow(row)
     return 0
 
 

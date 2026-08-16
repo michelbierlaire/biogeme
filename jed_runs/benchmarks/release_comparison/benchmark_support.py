@@ -22,12 +22,17 @@ from time import perf_counter
 from types import SimpleNamespace
 from typing import Any, Callable
 
+import numpy as np
+
 BENCHMARK_ROOT = Path(__file__).resolve().parent
 PROJECT_ROOT = BENCHMARK_ROOT.parents[2]
 DEFAULT_DATA_PATH = PROJECT_ROOT / 'docs' / 'source' / 'examples' / 'swissmetro' / 'swissmetro.dat'
 
 MODEL_DRAW_COUNTS = {
-    'b05a_normal_mixture': 10_000,
+    # The 3.3.3 full analytical-Hessian implementation needs substantially
+    # less memory than the original 10,000-draw benchmark allowed.  Keep this
+    # value common to all releases so that the comparison remains fair.
+    'b05a_normal_mixture': 2_000,
     'b11a_cnl': None,
     'b12_panel': 5_000,
 }
@@ -435,6 +440,92 @@ def extract_result(result: Any) -> dict[str, Any]:
     }
 
 
+def _timed_warm_evaluation(function: Callable[[], Any]) -> float:
+    """Return the time of one warm evaluation of ``function``.
+
+    A first JAX call can include compilation.  The benchmark's total wall
+    time deliberately includes that cost, while these supplementary numbers
+    describe the steady-state cost of one objective/derivative evaluation.
+    The untimed call also ensures that asynchronous JAX work is completed
+    before the measured call starts.
+    """
+    function()
+    started = perf_counter()
+    function()
+    return perf_counter() - started
+
+
+def measure_evaluation_times(
+    biogeme: Any, result: Any, *, legacy: bool
+) -> dict[str, float | None | str]:
+    """Measure one warm likelihood/gradient and Hessian evaluation.
+
+    The legacy C++ API and the modern JAX evaluator expose different entry
+    points, so this adapter keeps the benchmark scripts independent of those
+    details.  A Hessian time is reported only when the modern configuration
+    requested second derivatives; otherwise it is explicitly marked as not
+    requested rather than computed as an extra, unrepresentative operation.
+    """
+    beta_values = result.get_beta_values()
+
+    if legacy:
+        names = list(biogeme.free_beta_names)
+        beta_vector = np.asarray([beta_values[name] for name in names], dtype=float)
+
+        def likelihood_gradient() -> Any:
+            return biogeme.calculate_likelihood_and_derivatives(
+                beta_vector, scaled=False, hessian=False, bhhh=False
+            )
+
+        def likelihood_gradient_hessian() -> Any:
+            return biogeme.calculate_likelihood_and_derivatives(
+                beta_vector, scaled=False, hessian=True, bhhh=False
+            )
+
+        return {
+            'likelihood_gradient_seconds': _timed_warm_evaluation(
+                likelihood_gradient
+            ),
+            'likelihood_gradient_hessian_seconds': _timed_warm_evaluation(
+                likelihood_gradient_hessian
+            ),
+            'evaluation_timing_method': 'warm evaluation after one untimed call',
+        }
+
+    def likelihood_gradient() -> Any:
+        return biogeme.function_evaluator.evaluate(
+            the_betas=beta_values,
+            gradient=True,
+            hessian=False,
+            bhhh=False,
+        )
+
+    gradient_seconds = _timed_warm_evaluation(likelihood_gradient)
+    second_derivatives_mode = getattr(biogeme, 'second_derivatives_mode', None)
+    mode_value = getattr(second_derivatives_mode, 'value', second_derivatives_mode)
+    if mode_value == 'never':
+        hessian_seconds = None
+        timing_method = 'warm evaluation after one untimed call; Hessian not requested'
+    else:
+
+        def likelihood_gradient_hessian() -> Any:
+            return biogeme.function_evaluator.evaluate(
+                the_betas=beta_values,
+                gradient=True,
+                hessian=True,
+                bhhh=False,
+            )
+
+        hessian_seconds = _timed_warm_evaluation(likelihood_gradient_hessian)
+        timing_method = 'warm evaluation after one untimed call'
+
+    return {
+        'likelihood_gradient_seconds': gradient_seconds,
+        'likelihood_gradient_hessian_seconds': hessian_seconds,
+        'evaluation_timing_method': timing_method,
+    }
+
+
 def parse_arguments(*, release: str, model: str) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=f'Run {model} with Biogeme {release}.')
     parser.add_argument(
@@ -500,9 +591,10 @@ def run_case(*, release: str, model: str, legacy: bool) -> int:
     else:
         result = biogeme.estimate()
     elapsed = perf_counter() - start
+    evaluation_times = measure_evaluation_times(biogeme, result, legacy=legacy)
 
     record = {
-        'schema_version': 1,
+        'schema_version': 2,
         'release': release,
         'model': model,
         'model_name': model_name,
@@ -515,6 +607,7 @@ def run_case(*, release: str, model: str, legacy: bool) -> int:
         'number_of_draws': number_of_draws,
         'seed': 1223,
         'wall_time_seconds': elapsed,
+        **evaluation_times,
         'started_at_utc': started_at.isoformat(timespec='seconds'),
         'configuration': {
             key: value
