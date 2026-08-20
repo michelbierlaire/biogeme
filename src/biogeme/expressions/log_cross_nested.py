@@ -13,7 +13,7 @@ import pandas as pd
 import pytensor.tensor as pt
 
 from biogeme.exceptions import BiogemeError
-from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
+from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN, NEGATIVE_LARGE
 
 from .base_expressions import Expression, LogitTuple
 from .bayesian import PymcModelBuilderType
@@ -285,8 +285,10 @@ class LogCrossNested(Expression):
                 dtype=float,
             )
 
-        if self.av is not None and self.av[choice].get_value() == 0.0:
-            return -np.inf
+        available = availabilities != 0.0
+        choice_index = self.alt_ids.index(choice)
+        if not available[choice_index]:
+            return NEGATIVE_LARGE
 
         mus = np.asarray(
             [nest_parameter.get_value() for nest_parameter in self.nest_parameters],
@@ -303,71 +305,50 @@ class LogCrossNested(Expression):
 
         global_mu = None if self.mu is None else self.mu.get_value()
 
-        if global_mu is None:
-            kernels = np.full(self.number_of_alternatives, -np.inf, dtype=float)
+        kernels = np.full(
+            self.number_of_alternatives, NEGATIVE_LARGE, dtype=float
+        )
+        supported = np.zeros(self.number_of_alternatives, dtype=bool)
+        for m in range(self.number_of_nests):
+            mu_m = mus[m]
+            alpha_m = alphas[m, :]
+            positive_membership = alpha_m > 0.0
+            active_membership = positive_membership & available
+            if not np.any(active_membership):
+                continue
 
-            for m in range(self.number_of_nests):
-                mu_m = mus[m]
-                alpha_m = alphas[m, :]
-
-                biosum = np.sum(
-                    availabilities * alpha_m**mu_m * np.exp(mu_m * utilities)
+            alpha_exponent = mu_m if global_mu is None else mu_m / global_mu
+            log_biosum = float(
+                np.logaddexp.reduce(
+                    alpha_exponent * np.log(alpha_m[active_membership])
+                    + mu_m * utilities[active_membership]
                 )
-
-                if biosum <= 0.0:
-                    continue
-
-                log_biosum = np.log(biosum)
-
-                for i in range(self.number_of_alternatives):
-                    if alpha_m[i] == 0.0:
-                        continue
-
-                    term = (
-                        mu_m * np.log(alpha_m[i])
-                        + mu_m * utilities[i]
-                        + ((1.0 - mu_m) / mu_m) * log_biosum
-                    )
-
-                    kernels[i] = np.logaddexp(kernels[i], term)
-        else:
-            kernels = np.full(self.number_of_alternatives, -np.inf, dtype=float)
-
-            for m in range(self.number_of_nests):
-                mu_m = mus[m]
-                alpha_m = alphas[m, :]
-                alpha_exponent = mu_m / global_mu
-
-                biosum = np.sum(
-                    availabilities * alpha_m**alpha_exponent * np.exp(mu_m * utilities)
+            )
+            coefficient = (
+                (1.0 - mu_m) / mu_m
+                if global_mu is None
+                else (global_mu / mu_m) - 1.0
+            )
+            for i in np.flatnonzero(positive_membership):
+                term = (
+                    alpha_exponent * np.log(alpha_m[i])
+                    + mu_m * utilities[i]
+                    + coefficient * log_biosum
                 )
+                kernels[i] = np.logaddexp(kernels[i], term)
+                supported[i] = True
 
-                if biosum <= 0.0:
-                    continue
+        if global_mu is not None:
+            kernels[supported] += np.log(global_mu)
 
-                log_biosum = np.log(biosum)
-
-                for i in range(self.number_of_alternatives):
-                    if alpha_m[i] == 0.0:
-                        continue
-
-                    term = (
-                        alpha_exponent * np.log(alpha_m[i])
-                        + mu_m * utilities[i]
-                        + ((global_mu / mu_m) - 1.0) * log_biosum
-                    )
-
-                    kernels[i] = np.logaddexp(kernels[i], term)
-
-            kernels = np.log(global_mu) + kernels
-
-        choice_index = self.alt_ids.index(choice)
-        denominator = np.sum(availabilities * np.exp(kernels))
-
-        if denominator <= 0.0:
-            return -np.inf
-
-        return kernels[choice_index] - np.log(denominator)
+        if not supported[choice_index]:
+            return NEGATIVE_LARGE
+        denominator_terms = kernels[available & supported]
+        if denominator_terms.size == 0:
+            return NEGATIVE_LARGE
+        return kernels[choice_index] - float(
+            np.logaddexp.reduce(denominator_terms)
+        )
 
     def __str__(self) -> str:
         util_str = ', '.join(f'{alt}:{expr}' for alt, expr in self.util.items())
@@ -478,8 +459,11 @@ class LogCrossNested(Expression):
                 the_draws,
                 the_random_variables,
             )
-            choice_index = index_of(choice_id, alt_keys)
-            chosen_availability = availabilities[choice_index]
+            choice_matches = choice_id == alt_keys
+            any_match = jnp.any(choice_matches)
+            choice_index = jnp.argmax(choice_matches)
+            available = availabilities != 0.0
+            chosen_availability = available[choice_index]
 
             mus = evaluate_all(
                 nest_parameter_functions,
@@ -519,69 +503,53 @@ class LogCrossNested(Expression):
             # alphas:         (M, J)
 
             mu_u = mus[:, None] * utilities[None, :]
+            masked_mu_u = jnp.where(
+                available[None, :], mu_u, NEGATIVE_LARGE
+            )
+            alpha_exponents = (
+                mus[:, None]
+                if global_mu is None
+                else mus[:, None] / global_mu
+            )
+            alpha_power = alphas**alpha_exponents
+            biosums = jnp.sum(
+                alpha_power * jnp.exp(masked_mu_u), axis=1
+            )
+            safe_biosums = jnp.where(biosums > 0.0, biosums, 1.0)
+            log_biosums = jnp.log(safe_biosums)
+            coefficients = (
+                (1.0 - mus) / mus
+                if global_mu is None
+                else (global_mu / mus) - 1.0
+            )
+            kernel_terms = (
+                mu_u + coefficients[:, None] * log_biosums[:, None]
+            )
+            kernels = jax.nn.logsumexp(
+                kernel_terms,
+                axis=0,
+                b=alpha_power,
+            )
+            if global_mu is not None:
+                kernels = jnp.log(global_mu) + kernels
 
-            if global_mu is None:
-                alpha_power = alphas ** mus[:, None]
+            denominator_terms = jnp.exp(
+                jnp.where(available, kernels, NEGATIVE_LARGE)
+            )
+            denominator = jnp.sum(denominator_terms)
+            safe_denominator = jnp.where(
+                denominator > 0.0, denominator, 1.0
+            )
 
-                biosums = jnp.sum(
-                    availabilities[None, :] * alpha_power * jnp.exp(mu_u),
-                    axis=1,
-                )
+            log_probability = kernels[choice_index] - jnp.log(
+                safe_denominator
+            )
 
-                log_biosums = jnp.where(
-                    biosums > 0.0,
-                    jnp.log(biosums),
-                    -jnp.inf,
-                )
-
-                kernel_terms = (
-                    mu_u + ((1.0 - mus) / mus)[:, None] * log_biosums[:, None]
-                )
-
-                kernel_weights = alpha_power
-
-                kernels = jax.nn.logsumexp(
-                    kernel_terms,
-                    axis=0,
-                    b=kernel_weights,
-                )
-            else:
-                alpha_exponents = mus / global_mu
-                alpha_power = alphas ** alpha_exponents[:, None]
-
-                biosums = jnp.sum(
-                    availabilities[None, :] * alpha_power * jnp.exp(mu_u),
-                    axis=1,
-                )
-
-                log_biosums = jnp.where(
-                    biosums > 0.0,
-                    jnp.log(biosums),
-                    -jnp.inf,
-                )
-
-                kernel_terms = (
-                    mu_u + ((global_mu / mus) - 1.0)[:, None] * log_biosums[:, None]
-                )
-
-                kernel_weights = alpha_power
-
-                kernels = jnp.log(global_mu) + jax.nn.logsumexp(
-                    kernel_terms,
-                    axis=0,
-                    b=kernel_weights,
-                )
-
-            denominator = jnp.sum(availabilities * jnp.exp(kernels))
-
-            log_probability = kernels[choice_index] - jnp.log(denominator)
-
-            unavailable_value = -jnp.finfo(JAX_FLOAT).max
+            unavailable_value = jnp.asarray(NEGATIVE_LARGE, dtype=JAX_FLOAT)
+            valid_choice = any_match & chosen_availability
 
             return jnp.where(
-                chosen_availability == 0.0,
-                unavailable_value,
-                log_probability,
+                valid_choice, log_probability, unavailable_value
             )
 
         return the_jax_function
@@ -655,7 +623,7 @@ class LogCrossNested(Expression):
             utilities = pt.where(
                 ~(pt.isnan(utilities) | pt.isinf(utilities)),
                 utilities,
-                -1.0e30,
+                NEGATIVE_LARGE,
             )
 
             if availability_builders is None:
@@ -705,17 +673,17 @@ class LogCrossNested(Expression):
             ]
             alphas = pt.stack(alpha_rows, axis=1)
             membership = structural_membership[None, :, :]
-            safe_alphas = pt.where(membership, alphas, 1.0)
-            safe_alphas = pt.maximum(safe_alphas, float(LOG_CLIP_MIN))
+            effective_membership = membership & pt.gt(alphas, 0.0)
+            safe_alphas = pt.where(
+                effective_membership,
+                pt.maximum(alphas, float(LOG_CLIP_MIN)),
+                1.0,
+            )
             log_alphas = pt.log(safe_alphas)
 
-            available = pt.gt(availabilities, 0.0)
-            safe_availabilities = pt.where(available, availabilities, 1.0)
-            negative_infinity = pt.cast(pt.as_tensor_variable(-np.inf), utilities.dtype)
-            log_availabilities = pt.where(
-                available,
-                pt.log(safe_availabilities),
-                negative_infinity,
+            available = pt.neq(availabilities, 0.0)
+            negative_large = pt.cast(
+                pt.as_tensor_variable(NEGATIVE_LARGE), utilities.dtype
             )
 
             mu_utilities = nest_parameters[:, :, None] * utilities[:, None, :]
@@ -724,18 +692,17 @@ class LogCrossNested(Expression):
             else:
                 alpha_exponents = nest_parameters / global_mu[:, None]
 
+            active_memberships = effective_membership & available[:, None, :]
+            active_nests = pt.any(active_memberships, axis=2)
             log_nest_terms = (
-                log_availabilities[:, None, :]
-                + alpha_exponents[:, :, None] * log_alphas
-                + mu_utilities
+                alpha_exponents[:, :, None] * log_alphas + mu_utilities
             )
             log_nest_terms = pt.where(
-                membership,
+                active_memberships,
                 log_nest_terms,
-                negative_infinity,
+                negative_large,
             )
             log_biosums = pt.logsumexp(log_nest_terms, axis=2)
-            active_nests = ~(pt.isnan(log_biosums) | pt.isinf(log_biosums))
             safe_log_biosums = pt.where(active_nests, log_biosums, 0.0)
 
             if global_mu is None:
@@ -748,23 +715,23 @@ class LogCrossNested(Expression):
                 + coefficients[:, :, None] * safe_log_biosums[:, :, None]
             )
             kernel_terms = pt.where(
-                membership & active_nests[:, :, None],
+                effective_membership & active_nests[:, :, None],
                 kernel_terms,
-                negative_infinity,
+                negative_large,
             )
             kernels = pt.logsumexp(kernel_terms, axis=1)
             if global_mu is not None:
                 kernels = pt.log(global_mu)[:, None] + kernels
 
-            log_denominator = pt.logsumexp(
-                log_availabilities + kernels,
-                axis=1,
+            supported_alternatives = pt.any(
+                effective_membership & active_nests[:, :, None], axis=1
             )
-            safe_log_denominator = pt.where(
-                ~(pt.isnan(log_denominator) | pt.isinf(log_denominator)),
-                log_denominator,
-                0.0,
+            denominator_terms = pt.where(
+                available & supported_alternatives,
+                kernels,
+                negative_large,
             )
+            log_denominator = pt.logsumexp(denominator_terms, axis=1)
 
             matches = pt.eq(choice_i32[:, None], alt_keys[None, :])
             choice_index = pt.argmax(matches, axis=1)
@@ -773,10 +740,16 @@ class LogCrossNested(Expression):
             safe_choice_index = pt.where(any_match, choice_index, 0)
             chosen_kernel = kernels[row_index, safe_choice_index]
             chosen_availability = availabilities[row_index, safe_choice_index]
-            log_probability = chosen_kernel - safe_log_denominator
+            chosen_supported = supported_alternatives[
+                row_index, safe_choice_index
+            ]
+            log_probability = chosen_kernel - log_denominator
 
-            negative_large = pt.cast(pt.as_tensor_variable(-1.0e30), utilities.dtype)
-            valid_choice = any_match & pt.neq(chosen_availability, 0.0)
+            valid_choice = (
+                any_match
+                & pt.neq(chosen_availability, 0.0)
+                & chosen_supported
+            )
             return pt.where(valid_choice, log_probability, negative_large)
 
         return builder

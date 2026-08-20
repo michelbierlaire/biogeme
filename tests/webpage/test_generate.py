@@ -6,9 +6,9 @@ from webpage.generate import validate_release_version
 
 @pytest.fixture(autouse=True)
 def release_version_for_rendering_tests(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Render the checked-in 3.3.4 release notes on development checkouts."""
+    """Render the checked-in 3.3.5 release notes on development checkouts."""
 
-    monkeypatch.setattr(generate, 'BIOGEME_VERSION', '3.3.4')
+    monkeypatch.setattr(generate, 'BIOGEME_VERSION', '3.3.5')
 
 
 def test_plain_release_version_is_accepted() -> None:
@@ -28,15 +28,16 @@ def test_current_release_notes_are_rendered_in_homepage_and_faq() -> None:
     notes = generate.load_release_notes()
 
     assert generate.release_notes_title().startswith("What's new in Biogeme")
-    assert '<code>sparse_cnl</code>' in notes
+    assert 'finite log-domain masks' in notes
     homepage = generate.build_homepage()
-    assert homepage.count('expression-based computational backend') == 2
+    assert homepage.count('Numerically safe likelihood evaluation') == 2
 
 
 def test_historical_release_notes_are_loaded_from_the_canonical_file() -> None:
     sections = generate.load_release_note_sections()
 
     assert [version for version, _ in sections] == [
+        '3.3.5',
         '3.3.4',
         '3.3.3',
         '3.3.2',

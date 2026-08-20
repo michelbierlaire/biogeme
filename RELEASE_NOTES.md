@@ -1,3 +1,18 @@
+# Biogeme 3.3.5
+
+Numerically safe likelihood evaluation has been strengthened for logit,
+nested logit, cross-nested logit, and sparse cross-nested logit models.
+Unavailable alternatives and empty nests now use finite log-domain masks in
+all differentiated expressions when numerical safety is enabled, preventing
+NaN gradients, Hessians, and BHHH matrices. The performance-oriented JAX paths
+also use finite logit masks, Boolean availability semantics, explicit choice
+validation, and the common finite invalid-choice sentinel. Their nested and
+cross-nested logit calculations now tolerate availability-induced empty nests
+without non-finite derivatives, while retaining direct arithmetic for ordinary
+models. NumPy, JAX, and PyMC/PyTensor paths now share the same finite
+invalid-choice behavior, and regression coverage includes the Swissmetro
+singleton-nest availability case.
+
 # Biogeme 3.3.4
 
 Biogeme 3.3.4 introduces a new expression-based computational backend for

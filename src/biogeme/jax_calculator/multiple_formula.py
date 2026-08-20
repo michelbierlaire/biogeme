@@ -35,6 +35,7 @@ class MultiRowEvaluator:
     ):
         if model_elements is None:
             raise BiogemeError('A model must be provided.')
+        self.numerically_safe = numerically_safe
         self.multiple_model_elements = model_elements
         self.free_betas_names = model_elements.expressions_registry.free_betas_names
         self.names = list(model_elements.expressions.keys())

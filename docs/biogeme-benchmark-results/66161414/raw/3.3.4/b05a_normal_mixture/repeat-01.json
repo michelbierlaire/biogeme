@@ -1,0 +1,42 @@
+{
+  "biogeme_distribution_version": "3.3.4",
+  "biogeme_module": "/home/bierlair/github/biogeme-benchmark-worktrees/biogeme_3_3_4/src/biogeme/__init__.py",
+  "configuration": {
+    "analytical_hessian_mode": "automatic",
+    "calculating_second_derivatives": "analytical",
+    "generate_html": false,
+    "generate_netcdf": false,
+    "generate_yaml": false,
+    "max_iterations": 1000,
+    "number_of_threads": 1,
+    "optimization_algorithm": "automatic",
+    "save_iterations": false,
+    "tolerance": 6.055454452393343e-06
+  },
+  "converged": true,
+  "data_path": "/home/bierlair/github/biogeme/docs/source/examples/swissmetro/swissmetro.dat",
+  "estimated_parameters": {
+    "asc_car": 0.1363202808789201,
+    "asc_train": -0.40264212863592347,
+    "b_cost": -1.2846226483353205,
+    "b_time": -2.256833276642435,
+    "b_time_s": 1.6543391977077826
+  },
+  "final_log_likelihood": -5215.694234617809,
+  "function_evaluations": 89,
+  "gradient_evaluations": 49,
+  "hessian_evaluations": 0,
+  "iterations": null,
+  "legacy_api": false,
+  "model": "b05a_normal_mixture",
+  "model_name": "release_benchmark_3_3_4_b05a_normal_mixture",
+  "number_of_draws": 10000,
+  "optimization_time_seconds": 122.918433,
+  "python": "3.12.13 (main, Jun  2 2026, 22:27:15) [Clang 22.1.3 ]",
+  "python_executable": "/home/bierlair/venvs/biogeme-benchmark/biogeme_3_3_4/bin/python",
+  "release": "3.3.4",
+  "schema_version": 1,
+  "seed": 1223,
+  "started_at_utc": "2026-08-15T13:41:07+00:00",
+  "wall_time_seconds": 172.9858556902036
+}

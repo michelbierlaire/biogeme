@@ -13,7 +13,7 @@ import pandas as pd
 import pytensor.tensor as pt
 
 from biogeme.exceptions import BiogemeError
-from biogeme.floating_point import JAX_FLOAT
+from biogeme.floating_point import JAX_FLOAT, NEGATIVE_LARGE
 
 from .base_expressions import Expression, LogitTuple
 from .bayesian import PymcModelBuilderType
@@ -31,6 +31,11 @@ logger = logging.getLogger(__name__)
 def index_of(key: float, keys: jnp.ndarray) -> jnp.ndarray:
     """Return the index of a key in a vector of alternative identifiers."""
     return jnp.argmax(keys == key)
+
+
+def _numpy_logsumexp(values: np.ndarray) -> float:
+    """Stable NumPy log-sum-exp for a known non-empty finite vector."""
+    return float(np.logaddexp.reduce(np.asarray(values, dtype=float)))
 
 
 class LogNested(Expression):
@@ -239,8 +244,9 @@ class LogNested(Expression):
                 dtype=float,
             )
 
-        if self.av is not None and self.av[choice].get_value() == 0.0:
-            return -np.inf
+        available = availabilities != 0.0
+        if not available[self.alt_ids.index(choice)]:
+            return NEGATIVE_LARGE
 
         mus = np.asarray(
             [nest_parameter.get_value() for nest_parameter in self.nest_parameters],
@@ -249,21 +255,23 @@ class LogNested(Expression):
 
         global_mu = None if self.mu is None else self.mu.get_value()
 
-        kernels = np.full(self.number_of_alternatives, -np.inf, dtype=float)
+        kernels = np.full(
+            self.number_of_alternatives, NEGATIVE_LARGE, dtype=float
+        )
 
         for m in range(self.number_of_nests):
             mu_m = mus[m]
-            membership_m = self.nest_membership[m, :]
-
-            biosum = np.sum(membership_m * availabilities * np.exp(mu_m * utilities))
-
-            if biosum <= 0.0:
+            membership_m = self.nest_membership[m, :] != 0.0
+            active_members = membership_m & available
+            if not np.any(active_members):
                 continue
 
-            log_biosum = np.log(biosum)
+            log_biosum = _numpy_logsumexp(
+                mu_m * utilities[active_members]
+            )
 
             for i in range(self.number_of_alternatives):
-                if membership_m[i] == 0.0:
+                if not membership_m[i]:
                     continue
 
                 if global_mu is None:
@@ -286,12 +294,11 @@ class LogNested(Expression):
                     kernels[i] = np.log(global_mu) + global_mu * utilities[i]
 
         choice_index = self.alt_ids.index(choice)
-        denominator = np.sum(availabilities * np.exp(kernels))
+        denominator_terms = kernels[available]
+        if denominator_terms.size == 0:
+            return NEGATIVE_LARGE
 
-        if denominator <= 0.0:
-            return -np.inf
-
-        return kernels[choice_index] - np.log(denominator)
+        return kernels[choice_index] - _numpy_logsumexp(denominator_terms)
 
     def __str__(self) -> str:
         util_str = ', '.join(f'{alt}:{expr}' for alt, expr in self.util.items())
@@ -339,8 +346,8 @@ class LogNested(Expression):
         )
 
         alt_keys = self.alt_keys
-        nest_membership = jnp.asarray(self.nest_membership, dtype=JAX_FLOAT)
-        alone_membership = jnp.asarray(self.alone_membership, dtype=JAX_FLOAT)
+        nest_membership = jnp.asarray(self.nest_membership != 0.0, dtype=bool)
+        alone_membership = jnp.asarray(self.alone_membership != 0.0, dtype=bool)
 
         def evaluate_all(
             functions,
@@ -388,8 +395,11 @@ class LogNested(Expression):
                 the_draws,
                 the_random_variables,
             )
-            choice_index = index_of(choice_id, alt_keys)
-            chosen_availability = availabilities[choice_index]
+            choice_matches = choice_id == alt_keys
+            any_match = jnp.any(choice_matches)
+            choice_index = jnp.argmax(choice_matches)
+            available = availabilities != 0.0
+            chosen_availability = available[choice_index]
 
             mus = evaluate_all(
                 nest_parameter_functions,
@@ -412,28 +422,15 @@ class LogNested(Expression):
 
             mu_u = mus[:, None] * utilities[None, :]
 
-            masked_terms = jnp.where(
-                nest_membership != 0.0,
-                mu_u,
-                -jnp.inf,
-            )
-
-            availability_mask = jnp.where(
-                availabilities[None, :] != 0.0,
-                0.0,
-                -jnp.inf,
-            )
-
-            log_biosums = jax.nn.logsumexp(
-                masked_terms + availability_mask,
-                axis=1,
-            )
-
             if numerically_safe:
-                # A nest with no available alternatives has a log biosum of
-                # -inf.  Avoid expressions such as 0 * (-inf), and make sure
-                # that an unavailable nest cannot contribute to the kernels.
-                active_nests = jnp.isfinite(log_biosums)
+                active_memberships = nest_membership & available[None, :]
+                active_nests = jnp.any(active_memberships, axis=1)
+                masked_terms = jnp.where(
+                    active_memberships,
+                    mu_u,
+                    NEGATIVE_LARGE,
+                )
+                log_biosums = jax.nn.logsumexp(masked_terms, axis=1)
                 safe_log_biosums = jnp.where(active_nests, log_biosums, 0.0)
 
                 if global_mu is None:
@@ -451,11 +448,24 @@ class LogNested(Expression):
                     )
 
                 nest_kernels = jnp.where(
-                    (nest_membership != 0.0) & active_nests[:, None],
+                    nest_membership & active_nests[:, None],
                     nest_kernels,
-                    -jnp.inf,
+                    NEGATIVE_LARGE,
                 )
             else:
+                active_memberships = nest_membership & available[None, :]
+                biosums = jnp.sum(
+                    jnp.exp(
+                        jnp.where(
+                            active_memberships,
+                            mu_u,
+                            NEGATIVE_LARGE,
+                        )
+                    ),
+                    axis=1,
+                )
+                safe_biosums = jnp.where(biosums > 0.0, biosums, 1.0)
+                log_biosums = jnp.log(safe_biosums)
                 if global_mu is None:
                     nest_kernels = (
                         mu_u + ((1.0 / mus) - 1.0)[:, None] * log_biosums[:, None]
@@ -468,13 +478,17 @@ class LogNested(Expression):
                         * log_biosums[:, None]
                     )
 
+                # A nested-logit alternative belongs to at most one explicit
+                # nest, so no log-sum-exp reduction is required here.
                 nest_kernels = jnp.where(
-                    nest_membership != 0.0,
-                    nest_kernels,
-                    -jnp.inf,
+                    nest_membership, nest_kernels, 0.0
                 )
 
-            kernels_from_nests = jax.nn.logsumexp(nest_kernels, axis=0)
+            kernels_from_nests = (
+                jax.nn.logsumexp(nest_kernels, axis=0)
+                if numerically_safe
+                else jnp.sum(nest_kernels, axis=0)
+            )
 
             if global_mu is None:
                 alone_kernels = utilities
@@ -482,45 +496,35 @@ class LogNested(Expression):
                 alone_kernels = jnp.log(global_mu) + global_mu * utilities
 
             kernels = jnp.where(
-                alone_membership != 0.0,
+                alone_membership,
                 alone_kernels,
                 kernels_from_nests,
             )
 
             if numerically_safe:
-                positive_availabilities = availabilities > 0.0
-                safe_availabilities = jnp.where(
-                    positive_availabilities,
-                    availabilities,
-                    1.0,
+                denominator_terms = jnp.where(
+                    available,
+                    kernels,
+                    NEGATIVE_LARGE,
                 )
-                log_availabilities = jnp.where(
-                    positive_availabilities,
-                    jnp.log(safe_availabilities),
-                    -jnp.inf,
-                )
-                log_denominator = jax.nn.logsumexp(
-                    log_availabilities + kernels
-                )
-                # If every alternative is unavailable, the chosen-availability
-                # branch below returns the sentinel value.  Keep the unused
-                # arithmetic finite to avoid propagating inf/nan derivatives.
-                safe_log_denominator = jnp.where(
-                    jnp.isfinite(log_denominator),
-                    log_denominator,
-                    0.0,
-                )
-                log_probability = kernels[choice_index] - safe_log_denominator
+                log_denominator = jax.nn.logsumexp(denominator_terms)
+                log_probability = kernels[choice_index] - log_denominator
             else:
-                denominator = jnp.sum(availabilities * jnp.exp(kernels))
-                log_probability = kernels[choice_index] - jnp.log(denominator)
+                denominator_terms = jnp.exp(
+                    jnp.where(available, kernels, NEGATIVE_LARGE)
+                )
+                denominator = jnp.sum(denominator_terms)
+                safe_denominator = jnp.where(
+                    denominator > 0.0, denominator, 1.0
+                )
+                log_probability = kernels[choice_index] - jnp.log(
+                    safe_denominator
+                )
 
-            unavailable_value = -jnp.finfo(JAX_FLOAT).max
-
+            unavailable_value = jnp.asarray(NEGATIVE_LARGE, dtype=JAX_FLOAT)
+            valid_choice = any_match & chosen_availability
             return jnp.where(
-                chosen_availability == 0.0,
-                unavailable_value,
-                log_probability,
+                valid_choice, log_probability, unavailable_value
             )
 
         return the_jax_function
@@ -606,7 +610,7 @@ class LogNested(Expression):
             utilities = pt.where(
                 ~(pt.isnan(utilities) | pt.isinf(utilities)),
                 utilities,
-                -1.0e30,
+                NEGATIVE_LARGE,
             )
 
             choice = observation_vector(choice_builder(dataframe), 'choice')
@@ -628,17 +632,22 @@ class LogNested(Expression):
 
             membership = pt.cast(nest_membership, utilities.dtype)
             alone = pt.cast(alone_membership, utilities.dtype)
-            negative_infinity = pt.cast(pt.as_tensor_variable(-np.inf), utilities.dtype)
+            negative_large = pt.cast(
+                pt.as_tensor_variable(NEGATIVE_LARGE), utilities.dtype
+            )
 
-            available = pt.gt(availabilities, 0.0)
+            available = pt.neq(availabilities, 0.0)
             mu_times_utility = nest_parameters[:, :, None] * utilities[:, None, :]
+            active_memberships = (
+                pt.neq(membership[None, :, :], 0.0) & available[:, None, :]
+            )
             masked_mu_times_utility = pt.where(
-                pt.neq(membership[None, :, :], 0.0) & available[:, None, :],
+                active_memberships,
                 mu_times_utility,
-                negative_infinity,
+                negative_large,
             )
             log_biosums = pt.logsumexp(masked_mu_times_utility, axis=2)
-            active_nests = ~(pt.isnan(log_biosums) | pt.isinf(log_biosums))
+            active_nests = pt.any(active_memberships, axis=2)
             safe_log_biosums = pt.where(active_nests, log_biosums, 0.0)
 
             if global_mu is None:
@@ -658,7 +667,7 @@ class LogNested(Expression):
             nest_kernels = pt.where(
                 pt.neq(membership[None, :, :], 0.0) & active_nests[:, :, None],
                 nest_kernels,
-                negative_infinity,
+                negative_large,
             )
             kernels_from_nests = pt.logsumexp(nest_kernels, axis=1)
 
@@ -675,21 +684,10 @@ class LogNested(Expression):
                 kernels_from_nests,
             )
 
-            safe_availabilities = pt.where(available, availabilities, 1.0)
-            log_availabilities = pt.where(
-                available,
-                pt.log(safe_availabilities),
-                negative_infinity,
+            denominator_terms = pt.where(
+                available, kernels, negative_large
             )
-            log_denominator = pt.logsumexp(
-                log_availabilities + kernels,
-                axis=1,
-            )
-            safe_log_denominator = pt.where(
-                ~(pt.isnan(log_denominator) | pt.isinf(log_denominator)),
-                log_denominator,
-                0.0,
-            )
+            log_denominator = pt.logsumexp(denominator_terms, axis=1)
 
             matches = pt.eq(choice_i32[:, None], alt_keys[None, :])
             choice_index = pt.argmax(matches, axis=1)
@@ -698,9 +696,8 @@ class LogNested(Expression):
             safe_choice_index = pt.where(any_match, choice_index, 0)
             chosen_kernel = kernels[row_index, safe_choice_index]
             chosen_availability = availabilities[row_index, safe_choice_index]
-            log_probability = chosen_kernel - safe_log_denominator
+            log_probability = chosen_kernel - log_denominator
 
-            negative_large = pt.cast(pt.as_tensor_variable(-1.0e30), utilities.dtype)
             valid_choice = any_match & pt.neq(chosen_availability, 0.0)
             return pt.where(valid_choice, log_probability, negative_large)
 

@@ -61,6 +61,16 @@ with respect to the number and design of Monte Carlo draws.
 
   monte_carlo_diagnostic.rst
 
+Numerically safe likelihood evaluation
+--------------------------------------
+This section explains availability masking, empty nests, and finite
+derivatives in numerically safe mode.
+
+.. toctree::
+  :maxdepth: 2
+
+  numerical_safety.rst
+
 Biogeme code
 ------------
 This section provides detailed information about the code of Biogeme.

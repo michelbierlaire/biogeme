@@ -236,8 +236,9 @@ def all_parameters_tuple() -> tuple[ParameterTuple, ...]:
             type=bool,
             section='Specification',
             description=(
-                'If true, Biogeme is doing its best to deal with numerical issues, '
-                'such as division by a number close to zero, at the possible expense of speed.'
+                'If true, Biogeme prioritizes numerical stability over speed. '
+                'Likelihood expressions use finite masks for unavailable alternatives '
+                'and empty nests so that values and automatic derivatives remain finite.'
             ),
             check=(cp.is_boolean,),
         ),

@@ -8,7 +8,8 @@ import logging
 import os
 
 import numpy as np
-from jax import config, numpy as jnp
+from jax import config
+from jax import numpy as jnp
 
 from biogeme.exceptions import BiogemeError
 
@@ -36,6 +37,10 @@ EPSILON = jnp.finfo(JAX_FLOAT).eps
 SQRT_EPS = jnp.sqrt(EPSILON)
 SMALL_POSITIVE = 10 * EPSILON
 LOG_CLIP_MIN = SQRT_EPS
+# Finite replacement for impossible log-probability terms in expressions that
+# are differentiated by JAX or PyTensor.  It is deliberately representable in
+# both float32 and float64.
+NEGATIVE_LARGE = -1.0e30
 MAX_EXP_ARG = jnp.log(jnp.finfo(JAX_FLOAT).max)
 MIN_EXP_ARG = jnp.log(jnp.finfo(JAX_FLOAT).tiny)
 MOST_NEGATIVE = jnp.finfo(JAX_FLOAT).min

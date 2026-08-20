@@ -11,6 +11,7 @@ import pytest
 
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions.log_nested import LogNested
+from biogeme.floating_point import NEGATIVE_LARGE
 from biogeme.nests import NestsForNestedLogit, OneNestForNestedLogit
 
 
@@ -499,7 +500,7 @@ def test_get_value_detects_unavailable_chosen_alternative():
         choice=2,
     )
 
-    assert np.isneginf(expression.get_value())
+    assert expression.get_value() == NEGATIVE_LARGE
 
 
 def test_jax_detects_unavailable_chosen_alternative():

@@ -1,11 +1,11 @@
 import math
 
 import jax.numpy as jnp
-import numpy as np
 import pytest
 
 from biogeme.exceptions import BiogemeError
 from biogeme.expressions.logit_expressions import LogLogit
+from biogeme.floating_point import NEGATIVE_LARGE
 
 
 def _evaluate_jax_loglogit(expression: LogLogit) -> float:
@@ -63,7 +63,17 @@ def test_jax_loglogit_reordered_availability_detects_unavailable_chosen_alternat
 
     log_probability = _evaluate_jax_loglogit(expression)
 
-    assert np.isneginf(log_probability) or log_probability < -1.0e20
+    assert log_probability == NEGATIVE_LARGE
+
+
+def test_get_value_returns_finite_sentinel_for_unavailable_choice():
+    expression = LogLogit(
+        util={1: 0.0, 2: 1.0},
+        av={1: 1.0, 2: 0.0},
+        choice=2,
+    )
+
+    assert expression.get_value() == NEGATIVE_LARGE
 
 
 def test_get_value_is_independent_of_availability_dictionary_order():

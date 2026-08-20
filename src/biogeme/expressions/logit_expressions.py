@@ -10,27 +10,27 @@ import logging
 from itertools import chain
 from typing import TYPE_CHECKING
 
-import jax
 import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import pytensor.tensor as pt
 from jax.scipy.special import logsumexp
 
-from biogeme.floating_point import JAX_FLOAT, MIN_EXP_ARG
+from biogeme.floating_point import JAX_FLOAT, NEGATIVE_LARGE
+
+from ..deprecated import deprecated
+from ..exceptions import BiogemeError
 from .base_expressions import Expression, LogitTuple
 from .bayesian import PymcModelBuilderType
 from .convert import validate_and_convert
 from .jax_utils import JaxFunctionType
-from ..deprecated import deprecated
-from ..exceptions import BiogemeError
 
 if TYPE_CHECKING:
     from . import ExpressionOrNumeric
 logger: logging.Logger = logging.getLogger(__name__)
 
 
-MASKED_UTILITY_PT = pt.as_tensor_variable(float(MIN_EXP_ARG))
+MASKED_UTILITY_PT = pt.as_tensor_variable(float(NEGATIVE_LARGE))
 
 
 def _describe_tensor(t: pt.TensorVariable) -> str:
@@ -78,7 +78,7 @@ def _prepare_pymc_logit_inputs(
     util_tensors = [ub(dataframe) for ub in util_builders]
     bad_utils = [
         (alt, _describe_tensor(t))
-        for alt, t in zip(util_keys, util_tensors)
+        for alt, t in zip(util_keys, util_tensors, strict=True)
         if getattr(t, "ndim", None) != 1
     ]
     if bad_utils:
@@ -97,7 +97,10 @@ def _prepare_pymc_logit_inputs(
             "LogLogit PyMC builder: utilities for some alternatives are not "
             "shape-compatible for stacking along axis=1.\n"
             "Utilities (alt_id → tensor): "
-            + ", ".join(f"{alt}: {desc}" for alt, desc in zip(util_keys, shapes))
+            + ", ".join(
+                f"{alt}: {desc}"
+                for alt, desc in zip(util_keys, shapes, strict=True)
+            )
             + "\nExpected all utilities to be 1-D tensors with the same "
             "length N (number of rows in the dataframe)."
         ) from e
@@ -112,7 +115,7 @@ def _prepare_pymc_logit_inputs(
         av_tensors = [ab(dataframe) for ab in av_builders]
         bad_av = [
             (alt, _describe_tensor(t))
-            for alt, t in zip(util_keys, av_tensors)
+            for alt, t in zip(util_keys, av_tensors, strict=True)
             if getattr(t, "ndim", None) != 1
         ]
         if bad_av:
@@ -131,7 +134,10 @@ def _prepare_pymc_logit_inputs(
                 "LogLogit PyMC builder: availabilities for some alternatives "
                 "are not shape-compatible for stacking along axis=1.\n"
                 "Availabilities (alt_id → tensor): "
-                + ", ".join(f"{alt}: {desc}" for alt, desc in zip(util_keys, shapes))
+                + ", ".join(
+                    f"{alt}: {desc}"
+                    for alt, desc in zip(util_keys, shapes, strict=True)
+                )
                 + "\nExpected all availabilities to be 1-D tensors with the same "
                 "length N (number of rows in the dataframe)."
             ) from e
@@ -222,7 +228,7 @@ class LogLogit(Expression):
                     f'Unknown availability entries: {unknown_availability}.'
                 )
 
-            for i, e in self.av.items():
+            for e in self.av.values():
                 self.children.append(e)
 
             self.av_keys = self.util_keys
@@ -232,7 +238,7 @@ class LogLogit(Expression):
         """expression for the chosen alternative"""
 
         self.children.append(self.choice)
-        for i, e in self.util.items():
+        for e in self.util.values():
             self.children.append(e)
 
     def deep_flat_copy(self) -> LogLogit:
@@ -297,13 +303,15 @@ class LogLogit(Expression):
             raise BiogemeError(error_msg)
 
         if not available(choice):
-            return -np.log(0)
+            return NEGATIVE_LARGE
         v_chosen = self.util[choice].get_value()
-        denom = 0.0
+        relative_utilities = []
         for i, V in self.util.items():
             if available(i):
-                denom += np.exp(V.get_value() - v_chosen)
-        return -np.log(denom)
+                relative_utilities.append(V.get_value() - v_chosen)
+        if not relative_utilities:
+            return NEGATIVE_LARGE
+        return -float(np.logaddexp.reduce(relative_utilities))
 
     @deprecated(get_value)
     def getValue(self) -> float:
@@ -344,124 +352,63 @@ class LogLogit(Expression):
             )
             return jax_fn(parameters, one_row, the_draws, the_random_variables)
 
-        if self.av is None:
+        def the_jax_function(
+            parameters: jnp.ndarray,
+            one_row: jnp.ndarray,
+            the_draws: jnp.ndarray,
+            the_random_variables: jnp.ndarray,
+        ) -> jnp.ndarray:
+            """JAX-compatible logit calculation with finite safe masks."""
 
-            def the_jax_function(
-                parameters: jnp.ndarray,
-                one_row: jnp.ndarray,
-                the_draws: jnp.ndarray,
-                the_random_variables: jnp.ndarray,
-            ) -> jnp.ndarray:
-                """JAX-compatible function for logit probability calculation
-                with availability."""
+            choice_id = get_value(
+                self.choice, parameters, one_row, the_draws, the_random_variables
+            )
+            choice_matches = self.util_keys == choice_id
+            any_match = jnp.any(choice_matches)
+            choice_index = jnp.argmax(choice_matches)
 
-                choice_id = get_value(
-                    self.choice, parameters, one_row, the_draws, the_random_variables
-                )
-                choice_index = index_of(choice_id, self.util_keys)
-
-                # Compute v_chosen
-                branches = tuple(
-                    lambda _, V=V_expr: jnp.asarray(
-                        get_value(
-                            V, parameters, one_row, the_draws, the_random_variables
-                        ),
-                        dtype=JAX_FLOAT,
+            utilities = jnp.asarray(
+                [
+                    get_value(
+                        utility,
+                        parameters,
+                        one_row,
+                        the_draws,
+                        the_random_variables,
                     )
-                    for V_expr in self.util_values
-                )
-                v_chosen = jax.lax.switch(choice_index, branches, operand=None)
-
-                # Vectorized computation of utilities and availabilities
-                all_utils = jnp.array(
+                    for utility in self.util_values
+                ],
+                dtype=JAX_FLOAT,
+            )
+            availabilities = (
+                jnp.ones_like(utilities, dtype=bool)
+                if self.av is None
+                else jnp.asarray(
                     [
                         get_value(
-                            V, parameters, one_row, the_draws, the_random_variables
+                            availability,
+                            parameters,
+                            one_row,
+                            the_draws,
+                            the_random_variables,
                         )
-                        - v_chosen
-                        for V in self.util_values
-                    ]
+                        != 0.0
+                        for availability in self.av_values
+                    ],
+                    dtype=bool,
                 )
+            )
+            chosen_utility = utilities[choice_index]
+            relative_utilities = utilities - chosen_utility
+            masked_utilities = jnp.where(
+                availabilities, relative_utilities, NEGATIVE_LARGE
+            )
+            log_probability = -logsumexp(masked_utilities)
+            valid_choice = any_match & availabilities[choice_index]
+            invalid_value = jnp.asarray(NEGATIVE_LARGE, dtype=JAX_FLOAT)
+            return jnp.where(valid_choice, log_probability, invalid_value)
 
-                # Compute the log-sum-exp safely
-                result = -logsumexp(all_utils)
-                return result
-
-            return the_jax_function
-
-        else:
-
-            def the_jax_function(
-                parameters: jnp.ndarray,
-                one_row: jnp.ndarray,
-                the_draws: jnp.ndarray,
-                the_random_variables: jnp.ndarray,
-            ) -> jnp.ndarray:
-                """JAX-compatible function for logit probability calculation."""
-
-                choice_id = get_value(
-                    self.choice, parameters, one_row, the_draws, the_random_variables
-                )
-                choice_index = index_of(choice_id, self.util_keys)
-
-                # Get availability of chosen alternative
-                av_branches = tuple(
-                    lambda _, av=av_expr: get_value(
-                        av, parameters, one_row, the_draws, the_random_variables
-                    )
-                    for av_expr in self.av_values
-                )
-                chosen_avail = jax.lax.switch(choice_index, av_branches, operand=None)
-
-                def unavailable_branch(_):
-                    # If the chosen alternative is unavailable
-                    return -jnp.finfo(JAX_FLOAT).max
-
-                def available_branch(_):
-                    # Compute v_chosen
-                    branches = tuple(
-                        lambda _, V=V_expr: jnp.asarray(
-                            get_value(
-                                V, parameters, one_row, the_draws, the_random_variables
-                            ),
-                            dtype=JAX_FLOAT,
-                        )
-                        for V_expr in self.util_values
-                    )
-                    v_chosen = jax.lax.switch(choice_index, branches, operand=None)
-
-                    # Vectorized computation of utilities and availabilities
-                    all_utils = jnp.array(
-                        [
-                            get_value(
-                                V, parameters, one_row, the_draws, the_random_variables
-                            )
-                            - v_chosen
-                            for V in self.util_values
-                        ]
-                    )
-                    all_avail = jnp.array(
-                        [
-                            get_value(
-                                A, parameters, one_row, the_draws, the_random_variables
-                            )
-                            for A in self.av_values
-                        ]
-                    )
-
-                    masked_utils = jnp.where(all_avail != 0.0, all_utils, -jnp.inf)
-                    return -logsumexp(masked_utils)
-
-                # Conditionally compute result
-                result = jax.lax.cond(
-                    chosen_avail == 0.0,
-                    unavailable_branch,
-                    available_branch,
-                    operand=None,
-                )
-                return result
-
-            return the_jax_function
+        return the_jax_function
 
     def recursive_construct_pymc_model_builder(self) -> PymcModelBuilderType:
         """Return a *vectorized* PyTensor builder computing per-observation
@@ -515,7 +462,9 @@ class LogLogit(Expression):
             chosen_logits = U_masked[row_idx, idx_safe]  # (N,)
             ll = chosen_logits - pt.logsumexp(U_masked, axis=1)  # (N,)
 
-            neg_large = pt.cast(pt.as_tensor_variable(-1.0e30), utilities.dtype)
+            neg_large = pt.cast(
+                pt.as_tensor_variable(NEGATIVE_LARGE), utilities.dtype
+            )
 
             if availabilities is not None:
                 chosen_av = availabilities[row_idx, idx_safe]

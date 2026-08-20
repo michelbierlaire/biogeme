@@ -15,7 +15,14 @@ from biogeme.parameters import Parameters
 
 def test_bayesian_nested_logit_smoke(monkeypatch):
     """Bayesian estimation builds and evaluates a nested-logit PyTensor graph."""
-    dataframe = pd.DataFrame({'choice': [1, 2, 3, 1]})
+    dataframe = pd.DataFrame(
+        {
+            'choice': [1, 2, 3, 1],
+            'av1': [1, 1, 1, 1],
+            'av2': [1, 1, 1, 1],
+            'av3': [0, 0, 1, 0],
+        }
+    )
     database = Database('nested_logit_smoke', dataframe)
 
     nest_parameter = Beta(
@@ -30,14 +37,23 @@ def test_bayesian_nested_logit_smoke(monkeypatch):
         tuple_of_nests=(
             OneNestForNestedLogit(
                 nest_param=nest_parameter,
-                list_of_alternatives=[1, 3],
-                name='nested',
+                list_of_alternatives=[1, 2],
+                name='public_transport',
+            ),
+            OneNestForNestedLogit(
+                nest_param=1.0,
+                list_of_alternatives=[3],
+                name='car',
             ),
         ),
     )
     log_probability = lognested(
         util={1: 0.1, 2: 0.2, 3: -0.1},
-        availability=None,
+        availability={
+            1: Variable('av1'),
+            2: Variable('av2'),
+            3: Variable('av3'),
+        },
         nests=nests,
         choice=Variable('choice'),
     )
@@ -66,7 +82,10 @@ def test_bayesian_nested_logit_smoke(monkeypatch):
     ):
         # Compiling the model here verifies the full BIOGEME -> PyMC -> PyTensor
         # path without making this unit test depend on an MCMC runtime.
-        model.compile_logp()(model.initial_point())
+        point = model.initial_point()
+        assert np.isfinite(model.compile_logp()(point))
+        assert np.isfinite(model.compile_dlogp()(point)).all()
+        assert np.isfinite(model.compile_d2logp()(point)).all()
         samples = np.arange(chains * draws, dtype=float).reshape(chains, draws)
         samples = samples / 10.0 + 0.4
         posterior = {

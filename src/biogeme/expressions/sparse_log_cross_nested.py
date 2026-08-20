@@ -5,10 +5,10 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 
-from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
+from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN, NEGATIVE_LARGE
 
 from .jax_utils import JaxFunctionType
-from .log_cross_nested import LogCrossNested, index_of
+from .log_cross_nested import LogCrossNested
 from .numeric_expressions import Numeric
 
 
@@ -60,6 +60,39 @@ def _segment_logsumexp(
         jnp.inf,
         finite_result,
     )
+
+
+def _safe_segment_logsumexp(
+    values: jnp.ndarray,
+    segment_ids: jnp.ndarray,
+    num_segments: int,
+) -> jnp.ndarray:
+    """Finite log-sum-exp by segment for differentiated safe expressions.
+
+    A finite dummy term is appended to every segment.  Empty segments then
+    evaluate to ``NEGATIVE_LARGE`` without passing infinities or zero sums to
+    automatic differentiation.
+    """
+    dummy_ids = jnp.arange(num_segments, dtype=jnp.int32)
+    augmented_ids = jnp.concatenate((segment_ids, dummy_ids))
+    augmented_values = jnp.concatenate(
+        (
+            values,
+            jnp.full((num_segments,), NEGATIVE_LARGE, dtype=JAX_FLOAT),
+        )
+    )
+    maximum = jax.ops.segment_max(
+        augmented_values,
+        augmented_ids,
+        num_segments=num_segments,
+    )
+    shifted = jnp.exp(augmented_values - maximum[augmented_ids])
+    sums = jax.ops.segment_sum(
+        shifted,
+        augmented_ids,
+        num_segments=num_segments,
+    )
+    return maximum + jnp.log(sums)
 
 
 class SparseLogCrossNested(LogCrossNested):
@@ -170,8 +203,11 @@ class SparseLogCrossNested(LogCrossNested):
                 choice_id = choice_function(
                     parameters, one_row, the_draws, the_random_variables
                 )
-                choice_index = index_of(choice_id, alt_keys)
-                chosen_availability = availabilities[choice_index]
+                choice_matches = choice_id == alt_keys
+                any_match = jnp.any(choice_matches)
+                choice_index = jnp.argmax(choice_matches)
+                available = availabilities != 0.0
+                chosen_availability = available[choice_index]
                 mus = evaluate_all(
                     nest_parameter_functions,
                     parameters,
@@ -194,40 +230,44 @@ class SparseLogCrossNested(LogCrossNested):
                     )
                 )
 
-                positive_availabilities = availabilities > 0.0
-                safe_availabilities = jnp.where(
-                    positive_availabilities,
-                    availabilities,
-                    1.0,
-                )
-                log_availabilities = jnp.where(
-                    positive_availabilities,
-                    jnp.log(safe_availabilities),
-                    -jnp.inf,
-                )
-
                 edge_mus = mus[edge_nest_indices]
                 edge_utilities = utilities[edge_alternative_indices]
-                edge_log_availabilities = log_availabilities[
-                    edge_alternative_indices
-                ]
                 alpha_exponents = (
                     edge_mus if global_mu is None else edge_mus / global_mu
                 )
-                safe_alphas = jnp.maximum(alphas, LOG_CLIP_MIN)
+                effective_edges = alphas > 0.0
+                active_edges = (
+                    effective_edges & available[edge_alternative_indices]
+                )
+                safe_alphas = jnp.where(
+                    effective_edges,
+                    jnp.maximum(alphas, LOG_CLIP_MIN),
+                    1.0,
+                )
                 log_alphas = jnp.log(safe_alphas)
 
                 edge_log_biosum_terms = (
-                    edge_log_availabilities
-                    + alpha_exponents * log_alphas
+                    alpha_exponents * log_alphas
                     + edge_mus * edge_utilities
                 )
-                log_biosums = _segment_logsumexp(
+                edge_log_biosum_terms = jnp.where(
+                    active_edges,
+                    edge_log_biosum_terms,
+                    NEGATIVE_LARGE,
+                )
+                log_biosums = _safe_segment_logsumexp(
                     edge_log_biosum_terms,
                     edge_nest_indices,
                     num_segments=self.number_of_nests,
                 )
-                active_nests = jnp.isfinite(log_biosums)
+                active_nests = (
+                    jax.ops.segment_sum(
+                        active_edges.astype(JAX_FLOAT),
+                        edge_nest_indices,
+                        num_segments=self.number_of_nests,
+                    )
+                    > 0.0
+                )
                 safe_log_biosums = jnp.where(active_nests, log_biosums, 0.0)
                 coefficients = (
                     (1.0 - mus) / mus
@@ -240,12 +280,15 @@ class SparseLogCrossNested(LogCrossNested):
                     + coefficients[edge_nest_indices]
                     * safe_log_biosums[edge_nest_indices]
                 )
-                edge_log_kernel = jnp.where(
-                    active_nests[edge_nest_indices],
-                    edge_log_kernel,
-                    -jnp.inf,
+                kernel_edges = (
+                    effective_edges & active_nests[edge_nest_indices]
                 )
-                kernels = _segment_logsumexp(
+                edge_log_kernel = jnp.where(
+                    kernel_edges,
+                    edge_log_kernel,
+                    NEGATIVE_LARGE,
+                )
+                kernels = _safe_segment_logsumexp(
                     edge_log_kernel,
                     edge_alternative_indices,
                     num_segments=self.number_of_alternatives,
@@ -253,20 +296,31 @@ class SparseLogCrossNested(LogCrossNested):
                 if global_mu is not None:
                     kernels = jnp.log(global_mu) + kernels
 
-                log_denominator = jax.nn.logsumexp(
-                    log_availabilities + kernels
+                supported_alternatives = (
+                    jax.ops.segment_sum(
+                        kernel_edges.astype(JAX_FLOAT),
+                        edge_alternative_indices,
+                        num_segments=self.number_of_alternatives,
+                    )
+                    > 0.0
                 )
-                safe_log_denominator = jnp.where(
-                    jnp.isfinite(log_denominator),
-                    log_denominator,
-                    0.0,
+                denominator_terms = jnp.where(
+                    available & supported_alternatives,
+                    kernels,
+                    NEGATIVE_LARGE,
                 )
-                log_probability = kernels[choice_index] - safe_log_denominator
-                unavailable_value = -jnp.finfo(JAX_FLOAT).max
+                log_denominator = jax.nn.logsumexp(denominator_terms)
+                log_probability = kernels[choice_index] - log_denominator
+                unavailable_value = jnp.asarray(
+                    NEGATIVE_LARGE, dtype=JAX_FLOAT
+                )
+                valid_choice = (
+                    any_match
+                    & chosen_availability
+                    & supported_alternatives[choice_index]
+                )
                 return jnp.where(
-                    chosen_availability == 0.0,
-                    unavailable_value,
-                    log_probability,
+                    valid_choice, log_probability, unavailable_value
                 )
 
             return the_safe_jax_function
@@ -298,8 +352,11 @@ class SparseLogCrossNested(LogCrossNested):
             choice_id = choice_function(
                 parameters, one_row, the_draws, the_random_variables
             )
-            choice_index = index_of(choice_id, alt_keys)
-            chosen_availability = availabilities[choice_index]
+            choice_matches = choice_id == alt_keys
+            any_match = jnp.any(choice_matches)
+            choice_index = jnp.argmax(choice_matches)
+            available = availabilities != 0.0
+            chosen_availability = available[choice_index]
             mus = evaluate_all(
                 nest_parameter_functions,
                 parameters,
@@ -324,26 +381,24 @@ class SparseLogCrossNested(LogCrossNested):
 
             edge_mus = mus[edge_nest_indices]
             edge_utilities = utilities[edge_alternative_indices]
-            edge_availability = availabilities[edge_alternative_indices]
+            edge_availability = available[edge_alternative_indices]
             alpha_exponents = (
                 edge_mus if global_mu is None else edge_mus / global_mu
             )
             alpha_power = alphas**alpha_exponents
-            contributions = (
-                edge_availability
-                * alpha_power
-                * jnp.exp(edge_mus * edge_utilities)
+            exponential_arguments = jnp.where(
+                edge_availability,
+                edge_mus * edge_utilities,
+                NEGATIVE_LARGE,
             )
+            contributions = alpha_power * jnp.exp(exponential_arguments)
             biosums = jax.ops.segment_sum(
                 contributions,
                 edge_nest_indices,
                 num_segments=self.number_of_nests,
             )
-            log_biosums = jnp.where(
-                biosums > 0.0,
-                jnp.log(biosums),
-                -jnp.inf,
-            )
+            safe_biosums = jnp.where(biosums > 0.0, biosums, 1.0)
+            log_biosums = jnp.log(safe_biosums)
             coefficients = (
                 (1.0 - mus) / mus
                 if global_mu is None
@@ -369,17 +424,29 @@ class SparseLogCrossNested(LogCrossNested):
                 edge_alternative_indices,
                 num_segments=self.number_of_alternatives,
             )
-            kernels = maximum_by_alternative + jnp.log(exponential_sums)
+            safe_exponential_sums = jnp.where(
+                exponential_sums > 0.0, exponential_sums, 1.0
+            )
+            kernels = maximum_by_alternative + jnp.log(
+                safe_exponential_sums
+            )
             if global_mu is not None:
                 kernels = jnp.log(global_mu) + kernels
 
-            denominator = jnp.sum(availabilities * jnp.exp(kernels))
-            log_probability = kernels[choice_index] - jnp.log(denominator)
-            unavailable_value = -jnp.finfo(JAX_FLOAT).max
+            denominator_terms = jnp.exp(
+                jnp.where(available, kernels, NEGATIVE_LARGE)
+            )
+            denominator = jnp.sum(denominator_terms)
+            safe_denominator = jnp.where(
+                denominator > 0.0, denominator, 1.0
+            )
+            log_probability = kernels[choice_index] - jnp.log(
+                safe_denominator
+            )
+            unavailable_value = jnp.asarray(NEGATIVE_LARGE, dtype=JAX_FLOAT)
+            valid_choice = any_match & chosen_availability
             return jnp.where(
-                chosen_availability == 0.0,
-                unavailable_value,
-                log_probability,
+                valid_choice, log_probability, unavailable_value
             )
 
         return the_jax_function

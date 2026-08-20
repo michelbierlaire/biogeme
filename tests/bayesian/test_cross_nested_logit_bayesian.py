@@ -15,7 +15,14 @@ from biogeme.parameters import Parameters
 
 def test_bayesian_cross_nested_logit_smoke(monkeypatch):
     """Bayesian estimation builds and evaluates a cross-nested PyTensor graph."""
-    dataframe = pd.DataFrame({'choice': [1, 2, 3, 1]})
+    dataframe = pd.DataFrame(
+        {
+            'choice': [1, 2, 3, 1],
+            'av1': [1, 1, 1, 1],
+            'av2': [1, 1, 1, 1],
+            'av3': [0, 0, 1, 0],
+        }
+    )
     database = Database('cross_nested_logit_smoke', dataframe)
 
     nest_parameter = Beta(
@@ -30,19 +37,23 @@ def test_bayesian_cross_nested_logit_smoke(monkeypatch):
         tuple_of_nests=(
             OneNestForCrossNestedLogit(
                 nest_param=nest_parameter,
-                dict_of_alpha={1: 0.7, 2: 0.0, 3: 1.0},
-                name='existing',
+                dict_of_alpha={1: 1.0, 2: 1.0},
+                name='public_transport',
             ),
             OneNestForCrossNestedLogit(
-                nest_param=1.7,
-                dict_of_alpha={1: 0.3, 2: 1.0, 3: 0.0},
-                name='public',
+                nest_param=1.0,
+                dict_of_alpha={3: 1.0},
+                name='car',
             ),
         ),
     )
     log_probability = logcnl(
         util={1: 0.1, 2: 0.2, 3: -0.1},
-        availability=None,
+        availability={
+            1: Variable('av1'),
+            2: Variable('av2'),
+            3: Variable('av3'),
+        },
         nests=nests,
         choice=Variable('choice'),
     )
@@ -69,7 +80,10 @@ def test_bayesian_cross_nested_logit_smoke(monkeypatch):
     def fake_run_sampling(
         *, model, draws, tune, chains, config, starting_values=None
     ):
-        model.compile_logp()(model.initial_point())
+        point = model.initial_point()
+        assert np.isfinite(model.compile_logp()(point))
+        assert np.isfinite(model.compile_dlogp()(point)).all()
+        assert np.isfinite(model.compile_d2logp()(point)).all()
         samples = np.arange(chains * draws, dtype=float).reshape(chains, draws)
         samples = samples / 10.0 + 0.4
         posterior = {name: samples for name in biogeme.free_betas_names}

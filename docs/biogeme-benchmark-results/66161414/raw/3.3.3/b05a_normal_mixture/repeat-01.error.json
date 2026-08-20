@@ -1,0 +1,7 @@
+{
+  "case": "3.3.3/b05a_normal_mixture",
+  "repeat": 1,
+  "returncode": 1,
+  "stderr": "/home/bierlair/biogeme-benchmark-results/66161414/raw/3.3.3/b05a_normal_mixture/repeat-01.stderr.log",
+  "stdout": "/home/bierlair/biogeme-benchmark-results/66161414/raw/3.3.3/b05a_normal_mixture/repeat-01.stdout.log"
+}

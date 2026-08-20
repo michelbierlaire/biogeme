@@ -184,8 +184,9 @@ def test_sparse_expression_reports_structural_sparsity():
     assert expression.number_of_active_memberships == 6
 
 
-def test_sparse_safe_matches_dense_safe_when_parameter_alpha_is_zero():
-    """A dynamic zero allocation remains an active edge in safe mode."""
+@pytest.mark.parametrize('alpha_value', [0.0, 0.35, 1.0])
+def test_sparse_safe_matches_dense_safe_at_allocation_boundaries(alpha_value):
+    """Dynamic allocations remain structural edges, including at 0 and 1."""
     betas = {
         'asc1': 0.0,
         'asc2': 0.0,
@@ -193,7 +194,7 @@ def test_sparse_safe_matches_dense_safe_when_parameter_alpha_is_zero():
         'mu1': 1.2,
         'mu2': 1.4,
         'mu3': 1.6,
-        'alpha': 0.0,
+        'alpha': alpha_value,
         'global_mu': 1.0,
     }
     dense = CompiledFormulaEvaluator(
@@ -207,7 +208,12 @@ def test_sparse_safe_matches_dense_safe_when_parameter_alpha_is_zero():
         numerically_safe=True,
     )
 
-    expected = dense.evaluate(betas, gradient=True, hessian=False, bhhh=False)
-    actual = sparse.evaluate(betas, gradient=True, hessian=False, bhhh=False)
+    expected = dense.evaluate(betas, gradient=True, hessian=True, bhhh=True)
+    actual = sparse.evaluate(betas, gradient=True, hessian=True, bhhh=True)
 
     assert_outputs_equal(expected, actual)
+    for output in (expected, actual):
+        assert np.isfinite(output.function)
+        assert np.isfinite(output.gradient).all()
+        assert np.isfinite(output.hessian).all()
+        assert np.isfinite(output.bhhh).all()

@@ -5,10 +5,10 @@ from __future__ import annotations
 import jax
 import jax.numpy as jnp
 
-from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN
+from biogeme.floating_point import JAX_FLOAT, LOG_CLIP_MIN, NEGATIVE_LARGE
 
 from .jax_utils import JaxFunctionType
-from .log_cross_nested import LogCrossNested, index_of
+from .log_cross_nested import LogCrossNested
 from .numeric_expressions import Numeric
 
 
@@ -108,8 +108,11 @@ class LogDomainLogCrossNested(LogCrossNested):
             choice_id = choice_function(
                 parameters, one_row, the_draws, the_random_variables
             )
-            choice_index = index_of(choice_id, alt_keys)
-            chosen_availability = availabilities[choice_index]
+            choice_matches = choice_id == alt_keys
+            any_match = jnp.any(choice_matches)
+            choice_index = jnp.argmax(choice_matches)
+            available = availabilities != 0.0
+            chosen_availability = available[choice_index]
             mus = evaluate_all(
                 nest_parameter_functions,
                 parameters,
@@ -136,17 +139,12 @@ class LogDomainLogCrossNested(LogCrossNested):
                 )
             )
 
-            safe_availabilities = jnp.where(
-                availabilities > 0.0, availabilities, 1.0
+            effective_membership = structural_membership_mask & (alphas > 0.0)
+            safe_alphas = jnp.where(
+                effective_membership,
+                jnp.maximum(alphas, LOG_CLIP_MIN),
+                1.0,
             )
-            log_availabilities = jnp.where(
-                availabilities > 0.0,
-                jnp.log(safe_availabilities),
-                -jnp.inf,
-            )
-            safe_alphas = jnp.where(structural_membership_mask, alphas, 1.0)
-            if numerically_safe:
-                safe_alphas = jnp.maximum(safe_alphas, LOG_CLIP_MIN)
             log_alphas = jnp.log(safe_alphas)
             mu_utilities = mus[:, None] * utilities[None, :]
             alpha_exponents = (
@@ -154,15 +152,13 @@ class LogDomainLogCrossNested(LogCrossNested):
                 if global_mu is None
                 else mus[:, None] / global_mu
             )
-            log_nest_terms = (
-                log_availabilities[None, :]
-                + alpha_exponents * log_alphas
-                + mu_utilities
-            )
+            active_memberships = effective_membership & available[None, :]
+            active_nests = jnp.any(active_memberships, axis=1)
+            log_nest_terms = alpha_exponents * log_alphas + mu_utilities
             log_nest_terms = jnp.where(
-                structural_membership_mask,
+                active_memberships,
                 log_nest_terms,
-                -jnp.inf,
+                NEGATIVE_LARGE,
             )
             log_biosums = jax.nn.logsumexp(log_nest_terms, axis=1)
             coefficients = (
@@ -170,7 +166,6 @@ class LogDomainLogCrossNested(LogCrossNested):
                 if global_mu is None
                 else (global_mu / mus) - 1.0
             )
-            active_nests = jnp.isfinite(log_biosums)
             safe_log_biosums = jnp.where(active_nests, log_biosums, 0.0)
             kernel_terms = (
                 alpha_exponents * log_alphas
@@ -178,24 +173,32 @@ class LogDomainLogCrossNested(LogCrossNested):
                 + coefficients[:, None] * safe_log_biosums[:, None]
             )
             kernel_terms = jnp.where(
-                structural_membership_mask
-                & active_nests[:, None],
+                effective_membership & active_nests[:, None],
                 kernel_terms,
-                -jnp.inf,
+                NEGATIVE_LARGE,
             )
             kernels = jax.nn.logsumexp(kernel_terms, axis=0)
             if global_mu is not None:
                 kernels = jnp.log(global_mu) + kernels
 
-            log_denominator = jax.nn.logsumexp(
-                log_availabilities + kernels
+            supported_alternatives = jnp.any(
+                effective_membership & active_nests[:, None], axis=0
             )
+            denominator_terms = jnp.where(
+                available & supported_alternatives,
+                kernels,
+                NEGATIVE_LARGE,
+            )
+            log_denominator = jax.nn.logsumexp(denominator_terms)
             log_probability = kernels[choice_index] - log_denominator
-            unavailable_value = -jnp.finfo(JAX_FLOAT).max
+            unavailable_value = jnp.asarray(NEGATIVE_LARGE, dtype=JAX_FLOAT)
+            valid_choice = (
+                any_match
+                & chosen_availability
+                & supported_alternatives[choice_index]
+            )
             return jnp.where(
-                chosen_availability == 0.0,
-                unavailable_value,
-                log_probability,
+                valid_choice, log_probability, unavailable_value
             )
 
         return the_jax_function
