@@ -217,6 +217,7 @@ examples/swissmetro/26triangularPanelMixture.run
 !docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult.run
 !docs/source/examples/hybrid_choice_models/plot_h04_mode_lv_gauss_simult_preflight.run
 !jed_runs/benchmarks/release_comparison/biogeme_release_benchmark.run
+!jed_runs/benchmarks/release_comparison/apollo/apollo_benchmark.run
 examples/swissmetro/scitas.csh
 examples/swissmetro/scitas.py
 examples/swissmetro/.ipynb_checkpoints/Untitled-checkpoint.ipynb

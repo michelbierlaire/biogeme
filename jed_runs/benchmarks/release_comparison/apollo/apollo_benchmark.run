@@ -1,0 +1,72 @@
+#!/usr/bin/env bash
+# Run the Apollo versions of b05a_normal_mixture and b12_panel on JED.
+#
+# Submit from the repository root with:
+#   sbatch jed_runs/benchmarks/release_comparison/apollo/apollo_benchmark.run
+
+#SBATCH --job-name=apollo-release-benchmark
+#SBATCH --partition=standard
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=56000M
+#SBATCH --time=12:00:00
+#SBATCH --output=slurm-%x-%j.out
+#SBATCH --error=slurm-%x-%j.err
+
+set -u -o pipefail
+
+REPO_ROOT="${BIOGEME_REPO_ROOT:-/home/bierlair/github/biogeme}"
+RESULTS_ROOT="${APOLLO_BENCHMARK_RESULTS_ROOT:-/home/bierlair/apollo-benchmark-results/${SLURM_JOB_ID}}"
+RSCRIPT="${APOLLO_RSCRIPT:-Rscript}"
+PY="${BIOGEME_RUNNER_PYTHON:-${REPO_ROOT}/.venv/bin/python}"
+DATA_PATH="${BIOGEME_BENCHMARK_DATA:-${REPO_ROOT}/docs/source/examples/swissmetro/swissmetro.dat}"
+MODEL_ROOT="${REPO_ROOT}/jed_runs/benchmarks/release_comparison/apollo"
+REFERENCE="${REPO_ROOT}/docs/biogeme-benchmark-results/66162235/timings.csv"
+
+test -f "$MODEL_ROOT/b05a_normal_mixture.R"
+test -f "$MODEL_ROOT/b12_panel.R"
+test -f "$DATA_PATH"
+test -x "$PY"
+mkdir -p "$RESULTS_ROOT/raw" "$RESULTS_ROOT/logs"
+
+export OMP_NUM_THREADS=1
+export OPENBLAS_NUM_THREADS=1
+export MKL_NUM_THREADS=1
+export VECLIB_MAXIMUM_THREADS=1
+
+failed=0
+run_case() {
+  local model="$1"
+  local output="$RESULTS_ROOT/raw/${model}.json"
+  local log="$RESULTS_ROOT/logs/${model}.log"
+  echo "[RUN] $model"
+  echo "  $RSCRIPT $MODEL_ROOT/${model}.R --data $DATA_PATH --output $output"
+  if "$RSCRIPT" "$MODEL_ROOT/${model}.R" \
+      --data "$DATA_PATH" \
+      --output "$output" >"$log" 2>&1; then
+    echo "  OK"
+  else
+    echo "  FAILED; see $log"
+    failed=1
+  fi
+}
+
+if ! "$RSCRIPT" --vanilla -e 'stopifnot(requireNamespace("apollo", quietly=TRUE)); cat("Apollo", as.character(packageVersion("apollo")), "\\n")'; then
+  echo "Apollo is not available in this R environment." >&2
+  exit 2
+fi
+
+run_case b05a_normal_mixture
+run_case b12_panel
+
+if [ "$failed" -eq 0 ]; then
+  "$PY" "$MODEL_ROOT/compare_apollo.py" \
+    --results-root "$RESULTS_ROOT/raw" \
+    --reference "$REFERENCE" \
+    --markdown "$RESULTS_ROOT/report.md" \
+    --csv "$RESULTS_ROOT/timings.csv"
+else
+  echo "Comparison was not generated because at least one Apollo case failed."
+fi
+
+echo "Apollo benchmark results: $RESULTS_ROOT"
+exit "$failed"
