@@ -50,8 +50,13 @@ run_case() {
   fi
 }
 
-if ! "$RSCRIPT" --vanilla -e 'stopifnot(requireNamespace("apollo", quietly=TRUE)); cat("Apollo", as.character(packageVersion("apollo")), "\\n")'; then
-  echo "Apollo is not available in this R environment." >&2
+if ! "$RSCRIPT" --vanilla -e '
+required <- c("apollo", "jsonlite")
+missing <- required[!vapply(required, requireNamespace, logical(1), quietly = TRUE)]
+if (length(missing) > 0) stop("Missing R package(s): ", paste(missing, collapse = ", "))
+cat("Apollo", as.character(packageVersion("apollo")), "\n")
+'; then
+  echo "A required R package is not available in this R environment." >&2
   exit 2
 fi
 

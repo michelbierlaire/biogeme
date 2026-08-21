@@ -18,8 +18,8 @@ Use the R installation selected for the benchmark and install Apollo in the
 user R library if it is not already available:
 
 ```bash
-Rscript -e 'install.packages("apollo", repos="https://cloud.r-project.org")'
-Rscript -e 'library(apollo); cat(as.character(packageVersion("apollo")), "\\n")'
+Rscript -e 'install.packages(c("apollo", "jsonlite"), repos="https://cloud.r-project.org")'
+Rscript -e 'library(apollo); library(jsonlite); cat(as.character(packageVersion("apollo")), "\n")'
 ```
 
 Record the Apollo and R versions in the job log. If the selected Apollo
