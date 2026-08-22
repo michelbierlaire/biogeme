@@ -4,7 +4,9 @@ This directory contains Apollo/R versions of the two simulated Swissmetro
 models used in the Biogeme release benchmark:
 
 - `b05a_normal_mixture.R`: 2,000 inter-individual normal draws;
-- `b12_panel.R`: 5,000 inter-individual normal draws and panel products.
+- `b12_panel.R`: 5,000 inter-individual normal draws and panel products. It
+  uses `hessianRoutine="none"` and an explicit BGW limit of 6,000 function
+  evaluations so the optimizer is not stopped by Apollo's lower default.
 
 The data filtering, variable scaling, starting values, and availability rules
 are copied from the Biogeme benchmark. Apollo generates its own pseudo-random

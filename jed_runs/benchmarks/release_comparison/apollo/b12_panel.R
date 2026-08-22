@@ -97,6 +97,11 @@ estimate_settings <- list(
   estimationRoutine = "bgw",
   hessianRoutine = "none",
   maxIterations = 1000,
+  # Apollo's default BGW limit is derived from maxIterations and stops this
+  # panel model after roughly 3,000 evaluations without convergence.  Set an
+  # explicit limit so the benchmark can reach convergence while still
+  # avoiding an unbounded run.
+  bgw_settings = list(maxFunctionEvals = 6000),
   printLevel = 0,
   silent = TRUE,
   writeIter = FALSE,
