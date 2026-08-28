@@ -21,10 +21,6 @@ special['New release'] = (
 # )
 # special['Other special'] = 'Other special as well'
 
-# special['ChatGPT'] = (
-#    'Try the Biogeme Assistant <a href="https://chatgpt.com/g/g-mArtaAszx-biogeme-assistant" '
-#    'target="_blank">[Click here]</a> (credits: Yousef Maknoon)'
-# )
 
 about['Biogeme'] = (
     """
