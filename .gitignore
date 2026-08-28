@@ -473,3 +473,4 @@ src/biogeme/models/cnl_slow.py
 src/biogeme/sampling_of_alternatives/generate_model_slow.py
 /docs/.cache
 /docs/.cache
+/biogeme-3.3.5
