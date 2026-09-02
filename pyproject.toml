@@ -1,4 +1,4 @@
-[build-system]
+    [build-system]
 requires = ["setuptools>=75", "wheel"]
 build-backend = "setuptools.build_meta"
 
@@ -29,7 +29,7 @@ classifiers = [
 ]
 
 dependencies = [
-    "pandas>=2.3.3, <3",
+    "pandas>=2.3.3, <4",
     "scipy>=1.17.1, <2",
     "tqdm>=4.68.1",
     "tomlkit>=0.15.0",

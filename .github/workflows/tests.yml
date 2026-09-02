@@ -63,3 +63,24 @@ jobs:
       #     path: |
       #       .tox/**/junit*.xml
       #       .tox/**/coverage*.xml
+
+  pandas3:
+    name: Pandas 3 compatibility
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Set up Python 3.14
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.14'
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@08807647e7069bb48b6ef5acd8ec9567f424441b # v8.1.0
+
+      - name: Synchronize the locked CI environment
+        run: uv sync --locked --only-group ci --no-install-project
+
+      - name: Run test suite with pandas 3
+        run: uv run --locked --no-sync tox -e py314-pandas3

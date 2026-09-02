@@ -60,7 +60,12 @@ def split_validation_sets(
         raise BiogemeError("Validation requires at least 2 slices.")
     if group_column is None:
         shuffled = df.sample(frac=1)
-        folds = np.array_split(shuffled, slices)
+        # Split row positions rather than the DataFrame itself.  Recent
+        # pandas versions no longer guarantee that ``np.array_split`` returns
+        # DataFrames when given a DataFrame, while ``.iloc`` preserves that
+        # contract explicitly.
+        positions = np.array_split(np.arange(len(shuffled)), slices)
+        folds = [shuffled.iloc[position] for position in positions]
     else:
         if group_column not in df.columns:
             raise BiogemeError(f"Grouping column '{group_column}' not found.")

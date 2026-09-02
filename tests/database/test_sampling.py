@@ -57,7 +57,11 @@ class TestSamplingFunctions(unittest.TestCase):
         result = split_validation_sets(self.df, slices=3)
         self.assertEqual(len(result), 3)
         for est, val in result:
+            self.assertIsInstance(est, pd.DataFrame)
+            self.assertIsInstance(val, pd.DataFrame)
             self.assertEqual(len(est) + len(val), len(self.df))
+            combined = pd.concat([est, val], ignore_index=True)
+            self.assertCountEqual(combined['value'].tolist(), self.df['value'].tolist())
 
     def test_split_validation_sets_with_grouping(self):
         result = split_validation_sets(self.df, slices=2, group_column='id')

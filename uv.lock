@@ -195,7 +195,7 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.10.9,<4" },
     { name = "numpy", specifier = ">=2.4.6,<3" },
     { name = "numpyro", specifier = ">=0.21.0" },
-    { name = "pandas", specifier = ">=2.3.3,<3" },
+    { name = "pandas", specifier = ">=2.3.3,<4" },
     { name = "pymc", specifier = ">=6.0.1" },
     { name = "pytest", marker = "extra == 'testing'", specifier = ">=9.0.3" },
     { name = "pytest-cov", marker = "extra == 'testing'", specifier = ">=4.0.0" },
