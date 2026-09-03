@@ -1,0 +1,350 @@
+% Working draft for a Journal of Open Source Software submission.
+% The manuscript describes Biogeme 3.3.5. Replace the version and archive
+% information below if the submission is made against a later release.
+\documentclass[11pt]{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage[margin=1in]{geometry}
+\usepackage{microtype}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{tabularx}
+\usepackage{url}
+\usepackage[hidelinks]{hyperref}
+\usepackage[numbers,sort&compress]{natbib}
+
+\newcolumntype{Y}{>{\raggedright\arraybackslash}X}
+
+\title{Biogeme: An open-source Python framework for research and education in discrete-choice modeling}
+
+\author{Michel Bierlaire\\
+  Transport and Mobility Laboratory, ENAC,\\
+  \textsc{École Polytechnique Fédérale de Lausanne}, Switzerland}
+
+\date{}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Biogeme is an open-source Python package for the estimation and application of
+parametric models, with a particular emphasis on discrete-choice analysis. It
+is designed both as a research framework for developing and estimating advanced
+models and as an educational platform through which students can learn model
+specification, simulation, estimation, and interpretation. Its symbolic
+expression system allows users to write transparent likelihoods and reuse the
+same specification for estimation, simulation, derivatives, validation, and
+reporting. The package supports multinomial, nested, cross-nested, mixed,
+latent-class, ordered, panel, sampled-alternative, MDCEV, and hybrid choice
+models, together with maximum-likelihood and Bayesian workflows. NumPy and JAX
+backends, Monte Carlo integration, numerical-safety controls, memory-aware
+derivatives, and recoverable results make the framework suitable for demanding
+empirical applications while retaining a readable interface for teaching.
+\end{abstract}
+
+\section{Summary}
+
+Biogeme is an open-source Python package for the maximum-likelihood estimation
+of general parametric models, with a long-standing focus on discrete-choice
+models. The project grew from the original BIOGEME software described by
+\citet{Bierlaire2003,BierlaireFetiarison2009} and has evolved into a framework
+for specifying, estimating, simulating, and documenting a broad range of
+behavioral models. The current release considered in this paper is Biogeme
+3.3.5.
+
+The package has two closely related goals. For researchers, it provides a
+general expression language in which standard and non-standard likelihoods can
+be written directly, combined with simulation, automatic differentiation,
+Bayesian inference, and detailed post-estimation analysis. For educators, it
+provides a consistent syntax and a large collection of runnable examples that
+make the connection between equations, code, estimation output, and behavioral
+interpretation explicit. The same interface can therefore support an
+introductory multinomial logit exercise and a research application involving
+latent variables, panel observations, or a cross-nested structure.
+
+Biogeme is distributed under the MIT License. The source code is available at
+\url{https://github.com/michelbierlaire/biogeme}, the package is distributed on
+PyPI, and the documentation is hosted at
+\url{https://biogeme.epfl.ch/sphinx/index.html}.
+
+\section{Statement of need}
+
+Discrete-choice models are used to study decisions among competing
+alternatives in transportation, marketing, environmental economics, health,
+and many other fields. Although the multinomial logit model is an important
+starting point, applied research quickly encounters richer structures:
+correlated alternatives, random coefficients, repeated choices, latent
+preferences, endogenous sampling, multiple discrete-continuous decisions, and
+user-defined likelihood contributions. Estimating such models requires more
+than a collection of isolated estimators. It requires a representation that is
+flexible enough to express the model, reliable numerical methods, and tools for
+examining the implications of the fitted model.
+
+Many software packages provide excellent implementations of particular model
+families. A researcher who needs a model outside those families, however, may
+have to derive and implement likelihoods, gradients, simulation, and reporting
+separately. This separation makes experimentation difficult and can make it
+hard for readers or students to see how the implemented model corresponds to
+the mathematical specification. Biogeme addresses this need by treating the
+model expression as a first-class object that is shared by the computational
+workflows.
+
+The educational need is related but distinct. Students should be able to start
+from a small, readable example and then extend it without learning a new
+software interface for each model. A teaching package should expose the
+structure of the likelihood rather than hide it behind a fixed formula, while
+still providing robust defaults and informative output. Biogeme's examples
+cover a progression from basic logit and binary models through simulation,
+mixtures, GEV models, panel data, Bayesian estimation, and hybrid choice
+models. This makes the package useful in courses as well as in research
+projects.
+
+\section{State of the field}
+
+Biogeme occupies a space shared by general statistical environments, packages
+specialized in random-utility models, and commercial econometric software. The
+following comparison is intentionally high-level: it identifies design
+emphases rather than attempting to rank packages or reproduce every feature
+of their current releases.
+
+\begin{table}[htbp]
+  \centering
+  \caption{Representative software related to Biogeme.}
+  \label{tab:state-field}
+  \begin{tabularx}{\textwidth}{@{}lYY@{}}
+    \toprule
+    Software & Primary orientation & Relation to Biogeme in this paper \\
+    \midrule
+    Biogeme & Open-source Python framework with symbolic expressions,
+      simulation, advanced discrete-choice structures, and Bayesian workflows. &
+      Research and education through one extensible specification language. \\
+    \texttt{mlogit} & R package for maximum-likelihood random-utility models,
+      including several standard extensions \citep{Croissant2020}. &
+      Strong specialized alternative for common random-utility models. \\
+    \texttt{gmnl} & R package focused on generalized and mixed multinomial
+      logit models \citep{SarriasDaziano2017}. &
+      Focused implementation for important classes of taste heterogeneity. \\
+    Apollo & R framework for classical and Bayesian choice-model estimation,
+      including user-defined model components \citep{HessPalma2019}. &
+      Broad choice-model environment with a different language and workflow. \\
+    \texttt{statsmodels} & General Python statistical-modeling library whose
+      discrete module includes multinomial logit and related models
+      \citep{SeaboldPerktold2010}. &
+      General statistical ecosystem rather than a dedicated choice framework. \\
+    NLOGIT & Proprietary econometric software for multinomial, mixed, nested,
+      latent-class, and related discrete-choice models \citep{NLOGIT2025}. &
+      Commercial benchmark with a long history in applied econometrics. \\
+    ALOGIT & Proprietary professional software for estimating and analyzing
+      generalized logit choice models \citep{ALOGIT2025}. &
+      Commercial software emphasizing large logit-family applications. \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+Biogeme's distinctive design choice is to combine a general symbolic
+representation with dedicated implementations of important choice structures.
+The result is not intended to replace every specialized package. Rather, it
+offers a transparent route from a mathematical expression to estimation,
+simulation, derivatives, and reports, including when the expression does not
+belong to a small catalogue of predefined models.
+
+\section{Software design}
+
+\subsection{Symbolic expressions as the common model representation}
+
+Biogeme represents variables, parameters, constants, transformations, and
+probability expressions as nodes in an expression tree. Users can combine these
+objects with ordinary arithmetic notation to construct utilities, probabilities,
+measurement equations, structural equations, and complete likelihoods. The
+tree can then be evaluated for data and parameter values, differentiated, or
+translated to a numerical backend. This avoids maintaining separate versions
+of the model for estimation and simulation and makes the source code close to
+the mathematical specification.
+
+The expression representation also supports generic likelihoods. A user can
+define a contribution that is not one of the built-in choice probabilities and
+still use the standard estimation, derivative, reporting, and validation
+machinery. At the same time, dedicated expressions are available for common
+structures where exploiting the model's algebra improves clarity or
+performance.
+
+\subsection{Choice-model structures}
+
+The standard example sequence includes multinomial and binary logit, nested and
+cross-nested logit, mixed and latent-class models, ordered logit and probit,
+panel likelihoods, sampled alternatives, and models with individual-level
+parameters. Monte Carlo integration can use pseudo-random or quasi-random draw
+schemes, including Halton and modified Latin hypercube sequences, symmetric
+draws, and antithetic constructions. The simulation framework is shared by
+estimation and post-estimation calculations.
+
+Biogeme also supports multiple-discrete continuous extreme-value (MDCEV)
+models, including applications with no outside good \citep{BierlaireWang2024},
+and estimation with samples of alternatives \citep{BierlairePaschalidis2023}.
+Assisted specification tools help construct and compare families of models,
+while parameter overrides allow a user to control automatically generated
+parameters without rewriting the surrounding specification.
+
+\subsection{Hybrid choice models}
+
+Hybrid choice models combine a discrete-choice component with latent variables,
+structural equations, and measurement equations. Biogeme provides objects for
+these components, normalization rules, ordinal and continuous measurements,
+and both sequential and simultaneous estimation. The framework described in
+\citet{Bierlaire2016Latent,BierlaireBenAkivaWalker2026} is designed to keep the
+behavioral interpretation visible in the model code while allowing the
+measurement system and the choice system to be estimated jointly.
+
+\subsection{Numerical backends and derivatives}
+
+The conventional evaluation path uses NumPy and is intended to be easy to
+inspect and debug. JAX can compile expression evaluations and provide automatic
+differentiation for gradients and higher-order derivatives. Biogeme exposes
+numerical-safety controls because the most appropriate trade-off depends on the
+model and data. In fast mode, expressions use direct arithmetic whenever this
+is appropriate. In numerically safe mode, guarded and log-domain operations
+are used to reduce avoidable overflow, underflow, and invalid intermediate
+values.
+
+Several implementation choices target models whose dimensions make derivatives
+expensive. Sparse cross-nested logit expressions avoid work for alternatives
+with literal zero allocations. Hessians can be evaluated in chunks when a full
+automatic-differentiation workload would exceed a practical memory budget.
+These options preserve the model expression while making the computational
+strategy explicit to the user.
+
+\subsection{Estimation, diagnostics, and results}
+
+Biogeme supports maximum-likelihood estimation with several optimization
+strategies and derivative configurations. It can compute gradients, Hessians,
+and BHHH matrices, perform bootstrap and validation calculations, and produce
+elasticities, willingness-to-pay measures, and simulated quantities. Bayesian
+workflows are available through the Python probabilistic-programming
+ecosystem.
+
+Estimation results are saved in YAML files that can be recovered after an
+interruption, while HTML, LaTeX, pandas, and NetCDF outputs support inspection
+and downstream analysis. The separation between recoverable machine-readable
+results and human-readable reports is useful both in long research runs and in
+teaching, where students can inspect each stage of an estimation exercise.
+
+\subsection{Research and educational design}
+
+The example collection is organized as a progression. Early examples introduce
+data, utilities, availability, weights, and standard logit estimation. Later
+examples add simulation, mixtures, GEV structures, panel observations,
+multiple models, ordinal measurements, Bayesian estimation, and latent
+variables. Each example is executable and is intended to show a complete
+workflow rather than only an isolated API call.
+
+This progression is also a software-design constraint: model definitions should
+remain readable when new features are added. A student can modify a utility or
+probability expression and rerun the same workflow, while a researcher can use
+the same expression tree as the starting point for a more specialized model.
+
+\section{Research and educational impact}
+
+\subsection{Research impact}
+
+Biogeme has been developed and publicly distributed over several decades. Its
+technical reports document successive extensions for Monte Carlo integration
+\citep{Bierlaire2015}, latent-variable models \citep{Bierlaire2016Latent},
+assisted specification \citep{Ortelli2020}, sampled alternatives
+\citep{BierlairePaschalidis2023}, and MDCEV models \citep{BierlaireWang2024}.
+The package has also been used in empirical studies of transportation,
+connected vehicles, information effects, electric mobility, and other
+applications. Representative examples include \citet{Chorus2007},
+\citet{Derikx2016}, \citet{Kajanova2021}, \citet{Gerzinic2022}, and
+\citet{Nigro2024}.
+
+These applications illustrate the role of Biogeme as a research instrument:
+the software is used not only to estimate standard models, but also to explore
+heterogeneity, latent preferences, policy scenarios, and new likelihood
+specifications. The public repository, issue tracker, release history, and
+documentation make the computational environment inspectable by other
+researchers.
+
+\subsection{Educational impact}
+
+Biogeme is also intended for teaching. Its examples can be used to introduce
+the logic of random-utility models, maximum likelihood, simulated likelihood,
+identification, parameter constraints, and post-estimation interpretation.
+The progression from small examples to hybrid choice models supports courses
+with different levels of mathematical and computational depth. Because the
+model expression is written explicitly, instructors can connect a lecture's
+equations to executable code without introducing a separate opaque model
+language.
+
+The open-source license and public documentation lower the barrier to classroom
+use. Students can inspect the implementation, reproduce published examples,
+and extend them for projects. The same scripts can then be retained as a
+starting point for research, making the transition from education to applied
+work direct.
+
+\section{Reproducibility and quality assurance}
+
+The repository contains a large automated test suite covering expressions,
+databases, estimation, simulation, reporting, Bayesian workflows, and example
+infrastructure. Continuous-integration workflows exercise supported Python
+versions on Linux, macOS, and Windows, and documentation builds include link
+and example checks. Releases are built from versioned source, tested, and
+published through a reproducible packaging workflow.
+
+The examples use public or repository-provided data and record their outputs in
+machine-readable and human-readable formats. Recoverable optimization results
+allow long estimations to resume without discarding completed work. For
+simulation-based models, the configuration of draws and numerical options is
+part of the model workflow, so users can report the computational choices that
+affect simulation noise and run time.
+
+\section{Availability and sustainability}
+
+Biogeme is available from PyPI and from its public GitHub repository. The
+repository includes installation instructions, documentation, a comprehensive
+example gallery, tests, and release procedures. Questions and user support are
+handled through the project's public communication channels. The software is
+distributed under the MIT License, allowing use, modification, and
+redistribution with attribution.
+
+The project is maintained by the author at the Transport and Mobility
+Laboratory of EPFL. Development and maintenance are funded by the laboratory;
+there was no external funder or sponsor influence on the design, implementation,
+testing, or release decisions described here. A permanent archival record and
+DOI for the submitted release will be added to this section before submission.
+
+\section{Conclusions}
+
+Biogeme combines a transparent symbolic specification language with numerical
+and reporting infrastructure for discrete-choice research. Its coverage of
+standard and advanced model structures, simulation, latent variables, Bayesian
+workflows, and post-estimation analysis makes it suitable for methodological
+development and demanding empirical applications. Its readable syntax, public
+examples, and progressive documentation also make it suitable for education.
+
+The central design principle is continuity: the expression introduced by a
+researcher or instructor is the object that is evaluated, differentiated,
+estimated, simulated, and reported. This reduces duplication between a model's
+mathematical description and its implementation, while leaving users in control
+of the computational choices that matter for speed, numerical stability, and
+memory use.
+
+\section*{AI usage disclosure}
+
+ChatGPT 5.6 was used on September 2, 2026, solely to assist with the
+organization, drafting, and editing of this manuscript. It was not used for
+software development, implementation, testing, or release decisions. Michel
+Bierlaire reviewed and validated the manuscript, made all substantive technical
+decisions, and accepts full responsibility for its content.
+
+\section*{Acknowledgements}
+
+The author acknowledges the support of the Transport and Mobility Laboratory at
+the École Polytechnique Fédérale de Lausanne.
+
+\bibliographystyle{plainnat}
+\bibliography{biogeme_joss}
+
+\end{document}
