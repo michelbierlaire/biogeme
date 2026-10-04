@@ -503,7 +503,7 @@ Also, the Biogeme object has a function called
 \lstinline@estimate_catalog@, that iterates on all specifications in a
 catalog (if possible), and estimate the corresponding models. If there
 are too many specifications to be enumerated, it launches the assisted
-specification algorithm if not. This function is illustrated in
+specification algorithm. This function is illustrated in
 Section~\ref{sec:estimation}.
 
 \subsection{Synchronized catalogs}
@@ -1058,7 +1058,7 @@ We consider a catalog that considers both generic and alternative-specific speci
 full specification is available in
 Appendix~\ref{sec:b03alt_spec}. The results associated with each of
 the four specifications are reported in
-Figure~\vref{fig:b03alt_spec}. Note that the model where the cost coefficient is generic and the time coefficient is alternative-specific is dominated by the model where the cost coefficient is alternative-specific and the time coefficient is generic. Indeed, both models involve 6 parameters, that the latter has a better fit.
+Figure~\vref{fig:b03alt_spec}. Note that the model where the cost coefficient is generic and the time coefficient is alternative-specific is dominated by the model where the cost coefficient is alternative-specific and the time coefficient is generic. Indeed, both models involve 6 parameters, but the latter has a better fit.
 
 \begin{landscape}
   \begin{figure}[p]
@@ -1372,7 +1372,7 @@ The ``pareto file'' is the memory of the process. It stores all models that have
 \end{enumerate}
 If the file exists when the algorithm is started, its content is used to initialize the algorithm. This allows to interrupt the algorithm and to relaunch it without losing what has been found so far.
 
-Like the function calculating the indicators, the function verifying the validity of the results takes also estimation results as argument, as returns a tuple with two values:
+Like the function calculating the indicators, the function verifying the validity of the results also takes estimation results as argument, and returns a tuple with two values:
 \begin{enumerate}
 \item a boolean that is True if the results are valid, and False otherwise,
 \item a string explaining why the results are invalid, or None if they are valid.
