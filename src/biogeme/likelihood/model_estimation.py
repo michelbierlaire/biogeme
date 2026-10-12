@@ -73,7 +73,9 @@ def optimization(
         variable_names=variable_names,
         parameters=parameters,
     )
-    x_star, optimization_messages, convergence = output
+    x_star = output.solution
+    optimization_messages = output.messages
+    convergence = output.convergence
     optimization_messages["Optimization time"] = datetime.now() - start_time
     return AlgorithmResults(
         solution=x_star,
