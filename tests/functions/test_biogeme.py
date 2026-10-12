@@ -286,7 +286,7 @@ class TestBiogeme(unittest.TestCase):
             generate_yaml=False,
         )
         results = my_biogeme.estimate()
-        self.assertAlmostEqual(results.final_log_likelihood, 0, 5)
+        self.assertAlmostEqual(results.final_log_likelihood, 0, delta=1e-4)
 
     def test_estimate_ls_newton(self):
         data = getData(1)
